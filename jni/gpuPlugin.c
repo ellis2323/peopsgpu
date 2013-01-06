@@ -34,12 +34,16 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+
 #include "gpuExternals.h"
 #include "gpuPlugin.h"
 #include "gpuDraw.h"
 #include "gpuTexture.h"
 #include "gpuFps.h"
 #include "gpuPrim.h"
+
+#include "gpuContext.h"
+
 #include <android/log.h>
 #include <sys/time.h>
 #define  LOG_TAG    "libfpse"
@@ -499,208 +503,218 @@ int iSkipTwo=0;
 void GPU_vSinc(void){
 updateDisplay();
 }
+
 void updateDisplay(void)                               // UPDATE DISPLAY
 {
-//BOOL bBlur=FALSE;
-
-
-bFakeFrontBuffer=FALSE;
-bRenderFrontBuffer=FALSE;
-
-if(iRenderFVR)                                        // frame buffer read fix mode still active?
- {
-  iRenderFVR--;                                       // -> if some frames in a row without read access: turn off mode
-  if(!iRenderFVR) bFullVRam=FALSE;
- }
-
-if(iLastRGB24 && iLastRGB24!=PSXDisplay.RGB24+1)      // (mdec) garbage check
- {
-  iSkipTwo=2;                                         // -> skip two frames to avoid garbage if color mode changes
- }
-iLastRGB24=0;
-
-if(PSXDisplay.RGB24)// && !bNeedUploadAfter)          // (mdec) upload wanted?
- {
-  PrepareFullScreenUpload(-1);
-  UploadScreen(PSXDisplay.Interlaced);                // -> upload whole screen from psx vram
-  bNeedUploadTest=FALSE;
-  bNeedInterlaceUpdate=FALSE;
-  bNeedUploadAfter=FALSE;
-  bNeedRGB24Update=FALSE;
- }
-else
-if(bNeedInterlaceUpdate)                              // smaller upload?
- {
-  bNeedInterlaceUpdate=FALSE;
-  xrUploadArea=xrUploadAreaIL;                        // -> upload this rect
-  UploadScreen(TRUE);
- }
-
-if(dwActFixes&512) bCheckFF9G4(NULL);                 // special game fix for FF9 
-
-if(PreviousPSXDisplay.Range.x0||                      // paint black borders around display area, if needed
-   PreviousPSXDisplay.Range.y0)
- PaintBlackBorders();
-
-if(PSXDisplay.Disabled)                               // display disabled?
- {
- //LOGE("PSXDisplay.Disabled");
-
-  // moved here
-  glDisable(GL_SCISSOR_TEST);glError();                       
-  glClearColor(0,0,0,128);glError();                            // -> clear whole backbuffer
-  glClear(uiBufferBits);glError();
-  glEnable(GL_SCISSOR_TEST);glError();                       
-  gl_z=0.0f;
-  bDisplayNotSet = TRUE;
- }
-
-if(iSkipTwo)                                          // we are in skipping mood?
- {
-  iSkipTwo--;
-  iDrawnSomething=0;                                  // -> simply lie about something drawn
- }
-
-//if(iBlurBuffer && !bSkipNextFrame)                    // "blur display" activated?
-// {BlurBackBuffer();bBlur=TRUE;}                       // -> blur it
-
-// if(iUseScanLines) SetScanLines();                     // "scan lines" activated? do it
-
-// if(usCursorActive) ShowGunCursor();                   // "gun cursor" wanted? show 'em
-
-if(dwActFixes&128)                                    // special FPS limitation mode?
- {
-  if(bUseFrameLimit) PCFrameCap();                    // -> ok, do it
-//   if(bUseFrameSkip || ulKeybits&KEY_SHOWFPS)  
-   PCcalcfps();         
- }
-
-// if(gTexPicName) DisplayPic();                         // some gpu info picture active? display it
-
-// if(bSnapShot) DoSnapShot();                           // snapshot key pressed? cheeeese :)
-
-// if(ulKeybits&KEY_SHOWFPS)                             // wanna see FPS?
- {
-//   sprintf(szDispBuf,"%06.1f",fps_cur);
-//   DisplayText();                                      // -> show it
- }
-
-//----------------------------------------------------//
-// main buffer swapping (well, or skip it)
-   if(fastfwrd)                                          // fastfwd ?
-  {
-    fpscount++;
-   if(!bSkipNextFrame) flipEGL();                 // -> to skip or not to skip
-
-   if((fpscount==20))                                      // -> skip 6/7 frames
-        bSkipNextFrame =fpscount= 0;
-   else{
-        bSkipNextFrame = 1; 
-   }
-
-
-  }else if(bUseFrameSkip)                                     // frame skipping active ?
- {
-  if(!bSkipNextFrame) 
-   {
-    if(iDrawnSomething)     flipEGL();
-   }
-    /*if((fps_skip < fFrameRateHz) && !(bSkipNextFrame)) 
-     {bSkipNextFrame = TRUE; fps_skip=fFrameRateHz;}
-    else bSkipNextFrame = FALSE;
-*/FrameSkip();
- }
-else                                                  // no skip ?
- {
-  if(iDrawnSomething)  flipEGL();
- }
-
-iDrawnSomething=0;
-
-//----------------------------------------------------//
-
-if(qualcomm==1||lClearOnSwap)                                      // clear buffer after swap?
- {
-  GLclampf g,b,r;
-
-  if(bDisplayNotSet)                                  // -> set new vals
-   SetOGLDisplaySettings(1);
-
-  g=((GLclampf)GREEN(lClearOnSwapColor))/255.0f;      // -> get col
-  b=((GLclampf)BLUE(lClearOnSwapColor))/255.0f;
-  r=((GLclampf)RED(lClearOnSwapColor))/255.0f;
-  glDisable(GL_SCISSOR_TEST);glError();                       
-  glClearColor(r,g,b,128);glError();                            // -> clear 
-  glClear(uiBufferBits);glError();
-  glEnable(GL_SCISSOR_TEST);glError();                       
-  lClearOnSwap=0;                                     // -> done
- }
-else 
- {
-//  if(bBlur) UnBlurBackBuffer();                       // unblur buff, if blurred before
-
-  if(iZBufferDepth)                                   // clear zbuffer as well (if activated)
-   {
-    glDisable(GL_SCISSOR_TEST);glError();                       
-    glClear(GL_DEPTH_BUFFER_BIT);glError();
-    glEnable(GL_SCISSOR_TEST);glError();                       
-   }
- }
-
-gl_z=0.0f;
-
-//----------------------------------------------------//
-// additional uploads immediatly after swapping
-
-if(bNeedUploadAfter)                                  // upload wanted?
- {
-  bNeedUploadAfter=FALSE;                           
-  bNeedUploadTest=FALSE;
-  UploadScreen(-1);                                   // -> upload
- }
-
-if(bNeedUploadTest)
- {
-  bNeedUploadTest=FALSE;
-  if(PSXDisplay.InterlacedTest &&
-     //iOffscreenDrawing>2 &&
-     PreviousPSXDisplay.DisplayPosition.x==PSXDisplay.DisplayPosition.x &&
-     PreviousPSXDisplay.DisplayEnd.x==PSXDisplay.DisplayEnd.x &&
-     PreviousPSXDisplay.DisplayPosition.y==PSXDisplay.DisplayPosition.y &&
-     PreviousPSXDisplay.DisplayEnd.y==PSXDisplay.DisplayEnd.y)
-   {
-    PrepareFullScreenUpload(TRUE);
-    UploadScreen(TRUE);
-   }
- }
-
-//----------------------------------------------------//
-// rumbling (main emu pad effect)
-
-if(iRumbleTime)                                       // shake screen by modifying view port
- {
-  int i1=0,i2=0,i3=0,i4=0;
-
-  iRumbleTime--;
-  if(iRumbleTime) 
-   {
-    i1=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-    i2=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-    i3=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-    i4=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
-   }
-
-  glViewport(rRatioRect.left+i1,                      
-             iResY-(rRatioRect.top+rRatioRect.bottom)+i2,
-             rRatioRect.right+i3, 
-             rRatioRect.bottom+i4);glError();            
- }
-
-//----------------------------------------------------//
-
-
-
-// if(ulKeybits&KEY_RESETTEXSTORE) ResetStuff();         // reset on gpu mode changes? do it before next frame is filled
+    //BOOL bBlur=FALSE;
+    
+    
+    bFakeFrontBuffer=FALSE;
+    bRenderFrontBuffer=FALSE;
+    
+    if(iRenderFVR)                                        // frame buffer read fix mode still active?
+    {
+        iRenderFVR--;                                       // -> if some frames in a row without read access: turn off mode
+        if(!iRenderFVR) bFullVRam=FALSE;
+    }
+    
+    if(iLastRGB24 && iLastRGB24!=PSXDisplay.RGB24+1)      // (mdec) garbage check
+    {
+        iSkipTwo=2;                                         // -> skip two frames to avoid garbage if color mode changes
+    }
+    iLastRGB24=0;
+    
+    if(PSXDisplay.RGB24)// && !bNeedUploadAfter)          // (mdec) upload wanted?
+    {
+        PrepareFullScreenUpload(-1);
+        UploadScreen(PSXDisplay.Interlaced);                // -> upload whole screen from psx vram
+        bNeedUploadTest=FALSE;
+        bNeedInterlaceUpdate=FALSE;
+        bNeedUploadAfter=FALSE;
+        bNeedRGB24Update=FALSE;
+    }
+    else
+        if(bNeedInterlaceUpdate)                              // smaller upload?
+        {
+            bNeedInterlaceUpdate=FALSE;
+            xrUploadArea=xrUploadAreaIL;                        // -> upload this rect
+            UploadScreen(TRUE);
+        }
+    
+    if(dwActFixes&512) bCheckFF9G4(NULL);                 // special game fix for FF9
+    
+    if(PreviousPSXDisplay.Range.x0||                      // paint black borders around display area, if needed
+       PreviousPSXDisplay.Range.y0)
+        PaintBlackBorders();
+    
+    if(PSXDisplay.Disabled)                               // display disabled?
+    {
+        //LOGE("PSXDisplay.Disabled");
+        
+        // moved here
+        glDisable(GL_SCISSOR_TEST);glError();
+        glClearColor(0,0,0,128);glError();                            // -> clear whole backbuffer
+        glClear(uiBufferBits);glError();
+        glEnable(GL_SCISSOR_TEST);glError();
+        gl_z=0.0f;
+        bDisplayNotSet = TRUE;
+    }
+    
+    if(iSkipTwo)                                          // we are in skipping mood?
+    {
+        iSkipTwo--;
+        iDrawnSomething=0;                                  // -> simply lie about something drawn
+    }
+    
+    //if(iBlurBuffer && !bSkipNextFrame)                    // "blur display" activated?
+    // {BlurBackBuffer();bBlur=TRUE;}                       // -> blur it
+    
+    // if(iUseScanLines) SetScanLines();                     // "scan lines" activated? do it
+    
+    // if(usCursorActive) ShowGunCursor();                   // "gun cursor" wanted? show 'em
+    
+    if(dwActFixes&128)                                    // special FPS limitation mode?
+    {
+        if(bUseFrameLimit) PCFrameCap();                    // -> ok, do it
+        //   if(bUseFrameSkip || ulKeybits&KEY_SHOWFPS)
+        PCcalcfps();
+    }
+    
+    // if(gTexPicName) DisplayPic();                         // some gpu info picture active? display it
+    
+    // if(bSnapShot) DoSnapShot();                           // snapshot key pressed? cheeeese :)
+    
+    // if(ulKeybits&KEY_SHOWFPS)                             // wanna see FPS?
+    {
+        //   sprintf(szDispBuf,"%06.1f",fps_cur);
+        //   DisplayText();                                      // -> show it
+    }
+    
+    //----------------------------------------------------//
+    // main buffer swapping (well, or skip it)
+    if(fastfwrd)                                          // fastfwd ?
+    {
+        fpscount++;
+        if(!bSkipNextFrame) {
+            swapContext();
+            flipEGL();                 // -> to skip or not to skip
+        }
+        
+        if((fpscount==20))                                      // -> skip 6/7 frames
+            bSkipNextFrame =fpscount= 0;
+        else{
+            bSkipNextFrame = 1;
+        }
+        
+        
+    }else if(bUseFrameSkip)                                     // frame skipping active ?
+    {
+        if(!bSkipNextFrame)
+        {
+            if(iDrawnSomething) {
+                swapContext();
+                flipEGL();
+            }
+        }
+        /*if((fps_skip < fFrameRateHz) && !(bSkipNextFrame))
+         {bSkipNextFrame = TRUE; fps_skip=fFrameRateHz;}
+         else bSkipNextFrame = FALSE;
+         */FrameSkip();
+    }
+    else                                                  // no skip ?
+    {
+        if(iDrawnSomething) {
+            swapContext();
+            flipEGL();
+        }
+    }
+    
+    iDrawnSomething=0;
+    
+    //----------------------------------------------------//
+    
+    if(qualcomm==1||lClearOnSwap)                                      // clear buffer after swap?
+    {
+        GLclampf g,b,r;
+        
+        if(bDisplayNotSet)                                  // -> set new vals
+            SetOGLDisplaySettings(1);
+        
+        g=((GLclampf)GREEN(lClearOnSwapColor))/255.0f;      // -> get col
+        b=((GLclampf)BLUE(lClearOnSwapColor))/255.0f;
+        r=((GLclampf)RED(lClearOnSwapColor))/255.0f;
+        glDisable(GL_SCISSOR_TEST);glError();
+        glClearColor(r,g,b,128);glError();                            // -> clear
+        glClear(uiBufferBits);glError();
+        glEnable(GL_SCISSOR_TEST);glError();
+        lClearOnSwap=0;                                     // -> done
+    }
+    else
+    {
+        //  if(bBlur) UnBlurBackBuffer();                       // unblur buff, if blurred before
+        
+        if(iZBufferDepth)                                   // clear zbuffer as well (if activated)
+        {
+            glDisable(GL_SCISSOR_TEST);glError();
+            glClear(GL_DEPTH_BUFFER_BIT);glError();
+            glEnable(GL_SCISSOR_TEST);glError();
+        }
+    }
+    
+    gl_z=0.0f;
+    
+    //----------------------------------------------------//
+    // additional uploads immediatly after swapping
+    
+    if(bNeedUploadAfter)                                  // upload wanted?
+    {
+        bNeedUploadAfter=FALSE;
+        bNeedUploadTest=FALSE;
+        UploadScreen(-1);                                   // -> upload
+    }
+    
+    if(bNeedUploadTest)
+    {
+        bNeedUploadTest=FALSE;
+        if(PSXDisplay.InterlacedTest &&
+           //iOffscreenDrawing>2 &&
+           PreviousPSXDisplay.DisplayPosition.x==PSXDisplay.DisplayPosition.x &&
+           PreviousPSXDisplay.DisplayEnd.x==PSXDisplay.DisplayEnd.x &&
+           PreviousPSXDisplay.DisplayPosition.y==PSXDisplay.DisplayPosition.y &&
+           PreviousPSXDisplay.DisplayEnd.y==PSXDisplay.DisplayEnd.y)
+        {
+            PrepareFullScreenUpload(TRUE);
+            UploadScreen(TRUE);
+        }
+    }
+    
+    //----------------------------------------------------//
+    // rumbling (main emu pad effect)
+    
+    if(iRumbleTime)                                       // shake screen by modifying view port
+    {
+        int i1=0,i2=0,i3=0,i4=0;
+        
+        iRumbleTime--;
+        if(iRumbleTime) 
+        {
+            i1=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
+            i2=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
+            i3=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
+            i4=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
+        }
+        
+        glViewport(rRatioRect.left+i1,                      
+                   iResY-(rRatioRect.top+rRatioRect.bottom)+i2,
+                   rRatioRect.right+i3, 
+                   rRatioRect.bottom+i4);glError();            
+    }
+    
+    //----------------------------------------------------//
+    
+    
+    
+    // if(ulKeybits&KEY_RESETTEXSTORE) ResetStuff();         // reset on gpu mode changes? do it before next frame is filled
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -726,9 +740,10 @@ bRenderFrontBuffer=FALSE;
 // if(gTexPicName) DisplayPic();
 // if(ulKeybits&KEY_SHOWFPS) DisplayText();
 
-if(iDrawnSomething)                                   // linux:
-      flipEGL();
-
+if(iDrawnSomething) {                                  // linux:
+    swapContext();
+    flipEGL();
+}
 
 //if(iBlurBuffer) UnBlurBackBuffer();
 }
@@ -2563,6 +2578,11 @@ void CALLBACK GPUdisplayFlags(unsigned long dwFlags)
 // dwCoreFlags=dwFlags;
 }
 
+void flipEGL()
+{    (*env2)->CallVoidMethod(env2, FlipGLObj, FlipGL);
+      nbft4=0;
+}
+
 JNIEXPORT void JNICALL Java_com_emulator_fpse_MainGL_Presskeys(JNIEnv * env, jobject  obj, jint val) {
 }
 
@@ -2692,19 +2712,20 @@ JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setOptionGL(JNIEnv *env, jobj
   }
 }
 
-JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setResizeGL(JNIEnv *env, jobject obj,jint w,jint h)
+JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setResizeGL(JNIEnv *env, jobject obj, jint w, jint h)
 {
     iResX=w;
     iResY=h;
-    if (bIsFirstFrame == FALSE) ResizeWindow();
-}
-
-void flipEGL()
-{    (*env2)->CallVoidMethod(env2, FlipGLObj, FlipGL);
-      nbft4=0;
+    if (bIsFirstFrame == TRUE) {
+        createContext(w, h);
+    } else {
+        resizeContext(w, h);
+        ResizeWindow();
+    }
 }
 
 JNIEXPORT jint JNICALL Java_com_emulator_fpse_Main_getGLversion(JNIEnv *env, jobject obj) {
+    logInfo(TAG, "getGLversion");
 #ifdef GL_OGLES1
     return 1;
 #endif
@@ -2728,6 +2749,7 @@ JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setshaderspath(JNIEnv * env, 
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 {
+    logInfo(TAG, "OnLoad");
 	jniVM = vm;
 	return JNI_VERSION_1_4;
 }

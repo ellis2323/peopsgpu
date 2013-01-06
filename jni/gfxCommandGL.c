@@ -4,6 +4,22 @@
 
 #if defined(GL_OGLES2) || defined(GL_OGLES1)
 
+u32 sMatUID = 1;
+
+Material *createMaterial() {
+    Material *mat = (Material *)malloc(sizeof(Material));
+    mat->mUid = sMatUID;
+    sMatUID ++;
+    mat->mVersion = 1;
+    mat->mTextureId = 0;
+    return mat;
+}
+
+void destroyMaterial(Material *mat) {
+    free(mat);
+}
+
+
 u32 sCurrentBlendingMode = 7;
 E_TRIBOOL_TYPE sBlendingState = TRIBOOL_UNKNOWN;
 bool sDebugCmdFlag = false;

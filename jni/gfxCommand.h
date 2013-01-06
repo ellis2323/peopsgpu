@@ -26,12 +26,49 @@ enum TRIBOOL_TYPE {
 typedef enum TRIBOOL_TYPE E_TRIBOOL_TYPE;
 
 
+struct SFBO {
+    int mFBO;
+    int mTexture;
+    int mDepthRenderBuffer;
+};
+typedef struct SFBO FBO;
+
+/**
+ Depth Mode:
+ - 0: No ZBuffer
+ 
+ Type:
+ - 0: Flat
+ 
+ Transparency Mode:
+ - 0: Opaque
+*/
+struct SMaterial {
+    u16 mUid;
+    u16 mVersion;
+    u32 mTextureId;
+    u8 mDepthMode;
+    u8 mTransMode;
+};
+typedef struct SMaterial Material;
+
 // Public API
+FBO *createFBO(s32 width, s32 height, bool hd);
+void destroyFBO(FBO *fbo);
+void useFBO(FBO *fbo);
+
+Material *createMaterial();
+void destroyMaterial(Material *mat);
+
 void debugCommand(bool flag);
 void changeDebuggedCommand();
 bool isDebuggedCommand(E_CMD_TYPE type);
 
 // Public API: primitives
+
+void drawTriangles(Material *mat, OGLVertex *vertices, u16 *indices, s16 count);
+
+
 void drawPointOpaque(OGLVertex* vertices, u16 *indices, s32 count);
 void drawPointTrans(OGLVertex* vertices, u16 *indices, s32 count);
 
@@ -48,6 +85,9 @@ void drawGouTexTriOpaque(OGLVertex* vertices, u16 *indices, s32 count);
 void drawGouTexTriTrans(OGLVertex* vertices, u16 *indices, s32 count);
 
 // Private API: internal
+void setDepthMode(u8 mode);
+void setTransMode(u8 mode);
+
 void useBlending(E_TRIBOOL_TYPE flag);
 void drawDebugPoint(OGLVertex *vertices, u16 *indices, s32 count);
 void drawDebugLine(OGLVertex *vertices, u16 *indices, s32 count);

@@ -4,6 +4,9 @@
 
 #include "gpuShader.h"
 
+extern E_TRIBOOL_TYPE sBlendingState;
+extern u32 sCurrentBlendingMode;
+
 // MARK: New generation code
 
 void drawPointOpaque(OGLVertex *vertices, u16 *indices, s32 count) {
@@ -140,6 +143,11 @@ void drawGouTexTriTrans(OGLVertex *vertices, u16 *indices, s32 count) {
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, indices);
 }
 
+void mali400() {
+}
+
+// MARK: PRIVATE METHODS
+
 void drawDebugPoint(OGLVertex *vertices, u16 *indices, s32 count) {
     GLSLPrograms* programs = getGLSLPrograms();
     GLSLProgram* prg =  programs->mDebugProgram;
@@ -167,9 +175,15 @@ void drawDebugTri(OGLVertex *vertices, u16 *indices, s32 count) {
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, indices);
 }
 
-// MARK: PRIVATE METHODS
 
-u32 getBlendingMode();
+static u32 sBlendingMode = 0;
+void setBlendingMode(u32 mode) {
+    sBlendingMode = mode & 0x3;
+}
+
+u32 getBlendingMode() {
+    return sBlendingMode;
+}
 
 void useBlending(E_TRIBOOL_TYPE flag) {
     if (flag==TRIBOOL_TRUE) {

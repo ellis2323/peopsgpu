@@ -29,6 +29,7 @@ typedef double f64;
 #ifdef ANDROID
     
     #ifdef GL_OGLES1
+    #define GL_GLEXT_PROTOTYPES
     #include <GLES/gl.h>
     #include <GLES/glext.h>
     #endif
@@ -37,7 +38,9 @@ typedef double f64;
     #include <GLES2/gl2.h>
     #include <GLES2/gl2ext.h>
     #endif
-    
+
+    #define TAG "ELLIS"
+
 #else
 
 #include <OpenGLES/ES2/gl.h>
