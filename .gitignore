@@ -1,0 +1,9 @@
+# fixed
+.DS_Store
+*~
+*.swp
+
+# android build generated files
+libs/armeabi/
+fpse/**/*
+obj
