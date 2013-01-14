@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-#include "gpuCommon.h"
+#include "gfxCommon.h"
 
 // internally used defines
 

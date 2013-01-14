@@ -21,8 +21,9 @@ endif
 LOCAL_SRC_FILES :=  gpuDraw.c gpuFPS.c \
                     gpuPrim.c gpuPlugin.c \
                     gpupsemu.c gpusoft.c gpuTexture.c  \
-                    gpuCommon.c gpuShader.c gpuInput.c gpuContext.c \
+                    gfxCommon.c gfxShader.c gfxInput.c  \
                     gfxCommandGL.c gfxCommandGLES2.c gfxCommandGLES1.c gfxCommandLog.c \
+                    gfxTexture.c gfxFBO.c gfxContext.c \
 					rmalloc.c
 
 ifeq ($(APP_GL_ARCH),ogles1)

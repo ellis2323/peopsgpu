@@ -1,4 +1,4 @@
-#include "gpuCommon.h"
+#include "gfxCommon.h"
 #include <math.h>
 
 #define TAG "ELLIS"

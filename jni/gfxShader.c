@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 IOPixel. All rights reserved.
 //
 
-#include "gpuShader.h"
+#include "gfxShader.h"
 #include "gpuPlugin.h"
 
 #if defined (GL_OGLES2)

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GPU_COMMON_H
-#define GPU_COMMON_H
+#ifndef GFX_COMMON_H
+#define GFX_COMMON_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -66,7 +66,7 @@ typedef double f64;
 #define glOrtho(x,y,z,xx,yy,zz) glOrthof(x,y,z,xx,yy,zz)
 #endif
 
-#if 0
+/*#if 0
 #define glError() { \
     logInfo("ELLIS", "GL call %s:%u\n", __FILE__, __LINE__); \
     GLenum err = glGetError(); \
@@ -77,7 +77,7 @@ typedef double f64;
 }
 #else
 #define glError()
-#endif
+#endif*/
 
 #define fpoint(x) x
 
@@ -113,8 +113,13 @@ struct SCoord {
 
 typedef struct SCoord PSXCoord;
 
+enum TRIBOOL_TYPE {
+    TRIBOOL_FALSE=0, TRIBOOL_TRUE, TRIBOOL_UNKNOWN,
+};
+typedef enum TRIBOOL_TYPE E_TRIBOOL_TYPE;
+
 void initVertex(GLSLVertex *v);
 void initVertices(GLSLVertex *v, s32 count);
 void logVertex(const GLSLVertex *v);
 
-#endif // GPU_COMMON_H
+#endif // GFX_COMMON_H

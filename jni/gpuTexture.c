@@ -82,9 +82,6 @@
 extern unsigned int start,maxtime;
 #if 0
 #define glError() { \
-  if (start==0) start=GetTicks(); \
-  if (Getticks()-start>maxtime){maxtime=Getticks()-start;LOGE("Max time %s:%u    %d\n",  __FILE__, __LINE__,maxtime);} \
-  start=GetTicks(); \
   	GLenum err = glGetError(); \
 	while (err != GL_NO_ERROR) { \
 		LOGE("glError: %d caught at %s:%u\n", err, __FILE__, __LINE__); \
@@ -94,6 +91,8 @@ extern unsigned int start,maxtime;
 #else
 #define glError() 
 #endif
+
+#include "gfxTexture.h"
 
 #define CLUTCHK   0x00060000
 #define CLUTSHIFT 17
@@ -586,7 +585,9 @@ void CleanupTextureStore()
 
 void ResetTextureArea(BOOL bDelTex)
 {
- int i,j;textureSubCacheEntryS * tss;EXLong * lu;
+ int i,j;
+ textureSubCacheEntryS * tss;
+ EXLong * lu;
  textureWndCacheEntry * tsx;
  //----------------------------------------------------//
 
@@ -622,8 +623,11 @@ void ResetTextureArea(BOOL bDelTex)
   {
    lu=pxSsubtexLeft[i];
    lu->l=0;
-   if(bDelTex && uiStexturePage[i])
-    {glDeleteTextures(1,&uiStexturePage[i]);glError();uiStexturePage[i]=0;}
+   if(bDelTex && uiStexturePage[i]) {
+        glDeleteTextures(1,&uiStexturePage[i]);
+        glError();
+        uiStexturePage[i]=0;
+    }
   }
 }
 
@@ -843,7 +847,13 @@ void InvalidateTextureArea(long X,long Y,long W, long H)
 
 void DefineTextureWnd(void)
 {
- if(gTexName==0)
+    if(gTexName==0) {
+        gTexName = createTexture(1, 1);
+    }
+    setTexture(gTexName, TWin.Position.x1, TWin.Position.y1, 3, texturepart);
+    bindTexture(gTexName);
+
+/*    if(gTexName==0)
   glGenTextures(1, &gTexName);
 glError();
  glBindTexture(GL_TEXTURE_2D, gTexName);
@@ -861,7 +871,7 @@ glError();
               TWin.Position.x1, 
               TWin.Position.y1, 
               0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
-glError();
+glError();*/
 //LOGE("DefineTextureWnd x:%d y:%d",TWin.Position.x1,TWin.Position.y1);
 
 }
@@ -1613,6 +1623,12 @@ void UploadTexWndPal(int mode,short cx,short cy)
 
 void DefinePalTextureWnd(void)
 {
+    if(gTexName==0) {
+        gTexName = createTexture(1, 1);
+    }
+    setTexture(gTexName, TWin.Position.x1, TWin.Position.y1, 3, texturepart);
+    bindTexture(gTexName);
+/*
  if(gTexName==0)
   glGenTextures(1, &gTexName);
 glError();
@@ -1630,7 +1646,7 @@ glError();
               TWin.Position.x1, 
               TWin.Position.y1, 
               0, GL_RGBA, GL_UNSIGNED_BYTE,texturepart);
-  glError();
+  glError();*/
   //LOGE("DefinePalTextureWnd x:%d y:%d",TWin.Position.x1,TWin.Position.y1);
 }
 
@@ -1876,41 +1892,17 @@ GLuint LoadTextureWnd(long pageid,long TextureMode,unsigned long GivenClutId)
 
 void DefinePackedTextureMovie(void)
 {
- if(gTexMovieName==0)
-  {
-   glGenTextures(1, &gTexMovieName);glError();
-   gTexName=gTexMovieName;
-   glBindTexture(GL_TEXTURE_2D, gTexName);glError();
-
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);glError();
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);glError();
-
-   if(!bUseFastMdec) 
-    {
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glError();
+    if(gTexMovieName==0) {
+        s8 ctype = iClampType == GL_REPEAT ? 1 : 0;
+        s8 ftype = !bUseFastMdec ? 1 : 0;
+        gTexMovieName = createTexture(ftype, ctype);
+        gTexName=gTexMovieName;
+        setTexture(gTexMovieName, 256, 256, 3, texturepart);
+    } else {
+        gTexName=gTexMovieName;
+        bindTexture(gTexName);
     }
-   else
-    {
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);glError();
-    }
-                                 
-   glTexImage2D(GL_TEXTURE_2D, 0, //giWantedRGBA, 
-                GL_RGBA,
-                256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
-  }
- else 
-  {
-   gTexName=gTexMovieName;glBindTexture(GL_TEXTURE_2D, gTexName);glError();
-  }
-
- glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-                 (xrMovieArea.x1-xrMovieArea.x0), 
-                 (xrMovieArea.y1-xrMovieArea.y0), 
-                 GL_RGBA,
-                 GL_UNSIGNED_SHORT,
-                 texturepart);glError();
+    setSubTexture(gTexName, 0, 0, (xrMovieArea.x1-xrMovieArea.x0), (xrMovieArea.y1-xrMovieArea.y0), texturepart);
   //LOGE("DefinePackedTextureMovie x:%d y:%d",(xrMovieArea.x1-xrMovieArea.x0),(xrMovieArea.y1-xrMovieArea.y0));
 
 }
@@ -1919,38 +1911,18 @@ void DefinePackedTextureMovie(void)
 
 void DefineTextureMovie(void)
 {
- if(gTexMovieName==0)
-  {
-   glGenTextures(1, &gTexMovieName);glError();
-   glGenTextures(1, &gTexMovieName);glError();
-   gTexName=gTexMovieName;
-   glBindTexture(GL_TEXTURE_2D, gTexName);glError();
-
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);glError();
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);glError();
- 
-   if(!bUseFastMdec) 
-    {
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glError();
+    if(gTexMovieName==0) {
+        s8 ctype = iClampType == GL_REPEAT ? 1 : 0;
+        s8 ftype = !bUseFastMdec ? 1 : 0;
+        gTexMovieName = createTexture(ftype, ctype);
+        gTexName=gTexMovieName;
+        setTexture(gTexMovieName, 256, 256, 3, texturepart);
+    } else {
+        gTexName=gTexMovieName;
+        bindTexture(gTexName);
     }
-   else
-    {
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);glError();
-    }
+    setSubTexture(gTexName, 0, 0, (xrMovieArea.x1-xrMovieArea.x0), (xrMovieArea.y1-xrMovieArea.y0), texturepart);
 
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
-  }
- else 
-  {
-   gTexName=gTexMovieName;glBindTexture(GL_TEXTURE_2D, gTexName);glError();
-  }
-
- glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-                 (xrMovieArea.x1-xrMovieArea.x0), 
-                 (xrMovieArea.y1-xrMovieArea.y0), 
-                 GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
  //LOGE("DefineTextureMovie x:%d y:%d",(xrMovieArea.x1-xrMovieArea.x0),(xrMovieArea.y1-xrMovieArea.y0));
 }
 

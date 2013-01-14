@@ -1,129 +1,209 @@
 #include "gfxCommand.h"
+#include "gfxTexture.h"
+#include "gfxContext.h"
 #include "gpuExternals.h"
 #include "gpuPlugin.h"
 
 #if defined(GL_OGLES1)
 
+// Cache Information
+// - sCSVERTEX is for Client State of Vertices. sCSCOLOR of Colors Vertices. sCSTEXTURE of TexCoord Vertices
+// - sCTextureId is for Texture Id
 s32 sCSVERTEX = -1;
 s32 sCSCOLOR = -1;
 s32 sCSTEXTURE = -1;
+static s32 sCTextureId = -1;
+static s8 sCTextureFilters = -1;
+static s8 sCTextureClampTypes = -1;
 
-FBO *createFBO(s32 width, s32 height, bool hd) {
-    GLuint framebuffer;
-    GLuint depthRenderbuffer;
-    GLuint texture;
-    // ids
-    glGenFramebuffersOES(1, &framebuffer);
-    glGenTextures(1, &texture);
-    glGenRenderbuffersOES(1, &depthRenderbuffer);
+
+/*
+ ShadeModel is SMOOTH.
+ Flat or Gouraud are equal method.
+ */
+void drawTriGou(OGLVertex *vertices, u16 *indices, s16 count) {
+    /*if (sCSVERTEX) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR) glEnableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE) glDisableClientState(GL_TEXTURE_COORD_ARRAY);*/
     
-    // create texture
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (hd) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8_OES, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    } else {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
-    }
-    // create depth renderbuffer
-    glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderbuffer);
-    glRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT16_OES, width, height);
+    glDisable(GL_TEXTURE_2D);
 
-    // bind framebuffer & attach texture 
-    glBindFramebufferOES(GL_FRAMEBUFFER_OES, framebuffer);
-    glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, texture, 0);
-    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthRenderbuffer);
-
-    if (glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES) != GL_FRAMEBUFFER_COMPLETE_OES) {
-        return 0;
-    }
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
     
-    FBO *fbo = (FBO *)malloc(sizeof(FBO));
-    fbo->mFBO = framebuffer;
-    fbo->mTexture = texture;
-    fbo->mDepthRenderBuffer = depthRenderbuffer;
-    return fbo;
+    glVertexPointer(3, GL_FLOAT, sizeof(OGLVertex), &vertices[0].x);
+    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(OGLVertex), &vertices[0].c.lcol);
+    
+    glDrawElements(GL_TRIANGLES, 3*count, GL_UNSIGNED_SHORT, indices);
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    
+    sCSVERTEX=1;
+    sCSCOLOR=1;
+    sCSTEXTURE=0;
 }
 
-void destroyFBO(FBO *fbo) {
+/*
+ ShadeModel is SMOOTH.
+ Texture or Gouraud Textured are equal method.
+ */
+void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) {
+#ifdef DEBUG
+    if (mat==NULL) logError(TAG, "drawTexTriGou with NULL MATERIAL!");
+#endif
+    /*if (sCSVERTEX) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR) glEnableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE) glEnableClientState(GL_TEXTURE_COORD_ARRAY);*/
     
-}
-
-void useFBO(FBO *fbo) {
-    if(fbo) {
-        glBindFramebufferOES(GL_FRAMEBUFFER_OES, fbo->mFBO);
-    } else {
-        glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-    }
+    glEnable(GL_TEXTURE_2D);
+    Texture *tex = getTexture(mat->mTexturePtrId);
+    // bind to texture if needed
+    //if (mat->mTexture.mTextureId != sCTextureId) {
+        sCTextureId = tex->mTextureId;
+        glBindTexture(GL_TEXTURE_2D, sCTextureId);
+    //}
+    
+    // change Min&Mag filters
+    //if (mat->mTexture.mFilters != sCTextureFilters) {
+        sCTextureFilters = tex->mFilters;
+        switch (sCTextureFilters) {
+            case 0:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                break;
+            case 1:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                break;
+            default:
+                logError(TAG, "filter mode unknown");
+        }
+    //}
+    
+    //if (mat->mTexture.mClampTypes != sCTextureClampTypes) {
+        sCTextureClampTypes = tex->mClampTypes;
+        switch (sCTextureClampTypes) {
+            case 0:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                break;
+            case 1:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                break;
+        default:
+            logError(TAG, "clamp types");
+        }
+    //}
+    
+    // change
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisable(GL_SCISSOR_TEST);
+    
+    glVertexPointer(3, GL_FLOAT, sizeof(OGLVertex), &vertices[0].x);
+    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(OGLVertex), &vertices[0].c.lcol);
+    glTexCoordPointer(2, GL_FLOAT, sizeof(OGLVertex), &vertices[0].sow);
+    
+    
+    checkTexture();
+    
+    glDrawElements(GL_TRIANGLES, 3*count, GL_UNSIGNED_SHORT, indices);
+    
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    
+    glDisable(GL_TEXTURE_2D);
+    
+    //logInfo(TAG, "draw drawTexTriGou");
+    sCSVERTEX=1;
+    sCSCOLOR=1;
+    sCSTEXTURE=1;
 }
 
 void drawTriangles(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) {
     setDepthMode(mat->mDepthMode);
     setTransMode(mat->mTransMode);
     
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-    glVertexPointer(3, GL_FLOAT, sizeof(OGLVertex), &vertices[0].x);
-    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(OGLVertex), &vertices[0].c.lcol);
-    
-    glDrawElements(GL_TRIANGLES, 3*count, GL_UNSIGNED_SHORT, indices);
-    
-    sCSVERTEX=1;
-    sCSCOLOR=1;
-    sCSTEXTURE=0;
-
+    switch (mat->mType) {
+        case 0:
+            drawTriGou(vertices, indices, count);
+            break;
+        case 1:
+            drawTexTriGou(mat, vertices, indices, count);
+            break;
+        default:
+            logInfo(TAG, "Unkown type of material");
+    }
 }
 
 // MARK: Private
 
 static u8 sLastDepthMode;
 void setDepthMode(u8 mode) {
-    if (mode==sLastDepthMode) return;
+    //if (mode==sLastDepthMode) return;
     sLastDepthMode = mode;
     switch (mode) {
         case 0:
-        glDisable(GL_DEPTH_TEST);
-        break;
+            glDisable(GL_DEPTH_TEST);
+            break;
         case 1:
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_GREATER);
-        break;
-    default:
-        logInfo(TAG, "Depth Mode unkown");
-        break;
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_GREATER);
+            break;
+        default:
+            logInfo(TAG, "Depth Mode unkown");
+            break;
     }
 }
 
 static u8 sLastTransMode;
 void setTransMode(u8 mode) {
-    if (mode==sLastTransMode) return;
+    //if (mode==sLastTransMode) return;
     sLastTransMode = mode;
     switch (mode) {
         case 0:
-        glDisable(GL_BLEND);
-        break;
+            glDisable(GL_BLEND);
+            break;
         case 1:
-        glEnable(GL_BLEND);
-        break;
-    default:
-        logInfo(TAG, "Depth Mode unkown");
-        break;
+            glEnable(GL_BLEND);
+            break;
+        default:
+            logInfo(TAG, "Depth Mode unkown");
+            break;
     }
 }
 
 extern GLubyte *texturepart;
 void mali400() {
-    Vertex v[4];
+    glClearDepthf(1.0f);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+    glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);
+    glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
+    glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST);
+    glDepthFunc(GL_LEQUAL);
+    glFrontFace( GL_CW );
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+
+return;
+/*    Vertex v[4];
     Vertex2 v2[4];
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glAlphaFuncx(GL_NOTEQUAL,0);
     glDisable(GL_BLEND);
     glBlendFunc(770,770);
     glLoadIdentity();
-    glOrtho(0,256,0, 0, -1, 1);
+    glOrtho(0,256,256, 0, -1, 1);
     glScissor(0,0,iResX,iResY);
     glDisable(GL_SCISSOR_TEST);
     glClearColor(0,0,0,1.0f);
@@ -227,7 +307,7 @@ void mali400() {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_SCISSOR_TEST);
-    flipEGL();
+    flipEGL();*/
 }
 
 

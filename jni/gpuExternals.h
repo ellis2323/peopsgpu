@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-#include "gpuCommon.h"
+#include "gfxCommon.h"
 
 #ifndef _WINDOWS
 #include <GLES/gl.h>

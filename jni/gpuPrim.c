@@ -36,23 +36,24 @@ web : www.pbernert.com
 #include "gpuDraw.h"
 #include "gpuTexture.h"
 #include "gpuPrim.h"
+#include "gfxCommand.h"
+
 #include <sys/time.h>
 extern int nbft4;
 unsigned int start=0,maxtime=0;
-#if 0
+#if 1
 #define glError() { \
-  if (start==0) start=GetTicks(); \
-  if (GetTicks()-start>maxtime){maxtime=GetTicks()-start;LOGE("Max time %s:%u    %d\n",  __FILE__, __LINE__,maxtime);} \
-  start=GetTicks(); \
   	GLenum err = glGetError(); \
 	while (err != GL_NO_ERROR) { \
-		LOGE("glError: %d caught at %s:%u\n", err, __FILE__, __LINE__); \
+		logInfo(TAG, "glError: %d caught at %s:%u\n", err, __FILE__, __LINE__); \
 		err = glGetError(); \
 	} \
 }
 #else
 #define glError() 
 #endif
+
+#include "gfxTexture.h"
 
 ////////////////////////////////////////////////////////////////////////
 // defines
@@ -207,13 +208,23 @@ return ((BGR>>3)&0x1f)|((BGR&0xf80000)>>9)|((BGR&0xf800)>>6);
 // OpenGL primitive drawing commands
 ////////////////////////////////////////////////////////////////////////
 
+OGLVertex v[8];
+s16 indices[12];
+
 void PRIMdrawTexturedQuad(OGLVertex* vertex1, OGLVertex* vertex2,
 OGLVertex* vertex3, OGLVertex* vertex4)
 {
+    v[0] = *vertex1;
+    v[1] = *vertex2;
+    v[2] = *vertex3;
+    v[3] = *vertex4;
+    
+logVertex(&v[0]);
+logVertex(&v[1]);
+logVertex(&v[2]);
+logVertex(&v[3]);
 
-
-Vertex v[4];
-
+/*
 v[0].xyz.x = fpoint(vertex1->x);
 v[0].xyz.y = fpoint(vertex1->y);
 v[0].xyz.z = fpoint(vertex1->z);
@@ -237,14 +248,74 @@ v[3].xyz.y = fpoint(vertex3->y);
 v[3].xyz.z = fpoint(vertex3->z);
 v[3].st.x = fpoint(vertex3->sow);
 v[3].st.y = fpoint(vertex3->tow);
-if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
+*/
+        indices[0] = 0;
+        indices[1] = 1;
+        indices[2] = 2;
+        indices[3] = 0;
+        indices[4] = 2;
+        indices[5] = 3;
+
+/*if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
 if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);glError();
-if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
-glTexCoordPointer(2, GL_FLOAT, sizeof(v[0]), &v[0].st);glError();
-glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].xyz);glError();
+if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();*/
+
+/*f32 color1[4];
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, color1);
+glShadeModel(GL_SMOOTH);
+glDisable(GL_ALPHA_TEST);
+glDisable(GL_BLEND);
+glDisable(GL_SCISSOR_TEST);*/
+
+
+glDisableClientState(GL_NORMAL_ARRAY);
+glDisableClientState(GL_COLOR_ARRAY);
+glEnable(GL_TEXTURE_2D);
+glDisable(GL_ALPHA_TEST);
+glDisable(GL_COLOR_LOGIC_OP);
+glColorMask(true, true, true, true);
+glDisable(GL_FOG);
+glDisable(GL_LIGHTING);
+glDisable(GL_STENCIL_TEST);
+
+
+s32 current_texture;
+GLboolean b;
+glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture);
+logInfo(TAG, "CURRENT TEXTURE:%d", current_texture);
+glGetIntegerv(GL_ACTIVE_TEXTURE, &current_texture);
+logInfo(TAG, "UNIT TEXTURE:%d", current_texture);
+glActiveTexture(GL_TEXTURE0);
+glGetBooleanv(GL_ALPHA_TEST, &b);
+logInfo(TAG, "Alpha Test: %d", b);
+
+checkTexture();
+checkScissor();
+glDisable(GL_SCISSOR_TEST);
+glShadeModel(GL_SMOOTH);
+glViewport(0,0,200,200);
+
+glEnableClientState(GL_VERTEX_ARRAY);
+glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);glError();
+glTexCoordPointer(2, GL_FLOAT, sizeof(v[0]), &v[0].sow);glError();
+
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
+//glDrawElements(GL_POINTS, 6, GL_UNSIGNED_SHORT, indices);
+
+
+glDisableClientState(GL_VERTEX_ARRAY);
+glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+
+/*
 CSTEXTURE=CSVERTEX=1;
 CSCOLOR=0;
+*/
 }
 
 /////////////////////////////////////////////////////////
@@ -272,12 +343,21 @@ v[2].xyz.y = fpoint(vertex3->y);
 v[2].xyz.z = fpoint(vertex3->z);
 v[2].st.x = fpoint(vertex3->sow);
 v[2].st.y = fpoint(vertex3->tow);
-if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
+
+/*if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
 if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);glError();
-if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
+if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();*/
+
+glEnableClientState(GL_VERTEX_ARRAY);
+glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
 glTexCoordPointer(2, GL_FLOAT, sizeof(v[0]), &v[0].st);glError();
 glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].xyz);glError();
 glDrawArrays(GL_TRIANGLES, 0, 3);glError();
+
+glDisableClientState(GL_VERTEX_ARRAY);
+glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
 CSTEXTURE=CSVERTEX=1;
 CSCOLOR=0;
 
@@ -322,15 +402,25 @@ v[2].rgba.g = vertex3->c.col[1];
 v[2].rgba.b = vertex3->c.col[2];
 v[2].rgba.a = vertex3->c.col[3];
 
-if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);glError();
+/*if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
-if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
+if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();*/
+
+glEnableClientState(GL_VERTEX_ARRAY);
+glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+glEnableClientState(GL_COLOR_ARRAY);
 
 glTexCoordPointer(2, GL_FLOAT, sizeof(v[0]), &v[0].st);glError();
 glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].xyz);glError();
 glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].rgba);glError();
 
+checkTexture();
 glDrawArrays(GL_TRIANGLES, 0, 3);glError();
+
+glDisableClientState(GL_VERTEX_ARRAY);
+glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+glDisableClientState(GL_COLOR_ARRAY);
+
 CSTEXTURE=CSVERTEX=CSCOLOR=1;
 }
 
@@ -382,15 +472,24 @@ v[3].rgba.g = vertex3->c.col[1];
 v[3].rgba.b = vertex3->c.col[2];
 v[3].rgba.a = vertex3->c.col[3];
 
-if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);glError();
+/*if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
-if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
+if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();*/
+
+glEnableClientState(GL_VERTEX_ARRAY);
+glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+glEnableClientState(GL_COLOR_ARRAY);
 
 glTexCoordPointer(2, GL_FLOAT, sizeof(v[0]), &v[0].st);glError();
 glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].xyz);glError();
 glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].rgba);glError();
 
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
+
+glDisableClientState(GL_VERTEX_ARRAY);
+glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+glDisableClientState(GL_COLOR_ARRAY);
+
 CSTEXTURE=CSVERTEX=CSCOLOR=1;
 }
 
@@ -413,12 +512,17 @@ v[2].x = fpoint(vertex3->x);
 v[2].y = fpoint(vertex3->y);
 v[2].z = fpoint(vertex3->z);
 
-if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
+/*if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
-if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
+if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();*/
+
+glEnableClientState(GL_VERTEX_ARRAY);
 
 glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0]);glError();
 glDrawArrays(GL_TRIANGLES, 0, 3);glError();
+
+glDisableClientState(GL_VERTEX_ARRAY);
+
 CSVERTEX=1;
 CSTEXTURE=CSCOLOR=0;
 
@@ -448,12 +552,17 @@ v[3].x = fpoint(vertex4->x);
 v[3].y = fpoint(vertex4->y);
 v[3].z = fpoint(vertex4->z);
 
-if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
+/*if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
-if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
+if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();*/
+
+glEnableClientState(GL_VERTEX_ARRAY);
 
 glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0]);glError();
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
+
+glDisableClientState(GL_VERTEX_ARRAY);
+
 CSVERTEX=1;
 CSTEXTURE=CSCOLOR=0;
 }
@@ -490,14 +599,21 @@ v[2].rgba.g = vertex3->c.col[1];
 v[2].rgba.b = vertex3->c.col[2];
 v[2].rgba.a = vertex3->c.col[3];
 
-if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
+/*if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
-if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
+if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();*/
+
+glEnableClientState(GL_VERTEX_ARRAY);
+glEnableClientState(GL_COLOR_ARRAY);
 
 glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].xyz);glError();
 glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].rgba);glError();
 
 glDrawArrays(GL_TRIANGLES, 0, 3);glError();
+
+glDisableClientState(GL_VERTEX_ARRAY);
+glDisableClientState(GL_COLOR_ARRAY);
+
 CSVERTEX=CSCOLOR=1;
 CSTEXTURE=0;
 }
@@ -542,14 +658,21 @@ v[3].rgba.g = vertex4->c.col[1];
 v[3].rgba.b = vertex4->c.col[2];
 v[3].rgba.a = vertex4->c.col[3];
 
-if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
+/*if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
-if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
+if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();*/
+
+glEnableClientState(GL_VERTEX_ARRAY);
+glEnableClientState(GL_COLOR_ARRAY);
 
 glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].xyz);glError();
 glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].rgba);glError();
 
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
+
+glDisableClientState(GL_VERTEX_ARRAY);
+glDisableClientState(GL_COLOR_ARRAY);
+
 CSTEXTURE=0;
 CSVERTEX=CSCOLOR=1;
 }
@@ -593,14 +716,20 @@ v[3].rgba.g = vertex1->c.col[1];
 v[3].rgba.b = vertex1->c.col[2];
 v[3].rgba.a = vertex1->c.col[3];
 
-if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
+/*if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
-if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
+if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();*/
+
+glEnableClientState(GL_VERTEX_ARRAY);
+glEnableClientState(GL_COLOR_ARRAY);
 
 glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].xyz);glError();
 glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].rgba);glError();
 
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
+
+glDisableClientState(GL_VERTEX_ARRAY);
+glDisableClientState(GL_COLOR_ARRAY);
 
 CSTEXTURE=0;
 CSVERTEX=CSCOLOR=1;
@@ -647,14 +776,21 @@ v[2].rgba.g = vertex4->c.col[1];
 v[2].rgba.b = vertex4->c.col[2];
 v[2].rgba.a = vertex4->c.col[3];
 
-if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
+/*if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
-if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
+if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();*/
+
+glEnableClientState(GL_VERTEX_ARRAY);
+glEnableClientState(GL_COLOR_ARRAY);
 
 glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].xyz);glError();
 glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].rgba);glError();
 
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
+
+glDisableClientState(GL_VERTEX_ARRAY);
+glDisableClientState(GL_COLOR_ARRAY);
+
 CSTEXTURE=0;
 CSVERTEX=CSCOLOR=1;
 }
@@ -683,12 +819,18 @@ v[3].x = fpoint(vertex3->x);
 v[3].y = fpoint(vertex3->y);
 v[3].z = fpoint(vertex3->z);
 
-if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
+/*if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
-if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
+if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();*/
+
+glEnableClientState(GL_VERTEX_ARRAY);
 
 glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0]);glError();
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
+
+glDisableClientState(GL_VERTEX_ARRAY);
+
+
 CSTEXTURE=0;
 CSVERTEX=1;
 CSCOLOR=0;
@@ -1014,6 +1156,8 @@ GLuint currTex;
 if(bUsingTWin) currTex=LoadTextureWnd(GlobalTexturePage,GlobalTextTP, ulClutID);
 else if(bUsingMovie) currTex=LoadTextureMovie();
 else currTex=SelectSubTextureS(GlobalTextTP,ulClutID);
+
+logInfo(TAG, "BORDEL: %d", currTex);
 
 if(gTexName!=currTex)
 {gTexName=currTex;glBindTexture(GL_TEXTURE_2D,currTex);glError();}

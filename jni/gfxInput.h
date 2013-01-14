@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GPU_INPUT_H
-#define GPU_INPUT_H
+#ifndef GFX_INPUT_H
+#define GFX_INPUT_H
 
 //  gpuInput.h
 //  fpse
@@ -9,7 +9,7 @@
 //  Copyright (c) 2013 Mallet Laurent. All rights reserved.
 
 
-#include "gpuCommon.h"
+#include "gfxCommon.h"
 
 #define KEY_L1 0
 #define KEY_L2 1
@@ -21,4 +21,4 @@
 void keyPressed(int key, int val);
 
 
-#endif
+#endif // GFX_INPUT_H

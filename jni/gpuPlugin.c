@@ -42,7 +42,10 @@
 #include "gpuFps.h"
 #include "gpuPrim.h"
 
-#include "gpuContext.h"
+#include "gfxTexture.h"
+#include "gfxFBO.h"
+#include "gfxContext.h"
+
 
 #include <android/log.h>
 #include <sys/time.h>
@@ -73,9 +76,6 @@ void flipEGL();
 extern unsigned int start,maxtime;
 #if 0
 #define glError() { \
-  if (start==0) start=GetTicks(); \
-  if (GetTicks()-start>maxtime){maxtime=GetTicks()-start;LOGE("Max time %s:%u    %d\n",  __FILE__, __LINE__,maxtime);} \
-  start=GetTicks(); \
   	GLenum err = glGetError(); \
 	while (err != GL_NO_ERROR) { \
 		LOGE("glError: %d caught at %s:%u\n", err, __FILE__, __LINE__); \
@@ -431,11 +431,14 @@ static void draw_rectangle(float x0, float y0,float z0, float x1, float y1,float
 	verts[3]=verts[6];
 	verts[4]=verts[10];
 	verts[5]=verts[11];
-	if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
+/*	if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 	if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
-	if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();	
+	if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();	*/
+    
+    glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer( 3,GL_FLOAT,0, verts); 
 	glDrawArrays( GL_TRIANGLES, 0, 4 );
+    glDisableClientState(GL_VERTEX_ARRAY);
 	CSTEXTURE=0;
 	CSVERTEX=1;
 	CSCOLOR=0;
@@ -596,8 +599,9 @@ void updateDisplay(void)                               // UPDATE DISPLAY
     {
         fpscount++;
         if(!bSkipNextFrame) {
-            swapContext();
+            swapContext1();
             flipEGL();                 // -> to skip or not to skip
+            swapContext2();
         }
         
         if((fpscount==20))                                      // -> skip 6/7 frames
@@ -612,8 +616,9 @@ void updateDisplay(void)                               // UPDATE DISPLAY
         if(!bSkipNextFrame)
         {
             if(iDrawnSomething) {
-                swapContext();
+                swapContext1();
                 flipEGL();
+                swapContext2();
             }
         }
         /*if((fps_skip < fFrameRateHz) && !(bSkipNextFrame))
@@ -624,8 +629,9 @@ void updateDisplay(void)                               // UPDATE DISPLAY
     else                                                  // no skip ?
     {
         if(iDrawnSomething) {
-            swapContext();
+            swapContext1();
             flipEGL();
+            swapContext2();
         }
     }
     
@@ -741,8 +747,9 @@ bRenderFrontBuffer=FALSE;
 // if(ulKeybits&KEY_SHOWFPS) DisplayText();
 
 if(iDrawnSomething) {                                  // linux:
-    swapContext();
+    swapContext1();
     flipEGL();
+    swapContext2();
 }
 
 //if(iBlurBuffer) UnBlurBackBuffer();
@@ -915,10 +922,14 @@ if ((PSXDisplay.DisplayMode.y == PSXDisplay.DisplayModeNew.y) &&
  }
 else                                                  // some res change?
  {
-  glLoadIdentity();glError();
-  glOrtho(0,PSXDisplay.DisplayModeNew.x,              // -> new psx resolution
-            PSXDisplay.DisplayModeNew.y, 0, -1, 1);glError();
-            //LOGE("PSXDisplay.DisplayModeNew.x:%d ,PSXDisplay.DisplayModeNew.y:%d");              // -> new psx resolution
+  f32 x = PSXDisplay.DisplayModeNew.x;
+  f32 y = PSXDisplay.DisplayModeNew.y;
+  if (x>0 && y>0) {
+    glMatrixMode(GL_PROJECTION);glError();                          // init projection with psx resolution
+    glLoadIdentity();glError();
+    glOrthof(0, x, y, 0, -1, 1);glError(); // -> new psx resolution
+     logInfo(TAG, "PSXDisplay.DisplayModeNew.x:%d ,PSXDisplay.DisplayModeNew.y:%d", (s32)x, (s32)y); // -> new psx resolution
+    }
   if(bKeepRatio&&iResX>iResY) SetAspectRatio();
  }
 
@@ -2717,6 +2728,7 @@ JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setResizeGL(JNIEnv *env, jobj
     iResX=w;
     iResY=h;
     if (bIsFirstFrame == TRUE) {
+        initTextures();
         createContext(w, h);
     } else {
         resizeContext(w, h);

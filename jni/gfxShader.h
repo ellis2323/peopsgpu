@@ -9,7 +9,7 @@
 //  Copyright (c) 2012 IOPixel. All rights reserved.
 //
 
-#include "gpuCommon.h"
+#include "gfxCommon.h"
 #include "gpuExternals.h"
 
 #if defined (GL_OGLES2)

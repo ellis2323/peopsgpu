@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 Mallet Laurent. All rights reserved.
 //
 
-#include "gpuInput.h"
+#include "gfxInput.h"
 #include "gfxCommand.h"
 
 #define TAG "ELLIS"

@@ -2,7 +2,7 @@
 #ifndef GFX_COMMAND_H
 #define GFX_COMMAND_H
 
-#include "gpuCommon.h"
+#include "gfxCommon.h"
 
 enum CMD_TYPE {
     CMD_TYPE_NOOP=0,
@@ -15,25 +15,13 @@ enum CMD_TYPE {
 };
 typedef enum CMD_TYPE E_CMD_TYPE;
 
-enum CLAMP_TYPE {
-    CLAMP_TYPE_EDGE, CLAMP_TYPE_REPEAT,
-};
-typedef enum CLAMP_TYPE E_CLAMP_TYPE;
-
-enum TRIBOOL_TYPE {
-    TRIBOOL_FALSE=0, TRIBOOL_TRUE, TRIBOOL_UNKNOWN,
-};
-typedef enum TRIBOOL_TYPE E_TRIBOOL_TYPE;
 
 
-struct SFBO {
-    int mFBO;
-    int mTexture;
-    int mDepthRenderBuffer;
-};
-typedef struct SFBO FBO;
 
-/**
+
+
+
+/*
  Depth Mode:
  - 0: No ZBuffer
  
@@ -46,16 +34,33 @@ typedef struct SFBO FBO;
 struct SMaterial {
     u16 mUid;
     u16 mVersion;
-    u32 mTextureId;
+    s32 mTexturePtrId;
+    u8 mType;
     u8 mDepthMode;
     u8 mTransMode;
 };
 typedef struct SMaterial Material;
 
-// Public API
-FBO *createFBO(s32 width, s32 height, bool hd);
-void destroyFBO(FBO *fbo);
-void useFBO(FBO *fbo);
+// ********************** Public API ********************** 
+
+// SCISSOR
+
+/// Use or Not Scissor
+void useScissor(bool flag);
+
+/// Define the Scissor Box
+void setScissor(s32 x, s32 y, s32 width, s32 height);
+
+/// Check scissor box
+void checkScissor();
+
+// TRANSFORMATION
+
+/// Define the projection matrix by a 4x4 matrix ie array of 16 float
+void setProjectionMatrix(f32 *matrix);
+
+/// Define an orthogonal projection matrix
+void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far);
 
 Material *createMaterial();
 void destroyMaterial(Material *mat);
@@ -83,6 +88,9 @@ void drawTexTriTrans(OGLVertex* vertices, u16 *indices, s32 count);
 
 void drawGouTexTriOpaque(OGLVertex* vertices, u16 *indices, s32 count);
 void drawGouTexTriTrans(OGLVertex* vertices, u16 *indices, s32 count);
+
+
+
 
 // Private API: internal
 void setDepthMode(u8 mode);

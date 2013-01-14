@@ -9,7 +9,8 @@
 //  Copyright (c) 2013 Mallet Laurent. All rights reserved.
 //
 
-#include "gpuCommon.h"
+#include "gfxCommon.h"
+#include "gfxFBO.h"
 #include "gfxCommand.h"
 
 struct SContext {
@@ -23,6 +24,7 @@ typedef struct SContext Context;
 void createContext(s32 width, s32 height);
 Context *getContext();
 void resizeContext(s32 width, s32 height);
-void swapContext();
+void swapContext1();
+void swapContext2();
 
 #endif // GPU_CONTEXT_H
