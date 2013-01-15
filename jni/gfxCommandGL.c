@@ -51,6 +51,8 @@ void setScissor(s32 x, s32 y, s32 width, s32 height) {
 f32 sMatrixProjection[16];
 void setProjectionMatrix(f32 *matrix) {
     memcpy(sMatrixProjection, matrix, 16*sizeof(f32));
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(sMatrixProjection);
 }
 
 void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far) {
@@ -73,6 +75,9 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
     sMatrixProjection[13] = - (top+bottom) / (top-bottom);
     sMatrixProjection[14] = - (far+near) / (far-near);
     sMatrixProjection[15] = 1.0f;
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrthof(left, right, bottom, top, near, far);
 }
 
 Material *createMaterial() {
