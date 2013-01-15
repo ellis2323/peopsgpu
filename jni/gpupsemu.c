@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+
 #define DECLARE_GPU_VARS
 //#include "fpse.h"
 #include "type.h"

@@ -78,7 +78,7 @@ extern "C" {
 
 
 #else
-        #include <GLES/gl.h> // for opengl es types
+        #include <GLES/gl.h>
         #include <GLES/glext.h>
         #include <EGL/egl.h>
 #endif

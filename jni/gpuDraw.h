@@ -32,8 +32,8 @@
 
 extern "C" {
 #endif
+        
 
-#include "gfxCommon.h"
 
 // internally used defines
 

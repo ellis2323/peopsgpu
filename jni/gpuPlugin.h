@@ -85,6 +85,7 @@ long CALLBACK GPU_configure(void);
 long CALLBACK GPU_test(void);
 void CALLBACK GPU_about(void);
 
+
 void           DoSnapShot(void);
 void               GPU_vSinc(void);
 void           updateDisplay(void);
@@ -99,7 +100,7 @@ void PaintPicDot(unsigned char * p,unsigned char c);
 //void DrawNumBorPic(unsigned char *pMem, int lSelectedSlot);
 void ResizeWindow();
 void flipEGL();
-const c8 *getShaderPath();
+const char *getShaderPath();
 
 extern int UseFrameLimit;
 extern int UseFrameSkip;

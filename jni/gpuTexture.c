@@ -82,6 +82,9 @@
 extern unsigned int start,maxtime;
 #if 0
 #define glError() { \
+  if (start==0) start=GetTicks(); \
+  if (Getticks()-start>maxtime){maxtime=Getticks()-start;LOGE("Max time %s:%u    %d\n",  __FILE__, __LINE__,maxtime);} \
+  start=GetTicks(); \
   	GLenum err = glGetError(); \
 	while (err != GL_NO_ERROR) { \
 		LOGE("glError: %d caught at %s:%u\n", err, __FILE__, __LINE__); \
@@ -91,8 +94,6 @@ extern unsigned int start,maxtime;
 #else
 #define glError() 
 #endif
-
-#include "gfxTexture.h"
 
 #define CLUTCHK   0x00060000
 #define CLUTSHIFT 17
@@ -585,9 +586,7 @@ void CleanupTextureStore()
 
 void ResetTextureArea(BOOL bDelTex)
 {
- int i,j;
- textureSubCacheEntryS * tss;
- EXLong * lu;
+ int i,j;textureSubCacheEntryS * tss;EXLong * lu;
  textureWndCacheEntry * tsx;
  //----------------------------------------------------//
 
@@ -623,11 +622,8 @@ void ResetTextureArea(BOOL bDelTex)
   {
    lu=pxSsubtexLeft[i];
    lu->l=0;
-   if(bDelTex && uiStexturePage[i]) {
-        glDeleteTextures(1,&uiStexturePage[i]);
-        glError();
-        uiStexturePage[i]=0;
-    }
+   if(bDelTex && uiStexturePage[i])
+    {glDeleteTextures(1,&uiStexturePage[i]);glError();uiStexturePage[i]=0;}
   }
 }
 
@@ -847,13 +843,7 @@ void InvalidateTextureArea(long X,long Y,long W, long H)
 
 void DefineTextureWnd(void)
 {
-    if(gTexName==0) {
-        gTexName = createTexture(1, 1);
-    }
-    setTexture(gTexName, TWin.Position.x1, TWin.Position.y1, 3, texturepart);
-    bindTexture(gTexName);
-
-/*    if(gTexName==0)
+ if(gTexName==0)
   glGenTextures(1, &gTexName);
 glError();
  glBindTexture(GL_TEXTURE_2D, gTexName);
@@ -871,7 +861,7 @@ glError();
               TWin.Position.x1, 
               TWin.Position.y1, 
               0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
-glError();*/
+glError();
 //LOGE("DefineTextureWnd x:%d y:%d",TWin.Position.x1,TWin.Position.y1);
 
 }
@@ -1623,12 +1613,6 @@ void UploadTexWndPal(int mode,short cx,short cy)
 
 void DefinePalTextureWnd(void)
 {
-    if(gTexName==0) {
-        gTexName = createTexture(1, 1);
-    }
-    setTexture(gTexName, TWin.Position.x1, TWin.Position.y1, 3, texturepart);
-    bindTexture(gTexName);
-/*
  if(gTexName==0)
   glGenTextures(1, &gTexName);
 glError();
@@ -1646,7 +1630,7 @@ glError();
               TWin.Position.x1, 
               TWin.Position.y1, 
               0, GL_RGBA, GL_UNSIGNED_BYTE,texturepart);
-  glError();*/
+  glError();
   //LOGE("DefinePalTextureWnd x:%d y:%d",TWin.Position.x1,TWin.Position.y1);
 }
 
@@ -1892,17 +1876,41 @@ GLuint LoadTextureWnd(long pageid,long TextureMode,unsigned long GivenClutId)
 
 void DefinePackedTextureMovie(void)
 {
-    if(gTexMovieName==0) {
-        s8 ctype = iClampType == GL_REPEAT ? 1 : 0;
-        s8 ftype = !bUseFastMdec ? 1 : 0;
-        gTexMovieName = createTexture(ftype, ctype);
-        gTexName=gTexMovieName;
-        setTexture(gTexMovieName, 256, 256, 3, texturepart);
-    } else {
-        gTexName=gTexMovieName;
-        bindTexture(gTexName);
+ if(gTexMovieName==0)
+  {
+   glGenTextures(1, &gTexMovieName);glError();
+   gTexName=gTexMovieName;
+   glBindTexture(GL_TEXTURE_2D, gTexName);glError();
+
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);glError();
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);glError();
+
+   if(!bUseFastMdec) 
+    {
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glError();
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glError();
     }
-    setSubTexture(gTexName, 0, 0, (xrMovieArea.x1-xrMovieArea.x0), (xrMovieArea.y1-xrMovieArea.y0), texturepart);
+   else
+    {
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);glError();
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);glError();
+    }
+                                 
+   glTexImage2D(GL_TEXTURE_2D, 0, //giWantedRGBA, 
+                GL_RGBA,
+                256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
+  }
+ else 
+  {
+   gTexName=gTexMovieName;glBindTexture(GL_TEXTURE_2D, gTexName);glError();
+  }
+
+ glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+                 (xrMovieArea.x1-xrMovieArea.x0), 
+                 (xrMovieArea.y1-xrMovieArea.y0), 
+                 GL_RGBA,
+                 GL_UNSIGNED_SHORT,
+                 texturepart);glError();
   //LOGE("DefinePackedTextureMovie x:%d y:%d",(xrMovieArea.x1-xrMovieArea.x0),(xrMovieArea.y1-xrMovieArea.y0));
 
 }
@@ -1911,18 +1919,38 @@ void DefinePackedTextureMovie(void)
 
 void DefineTextureMovie(void)
 {
-    if(gTexMovieName==0) {
-        s8 ctype = iClampType == GL_REPEAT ? 1 : 0;
-        s8 ftype = !bUseFastMdec ? 1 : 0;
-        gTexMovieName = createTexture(ftype, ctype);
-        gTexName=gTexMovieName;
-        setTexture(gTexMovieName, 256, 256, 3, texturepart);
-    } else {
-        gTexName=gTexMovieName;
-        bindTexture(gTexName);
-    }
-    setSubTexture(gTexName, 0, 0, (xrMovieArea.x1-xrMovieArea.x0), (xrMovieArea.y1-xrMovieArea.y0), texturepart);
+ if(gTexMovieName==0)
+  {
+   glGenTextures(1, &gTexMovieName);glError();
+   glGenTextures(1, &gTexMovieName);glError();
+   gTexName=gTexMovieName;
+   glBindTexture(GL_TEXTURE_2D, gTexName);glError();
 
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);glError();
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);glError();
+ 
+   if(!bUseFastMdec) 
+    {
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glError();
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glError();
+    }
+   else
+    {
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);glError();
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);glError();
+    }
+
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
+  }
+ else 
+  {
+   gTexName=gTexMovieName;glBindTexture(GL_TEXTURE_2D, gTexName);glError();
+  }
+
+ glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+                 (xrMovieArea.x1-xrMovieArea.x0), 
+                 (xrMovieArea.y1-xrMovieArea.y0), 
+                 GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
  //LOGE("DefineTextureMovie x:%d y:%d",(xrMovieArea.x1-xrMovieArea.x0),(xrMovieArea.y1-xrMovieArea.y0));
 }
 
@@ -2071,9 +2099,11 @@ GLuint LoadTextureMovie(void)
         {
          dx=xrMovieArea.x1-xrMovieArea.x0+1;
          for(row=xrMovieArea.x0;row<xrMovieArea.x1;row++) {
-          *ta=*(ta-dx);ta++;
+          *ta=*(ta-dx);
+          ta++;
           }
-         *ta=*(ta-1);ta++;
+         *ta=*(ta-1);
+         ta++;
         }
       }
      else
@@ -4153,6 +4183,125 @@ GLuint SelectSubTextureS(long TextureMode, unsigned long GivenClutId)
  return (GLuint) gTexName;
 }
 
+#ifdef MALI
+void mali400(){
+Vertex v[4];
+Vertex2 v2[4];
+//Vec3f v3[4];
+glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+glAlphaFuncx(GL_NOTEQUAL,0);
+glDisable(GL_BLEND);
+glBlendFunc(770,770);
+glLoadIdentity();
+glOrtho(0,256,0, 0, -1, 1);
+glScissor(0,0,iResX,iResY);
+glDisable(GL_SCISSOR_TEST);
+glClearColor(0,0,0,1.0f);
+glClear(16384);
+glEnable(GL_SCISSOR_TEST);
+glLoadIdentity();
+glOrtho(0,256,251, 0, -1, 1);
+glLoadIdentity();
+glOrtho(0,368,502, 0, -1, 1);
+glDisable(GL_SCISSOR_TEST);
+glClearColor(0,0,0,128);
+glClear(16384);
+glEnable(GL_SCISSOR_TEST);
+glGenTextures(1, &gTexName);
+glBindTexture(GL_TEXTURE_2D, 1);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
+glEnable(GL_TEXTURE_2D);
+glEnableClientState(GL_VERTEX_ARRAY);
+glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+glEnableClientState(GL_COLOR_ARRAY);
+glBindTexture(GL_TEXTURE_2D, 1);
+glTexSubImage2D(GL_TEXTURE_2D, 0, 0,196,128,33,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
+v2[0].st.x=0.005207f;
+v2[0].st.y=0.770862f;
+v2[1].st.x=0.490906f;
+v2[1].st.y=0.770862f;
+v2[2].st.x=0.005207f;
+v2[2].st.y=0.885453f;
+v2[3].st.x=0.490906f;
+v2[3].st.y=0.885453f;
+v2[0].xyz.x=33.000000f;
+v2[0].xyz.y=70.000000f;
+v2[0].xyz.z=0.000000f;
+v2[1].xyz.x=159.000000f;
+v2[1].xyz.y=70.000000f;
+v2[1].xyz.z=0.000000f;
+v2[2].xyz.x=33.000000f;
+v2[2].xyz.y=100.000000f;
+v2[2].xyz.z=0.000000f;
+v2[3].xyz.x=159.000000f;
+v2[3].xyz.y=100.000000f;
+v2[3].xyz.z=0.000000f;
+v2[0].rgba.r=0;
+v2[0].rgba.g=0;
+v2[0].rgba.b=0;
+v2[0].rgba.a=0;
+v2[1].rgba.r=0;
+v2[1].rgba.g=0;
+v2[1].rgba.b=0;
+v2[1].rgba.a=0;
+v2[2].rgba.r=0;
+v2[2].rgba.g=0;
+v2[2].rgba.b=0;
+v2[2].rgba.a=0;
+v2[3].rgba.r=0;
+v2[3].rgba.g=0;
+v2[3].rgba.b=0;
+v2[3].rgba.a=0;
+glTexCoordPointer(2, GL_FLOAT, 24, &v2[0].st);
+glVertexPointer(3, GL_FLOAT, 24, &v2[0].xyz);
+glColorPointer(4, GL_UNSIGNED_BYTE, 24, &v2[0].rgba);
+glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+glGenTextures(1, &gTexName);
+glBindTexture(GL_TEXTURE_2D, 2);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
+glTexSubImage2D(GL_TEXTURE_2D, 0, 0,0,20,78,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
+glShadeModel(GL_FLAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+glDisableClientState(GL_COLOR_ARRAY);
+v[0].st.x=0.003906f;
+v[0].st.y=0.003906f;
+v[1].st.x=0.074222f;
+v[1].st.y=0.003906f;
+v[2].st.x=0.003906f;
+v[2].st.y=0.300793f;
+v[3].st.x=0.074222f;
+v[3].st.y=0.300793f;
+v[0].xyz.x=27.000000f;
+v[0].xyz.y=385.000000f;
+v[0].xyz.z=0.000000f;
+v[1].xyz.x=45.000000f;
+v[1].xyz.y=385.000000f;
+v[1].xyz.z=0.000000f;
+v[2].xyz.x=27.000000f;
+v[2].xyz.y=461.000000f;
+v[2].xyz.z=0.000000f;
+v[3].xyz.x=45.000000f;
+v[3].xyz.y=461.000000f;
+v[3].xyz.z=0.000000f;
+glTexCoordPointer(2, GL_FLOAT, 20, &v[0].st);
+glVertexPointer(3, GL_FLOAT, 20, &v[0].xyz);
+glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+glDisable(GL_TEXTURE_2D);
+glEnable(GL_SCISSOR_TEST);
+flipEGL();
+
+
+}
+#endif
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////

@@ -1469,7 +1469,7 @@ int LeftSection_G(void)
 
 ////////////////////////////////////////////////////////////////////////
 
- BOOL NextRow_G(void)
+BOOL NextRow_G(void)
 {
  if(--left_section_height<=0) 
   {
