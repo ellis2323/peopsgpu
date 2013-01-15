@@ -15,10 +15,13 @@ enum CMD_TYPE {
 };
 typedef enum CMD_TYPE E_CMD_TYPE;
 
-
-
-
-
+struct SBox {
+    s32 mX;
+    s32 mY;
+    s32 mWidth;
+    s32 mHeight;
+};
+typedef struct SBox Box;
 
 
 /*
@@ -42,6 +45,8 @@ struct SMaterial {
 typedef struct SMaterial Material;
 
 // ********************** Public API ********************** 
+
+void setViewport(s32 x, s32 y, s32 width, s32 height);
 
 // SCISSOR
 

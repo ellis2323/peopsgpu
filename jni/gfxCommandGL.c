@@ -12,6 +12,18 @@ E_TRIBOOL_TYPE sBlendingState = TRIBOOL_UNKNOWN;
 bool sDebugCmdFlag = false;
 E_CMD_TYPE sDebugCmdType = CMD_TYPE_NOOP;
 
+Box sViewportBox;
+void setViewport(s32 x, s32 y, s32 width, s32 height) {
+#ifdef DEBUG
+    if (x<=0 || y<=0 || width<=0 || height<=0) logError(TAG, "Invalid viewport [%d %d %d %d]", x, y, width, height);
+#endif
+    sViewportBox.mX = x;
+    sViewportBox.mY = y;
+    sViewportBox.mWidth = width;
+    sViewportBox.mHeight = height;
+    glViewport(x, y, width, height);
+}
+
 void checkScissor() {
     f32 sB[4];
     s32 vp[4];
