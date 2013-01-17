@@ -191,11 +191,7 @@ void ResizeWindow()
  setScissor(0, 0, iResX, iResY);                        // init clipping (fullscreen)
  useScissor(true);
 
-#ifndef OWNSCALE
- glMatrixMode(GL_TEXTURE);                             // init psx tex sow and tow if not "ownscale"
- glLoadIdentity();
- glScalef(1.0f/255.99f,1.0f/255.99f,1.0f);             // geforce precision hack
-#endif 
+
 
  // init projection with psx resolution
  setProjectionOrtho(0, PSXDisplay.DisplayMode.x, PSXDisplay.DisplayMode.y, 0, -1, 1);

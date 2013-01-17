@@ -1845,8 +1845,8 @@ TWin.Position.y1 == 256))
 bUsingTWin = FALSE; // -> just do it
 
 
-TWin.UScaleFactor =
-TWin.VScaleFactor = 1.0f/256.0f;
+TWin.UScaleFactor = 1.0f;
+TWin.VScaleFactor = 1.0f;
 }
 else // tw turned on
 {
@@ -1888,8 +1888,8 @@ else
 if(TWin.Position.y1<=256) TWin.Position.y1=256;
 
 
-TWin.UScaleFactor = ((float)TWin.Position.x1)/256.0f; // -> set scale factor
-TWin.VScaleFactor = ((float)TWin.Position.y1)/256.0f;
+TWin.UScaleFactor = (float)TWin.Position.x1;
+TWin.VScaleFactor = (float)TWin.Position.y1;
 }
 }
 
@@ -3959,28 +3959,28 @@ if(bUsingTWin)
 switch(UFlipped)
 {
 case 1:
-vertex[2].sow+=1.0f/TWin.UScaleFactor;
-vertex[3].sow+=1.0f/TWin.UScaleFactor;
+vertex[2].sow+=0.95f/TWin.UScaleFactor;
+vertex[3].sow+=0.95f/TWin.UScaleFactor;
 break;
 case 2:
-vertex[0].sow+=1.0f/TWin.UScaleFactor;
-vertex[1].sow+=1.0f/TWin.UScaleFactor;
+vertex[0].sow+=0.95f/TWin.UScaleFactor;
+vertex[1].sow+=0.95f/TWin.UScaleFactor;
 break;
 case 3:
-vertex[1].sow+=1.0f/TWin.UScaleFactor;
-vertex[3].sow+=1.0f/TWin.UScaleFactor;
+vertex[1].sow+=0.95f/TWin.UScaleFactor;
+vertex[3].sow+=0.95f/TWin.UScaleFactor;
 break;
 case 4:
-vertex[0].sow+=1.0f/TWin.UScaleFactor;
-vertex[2].sow+=1.0f/TWin.UScaleFactor;
+vertex[0].sow+=0.95f/TWin.UScaleFactor;
+vertex[2].sow+=0.95f/TWin.UScaleFactor;
 break;
 case 5:
-vertex[1].sow+=1.0f/TWin.UScaleFactor;
-vertex[2].sow+=1.0f/TWin.UScaleFactor;
+vertex[1].sow+=0.95f/TWin.UScaleFactor;
+vertex[2].sow+=0.95f/TWin.UScaleFactor;
 break;
 case 6:
-vertex[0].sow+=1.0f/TWin.UScaleFactor;
-vertex[3].sow+=1.0f/TWin.UScaleFactor;
+vertex[0].sow+=0.95f/TWin.UScaleFactor;
+vertex[3].sow+=0.95f/TWin.UScaleFactor;
 break;
 }
 }
@@ -3989,28 +3989,28 @@ else
 switch(UFlipped)
 {
 case 1:
-vertex[2].sow+=1.0f;
-vertex[3].sow+=1.0f;
+vertex[2].sow+=1.0f/ST_FAC;
+vertex[3].sow+=1.0f/ST_FAC;
 break;
 case 2:
-vertex[0].sow+=1.0f;
-vertex[1].sow+=1.0f;
+vertex[0].sow+=1.0f/ST_FAC;
+vertex[1].sow+=1.0f/ST_FAC;
 break;
 case 3:
-vertex[1].sow+=1.0f;
-vertex[3].sow+=1.0f;
+vertex[1].sow+=1.0f/ST_FAC;
+vertex[3].sow+=1.0f/ST_FAC;
 break;
 case 4:
-vertex[0].sow+=1.0f;
-vertex[2].sow+=1.0f;
+vertex[0].sow+=1.0f/ST_FAC;
+vertex[2].sow+=1.0f/ST_FAC;
 break;
 case 5:
-vertex[1].sow+=1.0f;
-vertex[2].sow+=1.0f;
+vertex[1].sow+=1.0f/ST_FAC;
+vertex[2].sow+=1.0f/ST_FAC;
 break;
 case 6:
-vertex[0].sow+=1.0f;
-vertex[3].sow+=1.0f;
+vertex[0].sow+=1.0f/ST_FAC;
+vertex[3].sow+=1.0f/ST_FAC;
 break;
 }
 }
@@ -4024,28 +4024,28 @@ if(bUsingTWin)
 switch(VFlipped)
 {
 case 1:
-vertex[2].tow+=1.0f/TWin.VScaleFactor;
-vertex[3].tow+=1.0f/TWin.VScaleFactor;
+vertex[2].tow+=0.95f/TWin.VScaleFactor;
+vertex[3].tow+=0.95f/TWin.VScaleFactor;
 break;
 case 2:
-vertex[0].tow+=1.0f/TWin.VScaleFactor;
-vertex[1].tow+=1.0f/TWin.VScaleFactor;
+vertex[0].tow+=0.95f/TWin.VScaleFactor;
+vertex[1].tow+=0.95f/TWin.VScaleFactor;
 break;
 case 3:
-vertex[1].tow+=1.0f/TWin.VScaleFactor;
-vertex[3].tow+=1.0f/TWin.VScaleFactor;
+vertex[1].tow+=0.95f/TWin.VScaleFactor;
+vertex[3].tow+=0.95f/TWin.VScaleFactor;
 break;
 case 4:
-vertex[0].tow+=1.0f/TWin.VScaleFactor;
-vertex[2].tow+=1.0f/TWin.VScaleFactor;
+vertex[0].tow+=0.95f/TWin.VScaleFactor;
+vertex[2].tow+=0.95f/TWin.VScaleFactor;
 break;
 case 5:
-vertex[1].tow+=1.0f/TWin.VScaleFactor;
-vertex[2].tow+=1.0f/TWin.VScaleFactor;
+vertex[1].tow+=0.95f/TWin.VScaleFactor;
+vertex[2].tow+=0.95f/TWin.VScaleFactor;
 break;
 case 6:
-vertex[0].tow+=1.0f/TWin.VScaleFactor;
-vertex[3].tow+=1.0f/TWin.VScaleFactor;
+vertex[0].tow+=0.95f/TWin.VScaleFactor;
+vertex[3].tow+=0.95f/TWin.VScaleFactor;
 break;
 }
 }
@@ -4054,28 +4054,28 @@ else
 switch(VFlipped)
 {
 case 1:
-vertex[2].tow+=1.0f;
-vertex[3].tow+=1.0f;
+vertex[2].tow+=1.0f/ST_FAC;
+vertex[3].tow+=1.0f/ST_FAC;
 break;
 case 2:
-vertex[0].tow+=1.0f;
-vertex[1].tow+=1.0f;
+vertex[0].tow+=1.0f/ST_FAC;
+vertex[1].tow+=1.0f/ST_FAC;
 break;
 case 3:
-vertex[1].tow+=1.0f;
-vertex[3].tow+=1.0f;
+vertex[1].tow+=1.0f/ST_FAC;
+vertex[3].tow+=1.0f/ST_FAC;
 break;
 case 4:
-vertex[0].tow+=1.0f;
-vertex[2].tow+=1.0f;
+vertex[0].tow+=1.0f/ST_FAC;
+vertex[2].tow+=1.0f/ST_FAC;
 break;
 case 5:
-vertex[1].tow+=1.0f;
-vertex[2].tow+=1.0f;
+vertex[1].tow+=1.0f/ST_FAC;
+vertex[2].tow+=1.0f/ST_FAC;
 break;
 case 6:
-vertex[0].tow+=1.0f;
-vertex[3].tow+=1.0f;
+vertex[0].tow+=1.0f/ST_FAC;
+vertex[3].tow+=1.0f/ST_FAC;
 break;
 }
 }

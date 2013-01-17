@@ -67,17 +67,22 @@
 #define glError() 
 #endif
 
+#define ST_FACSPRITE       255.99f
+#define ST_BFFACSPRITE     0.5f/256.0f
+#define ST_BFFACSPRITESORT 0.333f/256.0f
 
-#define ST_BFFACSPRITE     0.5f
-#define ST_BFFACSPRITESORT 0.333f
+#define ST_OFFSET          0.5f/256.0f;
 
-#define ST_BFFAC           0.5f
-#define ST_BFFACSORT       0.333f
+#define ST_FAC             255.99f
+#define ST_BFFAC           0.5f/256.0f
+#define ST_BFFACSORT       0.333f/256.0f
 
-#define ST_BFFACTRI        0.5f
-#define ST_BFFACTRISORT    0.333f
+#define ST_FACTRI          255.99f
+#define ST_BFFACTRI        0.5f/256.0f
+#define ST_BFFACTRISORT    0.333f/256.0f
 
-#define ST_OFFSET          0.5f;
+#define ST_FACVRAMX        255.0f
+#define ST_FACVRAM         256.0f
                 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -249,12 +254,7 @@ int GLinitialize()
                                                       
  setScissor(0, 0, iResX, rRatioRect.bottom);                        // init clipping (fullscreen)
  useScissor(true);
-#ifndef OWNSCALE
- glMatrixMode(GL_TEXTURE);                             // init psx tex sow and tow if not "ownscale"
- glLoadIdentity();
- glScalef(1.0f/255.99f,1.0f/255.99f,1.0f);             // geforce precision hack
-#endif 
- setProjectionOrtho(0, PSXDisplay.DisplayMode.x, PSXDisplay.DisplayMode.y, 0, -1, 1);
+setProjectionOrtho(0, PSXDisplay.DisplayMode.x, PSXDisplay.DisplayMode.y, 0, -1, 1);
 
  if(iZBufferDepth)                                     // zbuffer?
   {
@@ -780,25 +780,17 @@ void offsetBlk(void)
 void assignTextureVRAMWrite(void)
 {
 
- if(gl_ux[1]==255)
-  {
-   vertex[0].sow=(gl_ux[0]*255.99f)/255.0f;
-   vertex[1].sow=(gl_ux[1]*255.99f)/255.0f;
-   vertex[2].sow=(gl_ux[2]*255.99f)/255.0f;
-   vertex[3].sow=(gl_ux[3]*255.99f)/255.0f;
-  }
- else
-  {
-   vertex[0].sow=gl_ux[0];
-   vertex[1].sow=gl_ux[1];
-   vertex[2].sow=gl_ux[2];
-   vertex[3].sow=gl_ux[3];
-  }
+ vertex[0].sow=0.5f/ ST_FACVRAMX;
+ vertex[0].tow=0.5f/ ST_FACVRAM;
 
- vertex[0].tow=gl_vy[0];
- vertex[1].tow=gl_vy[1];
- vertex[2].tow=gl_vy[2];
- vertex[3].tow=gl_vy[3];
+ vertex[1].sow=(float)gl_ux[1]/ ST_FACVRAMX;
+ vertex[1].tow=0.5f/ ST_FACVRAM;
+
+ vertex[2].sow=(float)gl_ux[2]/ ST_FACVRAMX;
+ vertex[2].tow=(float)gl_vy[2]/ ST_FACVRAM;
+
+ vertex[3].sow=0.5f/ ST_FACVRAMX;
+ vertex[3].tow=(float)gl_vy[3]/ ST_FACVRAM;
 
 
 }
@@ -822,10 +814,10 @@ void assignTextureSprite(void)
   {
 
  
-   vertex[0].sow=vertex[3].sow=gl_ux[0];
-   vertex[1].sow=vertex[2].sow=sSprite_ux2;
-   vertex[0].tow=vertex[1].tow=gl_vy[0];
-   vertex[2].tow=vertex[3].tow=sSprite_vy2;
+   vertex[0].sow=vertex[3].sow=(float)gl_ux[0]     / ST_FACSPRITE;
+   vertex[1].sow=vertex[2].sow=(float)sSprite_ux2  / ST_FACSPRITE;
+   vertex[0].tow=vertex[1].tow=(float)gl_vy[0]     / ST_FACSPRITE;
+   vertex[2].tow=vertex[3].tow=(float)sSprite_vy2  / ST_FACSPRITE;
 
    if(iFilterType>2) 
     {
@@ -870,13 +862,13 @@ void assignTexture3(void)
   }
  else
   {
+   vertex[0].sow=(float)gl_ux[0] / ST_FACTRI;
+   vertex[0].tow=(float)gl_vy[0] / ST_FACTRI;
+   vertex[1].sow=(float)gl_ux[1] / ST_FACTRI;
 
-   vertex[0].sow=gl_ux[0];
-   vertex[0].tow=gl_vy[0];
-   vertex[1].sow=gl_ux[1];
-   vertex[1].tow=gl_vy[1];
-   vertex[2].sow=gl_ux[2];
-   vertex[2].tow=gl_vy[2];
+   vertex[1].tow=(float)gl_vy[1] / ST_FACTRI;
+   vertex[2].sow=(float)gl_ux[2] / ST_FACTRI;
+   vertex[2].tow=(float)gl_vy[2] / ST_FACTRI;
 
    if(iFilterType>2) 
     {
@@ -929,14 +921,14 @@ void assignTexture4(void)
  else
   {
 
-   vertex[0].sow=gl_ux[0];
-   vertex[0].tow=gl_vy[0];
-   vertex[1].sow=gl_ux[1];
-   vertex[1].tow=gl_vy[1];
-   vertex[2].sow=gl_ux[2];
-   vertex[2].tow=gl_vy[2];
-   vertex[3].sow=gl_ux[3];
-   vertex[3].tow=gl_vy[3];
+   vertex[0].sow=(float)gl_ux[0] / ST_FAC;
+   vertex[0].tow=(float)gl_vy[0] / ST_FAC;
+   vertex[1].sow=(float)gl_ux[1] / ST_FAC;
+   vertex[1].tow=(float)gl_vy[1] / ST_FAC;
+   vertex[2].sow=(float)gl_ux[2] / ST_FAC;
+   vertex[2].tow=(float)gl_vy[2] / ST_FAC;
+   vertex[3].sow=(float)gl_ux[3] / ST_FAC;
+   vertex[3].tow=(float)gl_vy[3] / ST_FAC;
 
    if(iFilterType>2) 
     {
