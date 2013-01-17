@@ -77,6 +77,9 @@
 #include "gpuPrim.h"
 #include <android/log.h>
 #include <sys/time.h>
+
+#include "gfxGL.h"
+
 #define  LOG_TAG    "libfpse"
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 extern unsigned int start,maxtime;

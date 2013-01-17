@@ -37,21 +37,6 @@ extern "C" {
         
         
         
-        // maybe we should remove this? 
-#ifdef _WINDOWS
-
-#define _CRT_SECURE_NO_WARNINGS
-
-#include <WINDOWS.H>
-#include <WINDOWSX.H>
-#include <Tchar.H>
-#include "resource.h"
-
-#pragma warning (disable:4244)
-
-#include <gl/gl.h>
-
-#else
 /*
 #define __X11_C_
 */
@@ -59,50 +44,18 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <sys/time.h>
-#ifdef __NANOGL__
-#include <gl/gl.h>
-#else
-#ifdef SOFT_LINKAGE
-#pragma softfp_linkage
-#endif
-#ifdef MAEMO_CHANGES
-
-        #include <GLES/glplatform.h>
-        #include <GLES/gl.h>
-        #include <GLES/glext.h>
-        #include <EGL/egl.h>
-        #include "../maemo/minimal.h"
-        #include <gdk/gdkx.h>
-        #include <gdk/gdk.h>
-
-
-#else
-        #include <GLES/gl.h>
-        #include <GLES/glext.h>
-        #include <EGL/egl.h>
-#endif
-#ifdef SOFT_LINKAGE
-#pragma no_softfp_linkage
-#endif
-#endif
 #include <math.h> 
 
-#define __inline inline
+//#define __inline inline
 
-#endif
+
 
 #define SHADETEXBIT(x) ((x>>24) & 0x1)
 #define SEMITRANSBIT(x) ((x>>25) & 0x1)
 
-#ifndef _WINDOWS
-#ifndef GL_BGRA_EXT
-#define GL_BGRA_EXT GL_RGBA
-#endif
-#endif
 
 #ifdef __cplusplus
 }
-#endif
+#endif // __cplusplus
 
-#endif
+#endif // __GPU_STDAFX__

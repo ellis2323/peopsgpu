@@ -36,13 +36,13 @@ extern "C" {
 
 void           InitializeTextureStore();
 void           CleanupTextureStore();
-GLuint         LoadTextureWnd(long pageid,long TextureMode,unsigned long GivenClutId);
-GLuint         LoadTextureMovie(void);
+u32            LoadTextureWnd(long pageid,long TextureMode,unsigned long GivenClutId);
+u32            LoadTextureMovie(void);
 void           InvalidateTextureArea(long imageX0,long imageY0,long imageX1,long imageY1);
 void           InvalidateTextureAreaEx(void);
 void           LoadTexturePage(int pageid, int mode, short cx, short cy);
 void           ResetTextureArea(BOOL bDelTex);
-GLuint         SelectSubTextureS(long TextureMode, unsigned long GivenClutId);
+u32            SelectSubTextureS(long TextureMode, unsigned long GivenClutId);
 void           CheckTextureMemory(void);
 
 

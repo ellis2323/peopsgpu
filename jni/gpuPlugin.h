@@ -49,8 +49,7 @@ extern "C" {
 
 #include "gpuExternals.h"
 #include "gpuPlugin.h"
-#include <GLES/gl.h> // for opengl es types
-#include <EGL/egl.h>
+
 /////////////////////////////////////////////////////////////////////////////
 
 #define CALLBACK

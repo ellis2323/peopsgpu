@@ -34,11 +34,6 @@ extern "C" {
 #include "gpuExternals.h"
 #include "gpuStdafx.h"
 
-#ifndef _WINDOWS
-extern EGLSurface surface;
-extern EGLDisplay display;
-#endif
-
 void UploadScreen (long Position);
 void PrepareFullScreenUpload (long Position);
 BOOL CheckAgainstScreen(short imageX0,short imageY0,short imageX1,short imageY1);

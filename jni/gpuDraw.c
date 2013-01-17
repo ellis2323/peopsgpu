@@ -40,10 +40,10 @@
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 #include <stdio.h>
 #include <stdlib.h>
-#include <GLES/gl.h>
 #include <math.h>
 //#include "menu.h"
-            
+#include "gfxGL.h"
+
 ////////////////////////////////////////////////////////////////////////////////////
 // defines
 #define SIGNBIT 0x800

@@ -9,6 +9,7 @@
 #include "gfxFBO.h"
 #include "gfxTexture.h"
 #include "gfxContext.h"
+#include "gfxGL.h"
 
 static FBO *sFBOUsed = NULL;
 

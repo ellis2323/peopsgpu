@@ -48,6 +48,9 @@
 //#include "NoPic.h"
 
 #include "gpuStdafx.h"
+
+#include "gfxGL.h"
+
 extern unsigned int CSVERTEX,CSCOLOR,CSTEXTURE;
 #ifdef MALI
 extern void mali400();

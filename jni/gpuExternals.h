@@ -35,11 +35,6 @@ extern "C" {
 
 #include "gfxCommon.h"
 
-#ifndef _WINDOWS
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-#endif
-
 #ifdef MAEMO_CHANGES
         #include "../psxCommon.h"
 #else
@@ -278,7 +273,7 @@ extern HWND           hWWindow;
 extern BOOL           bIsFirstFrame;
 extern int            iWinSize;
 extern int            iZBufferDepth;
-extern GLbitfield     uiBufferBits;
+extern u32            uiBufferBits;
 extern int            iUseMask;
 extern int            iSetMask;
 extern int            iDepthFunc;
@@ -286,7 +281,7 @@ extern BOOL           bCheckMask;
 extern unsigned short sSetMask;
 extern unsigned long  lSetMask;
 extern BOOL           bSetClip;
-extern GLuint         gTexScanName;
+extern u32            gTexScanName;
 
 #endif
 
@@ -324,11 +319,11 @@ extern PSXRect_t     xrMovieArea;
 extern PSXRect_t     xrUploadArea;
 extern PSXRect_t     xrUploadAreaIL;
 extern PSXRect_t     xrUploadAreaRGB24;
-extern GLuint        gTexName;
+extern u32           gTexName;
 extern BOOL          bDrawNonShaded;
 extern BOOL          bDrawMultiPass;
-extern GLubyte       ubGloColAlpha;
-extern GLubyte       ubGloAlpha;
+extern u8            ubGloColAlpha;
+extern u8            ubGloAlpha;
 extern short         sSprite_ux2;
 extern short         sSprite_vy2;
 extern BOOL          bRenderFrontBuffer;
@@ -360,9 +355,9 @@ extern short symax;
 #ifndef _IN_TEXTURE
 
 extern unsigned char  ubOpaqueDraw;
-extern GLint          giWantedRGBA;
-extern GLint          giWantedFMT;
-extern GLint          giWantedTYPE;
+extern s32            giWantedRGBA;
+extern s32            giWantedFMT;
+extern s32            giWantedTYPE;
 extern void           (*LoadSubTexFn) (int,int,short,short);
 extern long           GlobalTexturePage;
 extern unsigned long  (*TCF[]) (unsigned long);
@@ -375,8 +370,8 @@ extern int            iFrameReadType;
 extern int            iClampType;
 extern int            iSortTexCnt;
 extern BOOL           bFakeFrontBuffer;
-extern GLuint         gTexFrameName;
-extern GLuint         gTexBlurName;
+extern u32            gTexFrameName;
+extern u32            gTexBlurName;
 extern int            iVRamSize;
 extern int            iTexGarbageCollection;
 extern int            iFTexA;
@@ -414,10 +409,10 @@ extern unsigned short * psxVuw;
 extern signed short   * psxVsw;
 extern unsigned long  * psxVul;
 extern signed long    * psxVsl;
-extern GLfloat        gl_z;
+extern f32            gl_z;
 extern BOOL           bNeedRGB24Update;
 extern BOOL           bChangeWinMode;
-extern GLuint         uiScanLine;
+extern u32            uiScanLine;
 extern int            iUseScanLines;
 extern long           lSelectedSlot;
 extern int            iScanBlend;
@@ -443,7 +438,7 @@ extern int bFullScreen;
 #ifndef _IN_MENU
 
 //extern unsigned long  dwCoreFlags;
-extern GLuint         gTexPicName;
+extern u32         gTexPicName;
 //extern PSXPoint_t     ptCursorPoint[];
 //extern unsigned short usCursorActive;
 

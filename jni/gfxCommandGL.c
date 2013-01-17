@@ -1,5 +1,6 @@
 #include "gfxCommand.h"
 #include "gfxTexture.h"
+#include "gfxGL.h"
 
 #define TAG "ELLIS"
 

@@ -3,6 +3,7 @@
 #if defined(GL_OGLES2)
 
 #include "gpuShader.h"
+#include "gfxGL.h"
 
 extern E_TRIBOOL_TYPE sBlendingState;
 extern u32 sCurrentBlendingMode;

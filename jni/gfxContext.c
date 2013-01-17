@@ -8,6 +8,7 @@
 
 #include "gfxContext.h"
 #include "gfxFBO.h"
+#include "gfxGL.h"
 #include <math.h>
 
 Context *sContext;

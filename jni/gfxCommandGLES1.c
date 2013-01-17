@@ -3,6 +3,7 @@
 #include "gfxContext.h"
 #include "gpuExternals.h"
 #include "gpuPlugin.h"
+#include "gfxGL.h"
 
 #if defined(GL_OGLES1)
 

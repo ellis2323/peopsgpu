@@ -8,6 +8,7 @@
 
 #include "gfxTexture.h"
 #include "gfxFBO.h"
+#include "gfxGL.h"
 
 #define TAG "ELLIS"
 

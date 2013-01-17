@@ -26,27 +26,7 @@ typedef double f64;
 
 #define DEBUG 1
 
-#ifdef ANDROID
-    
-    #ifdef GL_OGLES1
-    #define GL_GLEXT_PROTOTYPES
-    #include <GLES/gl.h>
-    #include <GLES/glext.h>
-    #endif
-    
-    #ifdef GL_OGLES2
-    #include <GLES2/gl2.h>
-    #include <GLES2/gl2ext.h>
-    #endif
 
-    #define TAG "ELLIS"
-
-#else
-
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-
-#endif
 
 #ifdef ANDROID
 #include <android/log.h>

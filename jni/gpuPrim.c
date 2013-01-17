@@ -37,6 +37,9 @@ web : www.pbernert.com
 #include "gpuTexture.h"
 #include "gpuPrim.h"
 #include <sys/time.h>
+
+#include "gfxGL.h"
+
 extern int nbft4;
 unsigned int start=0,maxtime=0;
 #if 0
@@ -64,9 +67,6 @@ unsigned int start=0,maxtime=0;
 ////////////////////////////////////////////////////////////////////////
 // globals
 ////////////////////////////////////////////////////////////////////////
-
-EGLSurface surface;
-EGLDisplay display;
 
 
 BOOL bDrawTextured; // current active drawing states
