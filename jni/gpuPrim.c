@@ -39,6 +39,7 @@ web : www.pbernert.com
 #include <sys/time.h>
 
 #include "gfxGL.h"
+#include "gfxCommand.h"
 
 extern int nbft4;
 unsigned int start=0,maxtime=0;
@@ -1522,7 +1523,7 @@ short ya,yb,xa,xb,x, y, YStep, XStep, U, UStep,ux[4],vy[4];
 if(!PSXDisplay.DisplayMode.x) return;
 if(!PSXDisplay.DisplayMode.y) return;
 
-glDisable(GL_SCISSOR_TEST);glError();
+useScissor(false);
 glShadeModel(GL_FLAT);glError();
 bOldSmoothShaded=FALSE;
 glDisable(GL_BLEND);glError();
@@ -1594,7 +1595,7 @@ U+=UStep;
 // glPixelZoom(1.0F,1.0F);
 
 glEnable(GL_ALPHA_TEST);glError();
-glEnable(GL_SCISSOR_TEST);glError();
+useScissor(true);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1843,13 +1844,9 @@ TWin.Position.y1 == 256))
 {
 bUsingTWin = FALSE; // -> just do it
 
-#ifdef OWNSCALE
-TWin.UScaleFactor = 1.0f;
-TWin.VScaleFactor = 1.0f;
-#else
+
 TWin.UScaleFactor =
 TWin.VScaleFactor = 1.0f/256.0f;
-#endif
 }
 else // tw turned on
 {
@@ -1890,13 +1887,9 @@ if(TWin.Position.y1<=128) TWin.Position.y1=128;
 else
 if(TWin.Position.y1<=256) TWin.Position.y1=256;
 
-#ifdef OWNSCALE
-TWin.UScaleFactor = (float)TWin.Position.x1;
-TWin.VScaleFactor = (float)TWin.Position.y1;
-#else
+
 TWin.UScaleFactor = ((float)TWin.Position.x1)/256.0f; // -> set scale factor
 TWin.VScaleFactor = ((float)TWin.Position.y1)/256.0f;
-#endif
 }
 }
 
@@ -2315,7 +2308,7 @@ g=((GLclampf)GREEN(gpuData[0]))/255.0f;
 b=((GLclampf)BLUE(gpuData[0]))/255.0f;
 r=((GLclampf)RED(gpuData[0]))/255.0f;
 
-glDisable(GL_SCISSOR_TEST);glError();
+useScissor(false);
 glClearColor(r,g,b,1.0f);glError();
 glClear(uiBufferBits);glError();
 gl_z=0.0f;
@@ -2348,7 +2341,7 @@ PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 }
 }
 
-glEnable(GL_SCISSOR_TEST);glError();
+useScissor(true);
 }
 else
 {
@@ -2358,9 +2351,9 @@ SetRenderState((unsigned long)0x01000000);
 SetRenderMode((unsigned long)0x01000000, FALSE);
 vertex[0].c.lcol=gpuData[0]|0xff000000;
 SETCOL(vertex[0]);
-glDisable(GL_SCISSOR_TEST);glError();
+useScissor(false);
 PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
-glEnable(GL_SCISSOR_TEST);glError();
+useScissor(true);
 }
 }
 
@@ -3960,68 +3953,7 @@ UFlipped = 6;
 
 if (UFlipped)
 {
-#ifdef OWNSCALE
-if(bUsingTWin)
-{
-switch(UFlipped)
-{
-case 1:
-vertex[2].sow+=0.95f/TWin.UScaleFactor;
-vertex[3].sow+=0.95f/TWin.UScaleFactor;
-break;
-case 2:
-vertex[0].sow+=0.95f/TWin.UScaleFactor;
-vertex[1].sow+=0.95f/TWin.UScaleFactor;
-break;
-case 3:
-vertex[1].sow+=0.95f/TWin.UScaleFactor;
-vertex[3].sow+=0.95f/TWin.UScaleFactor;
-break;
-case 4:
-vertex[0].sow+=0.95f/TWin.UScaleFactor;
-vertex[2].sow+=0.95f/TWin.UScaleFactor;
-break;
-case 5:
-vertex[1].sow+=0.95f/TWin.UScaleFactor;
-vertex[2].sow+=0.95f/TWin.UScaleFactor;
-break;
-case 6:
-vertex[0].sow+=0.95f/TWin.UScaleFactor;
-vertex[3].sow+=0.95f/TWin.UScaleFactor;
-break;
-}
-}
-else
-{
-switch(UFlipped)
-{
-case 1:
-vertex[2].sow+=1.0f/ST_FAC;
-vertex[3].sow+=1.0f/ST_FAC;
-break;
-case 2:
-vertex[0].sow+=1.0f/ST_FAC;
-vertex[1].sow+=1.0f/ST_FAC;
-break;
-case 3:
-vertex[1].sow+=1.0f/ST_FAC;
-vertex[3].sow+=1.0f/ST_FAC;
-break;
-case 4:
-vertex[0].sow+=1.0f/ST_FAC;
-vertex[2].sow+=1.0f/ST_FAC;
-break;
-case 5:
-vertex[1].sow+=1.0f/ST_FAC;
-vertex[2].sow+=1.0f/ST_FAC;
-break;
-case 6:
-vertex[0].sow+=1.0f/ST_FAC;
-vertex[3].sow+=1.0f/ST_FAC;
-break;
-}
-}
-#else
+
 if(bUsingTWin)
 {
 switch(UFlipped)
@@ -4082,73 +4014,11 @@ vertex[3].sow+=1.0f;
 break;
 }
 }
-#endif
 }
 
 if (VFlipped)
 {
-#ifdef OWNSCALE
-if(bUsingTWin)
-{
-switch(VFlipped)
-{
-case 1:
-vertex[2].tow+=0.95f/TWin.VScaleFactor;
-vertex[3].tow+=0.95f/TWin.VScaleFactor;
-break;
-case 2:
-vertex[0].tow+=0.95f/TWin.VScaleFactor;
-vertex[1].tow+=0.95f/TWin.VScaleFactor;
-break;
-case 3:
-vertex[1].tow+=0.95f/TWin.VScaleFactor;
-vertex[3].tow+=0.95f/TWin.VScaleFactor;
-break;
-case 4:
-vertex[0].tow+=0.95f/TWin.VScaleFactor;
-vertex[2].tow+=0.95f/TWin.VScaleFactor;
-break;
-case 5:
-vertex[1].tow+=0.95f/TWin.VScaleFactor;
-vertex[2].tow+=0.95f/TWin.VScaleFactor;
-break;
-case 6:
-vertex[0].tow+=0.95f/TWin.VScaleFactor;
-vertex[3].tow+=0.95f/TWin.VScaleFactor;
-break;
-}
-}
-else
-{
-switch(VFlipped)
-{
-case 1:
-vertex[2].tow+=1.0f/ST_FAC;
-vertex[3].tow+=1.0f/ST_FAC;
-break;
-case 2:
-vertex[0].tow+=1.0f/ST_FAC;
-vertex[1].tow+=1.0f/ST_FAC;
-break;
-case 3:
-vertex[1].tow+=1.0f/ST_FAC;
-vertex[3].tow+=1.0f/ST_FAC;
-break;
-case 4:
-vertex[0].tow+=1.0f/ST_FAC;
-vertex[2].tow+=1.0f/ST_FAC;
-break;
-case 5:
-vertex[1].tow+=1.0f/ST_FAC;
-vertex[2].tow+=1.0f/ST_FAC;
-break;
-case 6:
-vertex[0].tow+=1.0f/ST_FAC;
-vertex[3].tow+=1.0f/ST_FAC;
-break;
-}
-}
-#else
+
 if(bUsingTWin)
 {
 switch(VFlipped)
@@ -4209,7 +4079,6 @@ vertex[3].tow+=1.0f;
 break;
 }
 }
-#endif
 }
 
 }

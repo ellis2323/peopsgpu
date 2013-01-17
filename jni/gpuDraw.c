@@ -38,10 +38,12 @@
 #include <android/log.h>
 #define  LOG_TAG    "libfpse"
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-//#include "menu.h"
+
+#include "gfxCommand.h"
 #include "gfxGL.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -64,30 +66,7 @@
 #else
 #define glError() 
 #endif
-#ifdef OWNSCALE
 
-///////////////////////////////////////////////////////////////
-
-#define ST_FACSPRITE       255.99f
-#define ST_BFFACSPRITE     0.5f/256.0f
-#define ST_BFFACSPRITESORT 0.333f/256.0f
-
-#define ST_OFFSET          0.5f/256.0f;
-
-#define ST_FAC             255.99f
-#define ST_BFFAC           0.5f/256.0f
-#define ST_BFFACSORT       0.333f/256.0f
-
-#define ST_FACTRI          255.99f
-#define ST_BFFACTRI        0.5f/256.0f
-#define ST_BFFACTRISORT    0.333f/256.0f
-
-#define ST_FACVRAMX        255.0f
-#define ST_FACVRAM         256.0f
-
-///////////////////////////////////////////////////////////////
-
-#else
 
 #define ST_BFFACSPRITE     0.5f
 #define ST_BFFACSPRITESORT 0.333f
@@ -100,7 +79,6 @@
 
 #define ST_OFFSET          0.5f;
                 
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////
 // draw globals
@@ -264,23 +242,19 @@ int GLinitialize()
  glDepthRangef(0.0f, 1.0f);glError();
  
  //----------------------------------------------------// 
- glViewport(rRatioRect.left,                           // init viewport by ratio rect
+ setViewport(rRatioRect.left,                           // init viewport by ratio rect
             iResY-(rRatioRect.top+rRatioRect.bottom),
             rRatioRect.right, 
-            rRatioRect.bottom);glError();      
+            rRatioRect.bottom);      
                                                       
- glScissor(0, 0, iResX, rRatioRect.bottom);glError();                        // init clipping (fullscreen)
- glEnable(GL_SCISSOR_TEST);glError();                       
+ setScissor(0, 0, iResX, rRatioRect.bottom);                        // init clipping (fullscreen)
+ useScissor(true);
 #ifndef OWNSCALE
  glMatrixMode(GL_TEXTURE);                             // init psx tex sow and tow if not "ownscale"
  glLoadIdentity();
  glScalef(1.0f/255.99f,1.0f/255.99f,1.0f);             // geforce precision hack
 #endif 
- glMatrixMode(GL_PROJECTION);glError();                          // init projection with psx resolution
- glLoadIdentity();glError();
-
- glOrtho(0,PSXDisplay.DisplayMode.x,
-         PSXDisplay.DisplayMode.y, 0, -1, 1);glError();
+ setProjectionOrtho(0, PSXDisplay.DisplayMode.x, PSXDisplay.DisplayMode.y, 0, -1, 1);
 
  if(iZBufferDepth)                                     // zbuffer?
   {
@@ -805,21 +779,6 @@ void offsetBlk(void)
 
 void assignTextureVRAMWrite(void)
 {
-#ifdef OWNSCALE
-
- vertex[0].sow=0.5f/ ST_FACVRAMX;
- vertex[0].tow=0.5f/ ST_FACVRAM;
-
- vertex[1].sow=(float)gl_ux[1]/ ST_FACVRAMX;
- vertex[1].tow=0.5f/ ST_FACVRAM;
-
- vertex[2].sow=(float)gl_ux[2]/ ST_FACVRAMX;
- vertex[2].tow=(float)gl_vy[2]/ ST_FACVRAM;
-
- vertex[3].sow=0.5f/ ST_FACVRAMX;
- vertex[3].tow=(float)gl_vy[3]/ ST_FACVRAM;
-
-#else
 
  if(gl_ux[1]==255)
   {
@@ -841,7 +800,7 @@ void assignTextureVRAMWrite(void)
  vertex[2].tow=gl_vy[2];
  vertex[3].tow=gl_vy[3];
 
-#endif
+
 }
 
 GLuint  gLastTex=0;
@@ -861,21 +820,12 @@ void assignTextureSprite(void)
   }
  else
   {
-#ifdef OWNSCALE
 
-   vertex[0].sow=vertex[3].sow=(float)gl_ux[0]     / ST_FACSPRITE;
-   vertex[1].sow=vertex[2].sow=(float)sSprite_ux2  / ST_FACSPRITE;
-   vertex[0].tow=vertex[1].tow=(float)gl_vy[0]     / ST_FACSPRITE;
-   vertex[2].tow=vertex[3].tow=(float)sSprite_vy2  / ST_FACSPRITE;
-
-#else
  
    vertex[0].sow=vertex[3].sow=gl_ux[0];
    vertex[1].sow=vertex[2].sow=sSprite_ux2;
    vertex[0].tow=vertex[1].tow=gl_vy[0];
    vertex[2].tow=vertex[3].tow=sSprite_vy2;
-
-#endif
 
    if(iFilterType>2) 
     {
@@ -920,22 +870,13 @@ void assignTexture3(void)
   }
  else
   {
-#ifdef OWNSCALE
-   vertex[0].sow=(float)gl_ux[0] / ST_FACTRI;
-   vertex[0].tow=(float)gl_vy[0] / ST_FACTRI;
-   vertex[1].sow=(float)gl_ux[1] / ST_FACTRI;
 
-   vertex[1].tow=(float)gl_vy[1] / ST_FACTRI;
-   vertex[2].sow=(float)gl_ux[2] / ST_FACTRI;
-   vertex[2].tow=(float)gl_vy[2] / ST_FACTRI;
-#else
    vertex[0].sow=gl_ux[0];
    vertex[0].tow=gl_vy[0];
    vertex[1].sow=gl_ux[1];
    vertex[1].tow=gl_vy[1];
    vertex[2].sow=gl_ux[2];
    vertex[2].tow=gl_vy[2];
-#endif
 
    if(iFilterType>2) 
     {
@@ -987,16 +928,7 @@ void assignTexture4(void)
   }
  else
   {
-#ifdef OWNSCALE
-   vertex[0].sow=(float)gl_ux[0] / ST_FAC;
-   vertex[0].tow=(float)gl_vy[0] / ST_FAC;
-   vertex[1].sow=(float)gl_ux[1] / ST_FAC;
-   vertex[1].tow=(float)gl_vy[1] / ST_FAC;
-   vertex[2].sow=(float)gl_ux[2] / ST_FAC;
-   vertex[2].tow=(float)gl_vy[2] / ST_FAC;
-   vertex[3].sow=(float)gl_ux[3] / ST_FAC;
-   vertex[3].tow=(float)gl_vy[3] / ST_FAC;
-#else
+
    vertex[0].sow=gl_ux[0];
    vertex[0].tow=gl_vy[0];
    vertex[1].sow=gl_ux[1];
@@ -1005,7 +937,6 @@ void assignTexture4(void)
    vertex[2].tow=gl_vy[2];
    vertex[3].sow=gl_ux[3];
    vertex[3].tow=gl_vy[3];
-#endif
 
    if(iFilterType>2) 
     {
@@ -1083,9 +1014,8 @@ void SetOGLDisplaySettings(BOOL DisplaySet)
    if(bSetClip || !EqualRect(&rC,&rX))
     {
      rC=rX;
-     glScissor(rC.left,rC.top,rC.right,rC.bottom);glError();
-     //LOGE("glscissor:%d %d %d %d",rC.left,rC.top,rC.right,rC.bottom);
-     bSetClip=FALSE; 
+     setScissor(rC.left,rC.top,rC.right,rC.bottom);
+     bSetClip=FALSE;
     }
    return;
   }
@@ -1175,7 +1105,7 @@ void SetOGLDisplaySettings(BOOL DisplaySet)
 
  if(bSetClip || !EqualRect(&r,&rC))
   {
-   glScissor(r.left,r.top,r.right,r.bottom);glError();
+   setScissor(r.left,r.top,r.right,r.bottom);
 
    rC=r;
    bSetClip=FALSE;

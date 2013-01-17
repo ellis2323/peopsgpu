@@ -49,6 +49,7 @@
 
 #include "gpuStdafx.h"
 
+#include "gfxCommand.h"
 #include "gfxGL.h"
 
 extern unsigned int CSVERTEX,CSCOLOR,CSTEXTURE;
@@ -177,15 +178,18 @@ void ResizeWindow()
 {
  rRatioRect.left   = rRatioRect.top=0;
  rRatioRect.right  = iResX;
- if (iResX<iResY) rRatioRect.bottom = (iResX*3)/4;
- else rRatioRect.bottom = iResY;
- glViewport(rRatioRect.left,                           // init viewport by ratio rect
+ if (iResX<iResY) {
+    rRatioRect.bottom = (iResX*3)/4;
+ } else {
+    rRatioRect.bottom = iResY;
+ }
+ setViewport(rRatioRect.left,                           // init viewport by ratio rect
             iResY-(rRatioRect.top+rRatioRect.bottom),
             rRatioRect.right, 
-            rRatioRect.bottom);glError();         
+            rRatioRect.bottom);
                                                       
- glScissor(0, 0, iResX, iResY);glError();                        // init clipping (fullscreen)
- glEnable(GL_SCISSOR_TEST);glError();                       
+ setScissor(0, 0, iResX, iResY);                        // init clipping (fullscreen)
+ useScissor(true);
 
 #ifndef OWNSCALE
  glMatrixMode(GL_TEXTURE);                             // init psx tex sow and tow if not "ownscale"
@@ -193,10 +197,8 @@ void ResizeWindow()
  glScalef(1.0f/255.99f,1.0f/255.99f,1.0f);             // geforce precision hack
 #endif 
 
- glMatrixMode(GL_PROJECTION);glError();                          // init projection with psx resolution
- glLoadIdentity();glError();
- glOrtho(0,PSXDisplay.DisplayMode.x,
-         PSXDisplay.DisplayMode.y, 0, -1, 1);glError();
+ // init projection with psx resolution
+ setProjectionOrtho(0, PSXDisplay.DisplayMode.x, PSXDisplay.DisplayMode.y, 0, -1, 1);
  if (bKeepRatio&&iResX>iResY)
  SetAspectRatio();
 }
@@ -432,7 +434,7 @@ static void draw_rectangle(float x0, float y0,float z0, float x1, float y1,float
 void PaintBlackBorders(void)
 {
  short s;
- glDisable(GL_SCISSOR_TEST);glError();
+ useScissor(false);
  if(bTexEnabled) {glDisable(GL_TEXTURE_2D);bTexEnabled=FALSE;}glError();
  if(bOldSmoothShaded) {glShadeModel(GL_FLAT);bOldSmoothShaded=FALSE;}glError();
  if(bBlendEnable)     {glDisable(GL_BLEND);bBlendEnable=FALSE;}glError();
@@ -454,7 +456,7 @@ void PaintBlackBorders(void)
    draw_rectangle(0,0,0.99996f, PSXDisplay.DisplayMode.x,s,0.99996f);
   }
  glEnable(GL_ALPHA_TEST);
- glEnable(GL_SCISSOR_TEST);glError();
+ useScissor(true);
 
 }
 
@@ -540,10 +542,10 @@ if(PSXDisplay.Disabled)                               // display disabled?
  //LOGE("PSXDisplay.Disabled");
 
   // moved here
-  glDisable(GL_SCISSOR_TEST);glError();                       
+  useScissor(false);
   glClearColor(0,0,0,128);glError();                            // -> clear whole backbuffer
   glClear(uiBufferBits);glError();
-  glEnable(GL_SCISSOR_TEST);glError();                       
+  useScissor(true);
   gl_z=0.0f;
   bDisplayNotSet = TRUE;
  }
@@ -622,10 +624,10 @@ if(qualcomm==1||lClearOnSwap)                                      // clear buff
   g=((GLclampf)GREEN(lClearOnSwapColor))/255.0f;      // -> get col
   b=((GLclampf)BLUE(lClearOnSwapColor))/255.0f;
   r=((GLclampf)RED(lClearOnSwapColor))/255.0f;
-  glDisable(GL_SCISSOR_TEST);glError();                       
+  useScissor(false);
   glClearColor(r,g,b,128);glError();                            // -> clear 
   glClear(uiBufferBits);glError();
-  glEnable(GL_SCISSOR_TEST);glError();                       
+  useScissor(true);
   lClearOnSwap=0;                                     // -> done
  }
 else 
@@ -634,9 +636,9 @@ else
 
   if(iZBufferDepth)                                   // clear zbuffer as well (if activated)
    {
-    glDisable(GL_SCISSOR_TEST);glError();                       
+    useScissor(false);
     glClear(GL_DEPTH_BUFFER_BIT);glError();
-    glEnable(GL_SCISSOR_TEST);glError();                       
+    useScissor(true);
    }
  }
 
@@ -683,7 +685,7 @@ if(iRumbleTime)                                       // shake screen by modifyi
     i4=((rand()*iRumbleVal)/RAND_MAX)-(iRumbleVal/2); 
    }
 
-  glViewport(rRatioRect.left+i1,                      
+  setViewport(rRatioRect.left+i1,
              iResY-(rRatioRect.top+rRatioRect.bottom)+i2,
              rRatioRect.right+i3, 
              rRatioRect.bottom+i4);glError();            
@@ -837,11 +839,11 @@ if(r.bottom<rRatioRect.bottom ||
     rC.top=0;
     rC.right=r.left;
     rC.bottom=iResY;
-    glScissor(rC.left,rC.top,rC.right,rC.bottom);glError();
+    setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
     glClear(uiBufferBits);glError();
     rC.left=iResX-rC.right;
-    glScissor(rC.left,rC.top,rC.right,rC.bottom);glError();
+    setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
     
     glClear(uiBufferBits);glError();
@@ -853,12 +855,12 @@ if(r.bottom<rRatioRect.bottom ||
     rC.top=0;
     rC.right=iResX;
     rC.bottom=r.top;
-    glScissor(rC.left,rC.top,rC.right,rC.bottom);glError();
+    setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
 
     glClear(uiBufferBits);glError();
     rC.top=iResY-rC.bottom;
-    glScissor(rC.left,rC.top,rC.right,rC.bottom);glError();
+    setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
     glClear(uiBufferBits);glError();
    }
@@ -870,7 +872,7 @@ if(r.bottom<rRatioRect.bottom ||
 rRatioRect=r;
 
 
-glViewport(rRatioRect.left,
+setViewport(rRatioRect.left,
            iResY-(rRatioRect.top+rRatioRect.bottom),
            rRatioRect.right,
            rRatioRect.bottom);glError();                         // init viewport
@@ -893,9 +895,9 @@ if ((PSXDisplay.DisplayMode.y == PSXDisplay.DisplayModeNew.y) &&
  }
 else                                                  // some res change?
  {
-  glLoadIdentity();glError();
-  glOrtho(0,PSXDisplay.DisplayModeNew.x,              // -> new psx resolution
-            PSXDisplay.DisplayModeNew.y, 0, -1, 1);glError();
+   // -> new psx resolution
+  setProjectionOrtho(0,PSXDisplay.DisplayModeNew.x,
+            PSXDisplay.DisplayModeNew.y, 0, -1, 1);
             //LOGE("PSXDisplay.DisplayModeNew.x:%d ,PSXDisplay.DisplayModeNew.y:%d");              // -> new psx resolution
   if(bKeepRatio&&iResX>iResY) SetAspectRatio();
  }
