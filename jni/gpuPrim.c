@@ -40,6 +40,7 @@ web : www.pbernert.com
 
 #include "gfxGL.h"
 #include "gfxCommand.h"
+#include "gfxTexture.h"
 
 extern int nbft4;
 unsigned int start=0,maxtime=0;
@@ -1016,8 +1017,10 @@ if(bUsingTWin) currTex=LoadTextureWnd(GlobalTexturePage,GlobalTextTP, ulClutID);
 else if(bUsingMovie) currTex=LoadTextureMovie();
 else currTex=SelectSubTextureS(GlobalTextTP,ulClutID);
 
-if(gTexName!=currTex)
-{gTexName=currTex;glBindTexture(GL_TEXTURE_2D,currTex);glError();}
+if(gTexName!=currTex) {
+    gTexName=currTex;
+    bindTexture(currTex);
+}
 
 if(!bTexEnabled) // -> turn texturing on
 {bTexEnabled=TRUE;glEnable(GL_TEXTURE_2D);glError();}

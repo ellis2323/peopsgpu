@@ -79,6 +79,7 @@
 #include <sys/time.h>
 
 #include "gfxGL.h"
+#include "gfxTexture.h"
 
 #define  LOG_TAG    "libfpse"
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
@@ -477,7 +478,8 @@ void CheckTextureMemory(void)
 
 void InitializeTextureStore() 
 {
- int i,j;
+    logInfo(TAG, "InitializeTextureStore");
+    int i,j;
 
  if(iGPUHeight==1024)
   {
@@ -530,8 +532,7 @@ void CleanupTextureStore()
 {
  int i,j;textureWndCacheEntry * tsx;
  //----------------------------------------------------//
- glBindTexture(GL_TEXTURE_2D,0);
- glError();
+    bindTexture(0);
  //----------------------------------------------------//
  free(texturepart);                                    // free tex part
  texturepart=0;
@@ -541,45 +542,43 @@ void CleanupTextureStore()
    texturebuffer=0;
   }
  //----------------------------------------------------//
- tsx=wcWndtexStore;                                    // loop tex window cache
- for(i=0;i<MAXWNDTEXCACHE;i++,tsx++)
-  {
-   if(tsx->texname)                                    // -> some tex?
-    glDeleteTextures(1,&tsx->texname);                 // --> delete it
-    glError();
-  }
- iMaxTexWnds=0;                                        // no more tex wnds
- //----------------------------------------------------//
- if(gTexMovieName!=0)                                  // some movie tex?
-  glDeleteTextures(1, &gTexMovieName);                 // -> delete it
-  glError();
- gTexMovieName=0;                                      // no more movie tex
- //----------------------------------------------------//
- if(gTexFrameName!=0)                                  // some 15bit framebuffer tex?
-  glDeleteTextures(1, &gTexFrameName);                 // -> delete it
-  glError();
- gTexFrameName=0;                                      // no more movie tex
- //----------------------------------------------------//
- if(gTexBlurName!=0)                                   // some 15bit framebuffer tex?
-  glDeleteTextures(1, &gTexBlurName);                  // -> delete it
-  glError();
- gTexBlurName=0;                                       // no more movie tex
- //----------------------------------------------------//
- for(i=0;i<3;i++)                                    // -> loop
-  for(j=0;j<MAXTPAGES;j++)                           // loop tex pages
-   {
-    free(pscSubtexStore[i][j]);                      // -> clean mem
-   }
- for(i=0;i<MAXSORTTEX;i++)
-  {
-   if(uiStexturePage[i])                             // --> tex used ?
-    {
-     glDeleteTextures(1,&uiStexturePage[i]);
-     glError();
-     uiStexturePage[i]=0;                            // --> delete it
+    tsx=wcWndtexStore;                                    // loop tex window cache
+    for(i=0;i<MAXWNDTEXCACHE;i++,tsx++) {
+        if(tsx->texname) {                                // -> some tex?
+            destroyTexture(tsx->texname);                 // --> delete it
+        }
     }
-   free(pxSsubtexLeft[i]);                           // -> clean mem
-  }
+    iMaxTexWnds=0;                                        // no more tex wnds
+    //----------------------------------------------------//
+    if(gTexMovieName!=0) {                                // some movie tex?
+        destroyTexture(gTexMovieName);                 // -> delete it
+    }
+    gTexMovieName=0;                                      // no more movie tex
+    //----------------------------------------------------//
+    if(gTexFrameName!=0) {                                 // some 15bit framebuffer tex?
+        destroyTexture(gTexFrameName);                 // -> delete it
+    }
+    gTexFrameName=0;                                      // no more movie tex
+    //----------------------------------------------------//
+    if(gTexBlurName!=0) {                                  // some 15bit framebuffer tex?
+        destroyTexture(gTexBlurName);                  // -> delete it
+    }
+    gTexBlurName=0;                                       // no more movie tex
+    //----------------------------------------------------//
+    for(i=0;i<3;i++) {                                    // -> loop
+        for(j=0;j<MAXTPAGES;j++) {                         // loop tex pages
+            free(pscSubtexStore[i][j]);                      // -> clean mem
+        }
+    }
+    for(i=0;i<MAXSORTTEX;i++)
+    {
+        if(uiStexturePage[i])                             // --> tex used ?
+        {
+            destroyTexture(uiStexturePage[i]);
+            uiStexturePage[i]=0;                            // --> delete it
+        }
+        free(pxSsubtexLeft[i]);                           // -> clean mem
+    }
  //----------------------------------------------------//
 }
 
@@ -596,7 +595,10 @@ void ResetTextureArea(BOOL bDelTex)
  dwTexPageComp=0;
 
  //----------------------------------------------------//
- if(bDelTex) {glBindTexture(GL_TEXTURE_2D,0);glError();gTexName=0;}
+    if(bDelTex) {
+        bindTexture(0);
+        gTexName=0;
+    }
  //----------------------------------------------------//
  tsx=wcWndtexStore;
  for(i=0;i<MAXWNDTEXCACHE;i++,tsx++)
@@ -846,25 +848,19 @@ void InvalidateTextureArea(long X,long Y,long W, long H)
 
 void DefineTextureWnd(void)
 {
- if(gTexName==0)
-  glGenTextures(1, &gTexName);
-glError();
- glBindTexture(GL_TEXTURE_2D, gTexName);
-glError();
- glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
- glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-glError(); 
-{
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);
-  glError();
-  }
+    if(gTexName==0) {
+        s8 clampType = convertGLFilter(iFilter);
+        gTexName = createTexture(1, clampType);
+        
+    }
 
- glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, 
+    bindTexture(gTexName);
+ 
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, 
               TWin.Position.x1, 
               TWin.Position.y1, 
               0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
-glError();
+    glError();
 //LOGE("DefineTextureWnd x:%d y:%d",TWin.Position.x1,TWin.Position.y1);
 
 }
@@ -1616,24 +1612,19 @@ void UploadTexWndPal(int mode,short cx,short cy)
 
 void DefinePalTextureWnd(void)
 {
- if(gTexName==0)
-  glGenTextures(1, &gTexName);
-glError();
- glBindTexture(GL_TEXTURE_2D, gTexName);
-glError();
- glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
- glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
- glError();
-{
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);
-  }
-glError();
- glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, 
+    if(gTexName==0) {
+        s8 clampType = convertGLFilter(iFilter);
+        gTexName = createTexture(1, clampType);
+        
+    }
+    
+    bindTexture(gTexName);
+    
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA,
               TWin.Position.x1, 
               TWin.Position.y1, 
               0, GL_RGBA, GL_UNSIGNED_BYTE,texturepart);
-  glError();
+    glError();
   //LOGE("DefinePalTextureWnd x:%d y:%d",TWin.Position.x1,TWin.Position.y1);
 }
 
@@ -1879,33 +1870,27 @@ GLuint LoadTextureWnd(long pageid,long TextureMode,unsigned long GivenClutId)
 
 void DefinePackedTextureMovie(void)
 {
- if(gTexMovieName==0)
-  {
-   glGenTextures(1, &gTexMovieName);glError();
-   gTexName=gTexMovieName;
-   glBindTexture(GL_TEXTURE_2D, gTexName);glError();
-
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);glError();
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);glError();
-
-   if(!bUseFastMdec) 
-    {
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glError();
-    }
-   else
-    {
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);glError();
-    }
-                                 
-   glTexImage2D(GL_TEXTURE_2D, 0, //giWantedRGBA, 
+    if(gTexMovieName==0) {
+        s8 clampType = convertGLClamp(iClampType);
+        s8 filter;
+        if(!bUseFastMdec) {
+            filter = 1;
+        } else {
+            filter = convertGLFilter(iFilter);
+        }
+        gTexMovieName = createTexture(filter, clampType);
+        gTexName=gTexMovieName;
+   
+        bindTexture(gTexName);
+        
+        glTexImage2D(GL_TEXTURE_2D, 0, //giWantedRGBA,
                 GL_RGBA,
                 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
   }
  else 
   {
-   gTexName=gTexMovieName;glBindTexture(GL_TEXTURE_2D, gTexName);glError();
+   gTexName=gTexMovieName;
+   bindTexture(gTexName);
   }
 
  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
@@ -1922,32 +1907,23 @@ void DefinePackedTextureMovie(void)
 
 void DefineTextureMovie(void)
 {
- if(gTexMovieName==0)
-  {
-   glGenTextures(1, &gTexMovieName);glError();
-   glGenTextures(1, &gTexMovieName);glError();
-   gTexName=gTexMovieName;
-   glBindTexture(GL_TEXTURE_2D, gTexName);glError();
-
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);glError();
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);glError();
- 
-   if(!bUseFastMdec) 
-    {
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glError();
-    }
-   else
-    {
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);glError();
-    }
-
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
+    if(gTexMovieName==0) {
+        s8 clampType = convertGLClamp(iClampType);
+        s8 filter;
+        if(!bUseFastMdec) {
+            filter = 1;
+        } else {
+            filter = convertGLFilter(iFilter);
+        }
+        gTexMovieName = createTexture(filter, clampType);
+        gTexName=gTexMovieName;
+        
+        bindTexture(gTexName);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
   }
  else 
   {
-   gTexName=gTexMovieName;glBindTexture(GL_TEXTURE_2D, gTexName);glError();
+   gTexName=gTexMovieName;bindTexture(gTexName);
   }
 
  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
@@ -2219,17 +2195,15 @@ GLuint BlackFake15BitTexture(void)
  if(   FastCheckAgainstFrontScreen(x1,y1,x2,y2)
     || FastCheckAgainstScreen(x1,y1,x2,y2))
   {
-   if(!gTexFrameName)
-    {
-     glGenTextures(1, &gTexFrameName);glError();
-     gTexName=gTexFrameName;
-     glBindTexture(GL_TEXTURE_2D, gTexName);glError();
+        if(!gTexFrameName) {
+            s8 clampType = convertGLClamp(iClampType);
+            s8 filter = convertGLFilter(iFilter);
+            gTexFrameName = createTexture(filter, clampType);
+            gTexName=gTexFrameName;
+     
+            bindTexture(gTexName);
 
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);glError();
- 
+     
      {
        unsigned long * ta=(unsigned long *)texturepart;
        for(y1=0;y1<=4;y1++)
@@ -2242,7 +2216,7 @@ GLuint BlackFake15BitTexture(void)
    else
     {
      gTexName=gTexFrameName;
-     glBindTexture(GL_TEXTURE_2D, gTexName);glError();
+     bindTexture(gTexName);
     }
       //LOGE("BlackFake15BitTexture x:%d y:%d",4,4);
    ubOpaqueDraw=0;
@@ -2315,14 +2289,15 @@ GLuint Fake15BitTexture(void)
    if(iResX>640  || iResY>480)  iFTex=1024;
    else                         iFTex=512; 
 
-   glGenTextures(1, &gTexFrameName);glError();
-   gTexName=gTexFrameName;
-   glBindTexture(GL_TEXTURE_2D, gTexName);glError();
+    
+    s8 clampType = convertGLClamp(iClampType);
+    s8 filter = convertGLFilter(iFilter);
+    gTexFrameName = createTexture(filter, clampType);
+    gTexName=gTexFrameName;
 
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);glError();
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);glError();
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);glError();
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);glError();
+
+   bindTexture(gTexName);
+
 
    p=(char *)malloc(iFTex*iFTex*4);
    memset(p,0,iFTex*iFTex*4);
@@ -2334,7 +2309,7 @@ GLuint Fake15BitTexture(void)
  else 
   {
    gTexName=gTexFrameName;
-   glBindTexture(GL_TEXTURE_2D, gTexName);glError();
+   bindTexture(gTexName);
   }
       //LOGE("Fake15BitTexture x:%d y:%d",iFTex,iFTex);
  x1+=PreviousPSXDisplay.Range.x0;
@@ -3412,27 +3387,25 @@ void Super2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
 void DefineSubTextureSortHiRes(void)
 {
 
- if(!gTexName)             
-  {
-   glGenTextures(1, &gTexName);glError();
-   glBindTexture(GL_TEXTURE_2D, gTexName);glError();
+        gTexName=gTexMovieName;
 
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);glError();
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);glError();
+    if(!gTexName) {
+        s8 clampType = convertGLClamp(iClampType);
+        s8 filter;
+        if(iFilterType) {
+            filter = 1;
+        } else {
+            filter = convertGLFilter(iFilter);
+        }
+        gTexName = createTexture(filter, clampType);
 
-   if(iFilterType)
-    {
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glError();
-    }
-   else
-    {            
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);glError();
-    }   
+ 
+   bindTexture(gTexName);
+
+   
    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturebuffer);glError();
   }
- else glBindTexture(GL_TEXTURE_2D, gTexName);glError();
+ else bindTexture(gTexName);
 
  glTexSubImage2D(GL_TEXTURE_2D, 0, XTexS<<1, YTexS<<1,
                  DXTexS<<1, DYTexS<<1,
@@ -3444,28 +3417,23 @@ void DefineSubTextureSortHiRes(void)
 
 void DefineSubTextureSort(void)
 {
+    logInfo(TAG, "DefineSubTextureSort %d", gTexName);
+    if(!gTexName) {
+        s8 clampType = convertGLClamp(iClampType);
+        s8 filter;
+        if(iFilterType) {
+            filter = 1;
+        } else {
+            filter = convertGLFilter(iFilter);
+        }
+        logInfo(TAG, "createTexture");
+        gTexName = createTexture(filter, clampType);
+        bindTexture(gTexName);
 
- if(!gTexName)
-  {
-   glGenTextures(1, &gTexName);glError();
-   glBindTexture(GL_TEXTURE_2D, gTexName);glError();
-
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);glError();
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);glError();
-
-   if(iFilterType)
-    {
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glError();
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
+    } else {
+        bindTexture(gTexName);
     }
-   else
-    {
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iFilter);glError();
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, iFilter);glError();
-    }
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
-  }
- else glBindTexture(GL_TEXTURE_2D, gTexName);glError();
                                         //LOGE("DefineSubTextureSort x:%d y:%d w:%d h:%d",XTexS,YTexS,DXTexS,DYTexS);
 
  glTexSubImage2D(GL_TEXTURE_2D, 0, XTexS, YTexS,

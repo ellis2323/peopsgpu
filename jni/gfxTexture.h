@@ -79,6 +79,12 @@ Texture *getTexture(s32 TexturePtrId);
 /// Bind Texture
 void bindTexture(s32 tId);
 
+/// Convert GL filter constants to gfx cst 
+s8 convertGLFilter(s32 GLFilter);
+
+/// Convert GL Clamp constants to gfx cst
+s8 convertGLClamp(s32 GLClamp);
+
 /// Check Texture
 bool checkTexture();
 

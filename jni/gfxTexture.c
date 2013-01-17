@@ -15,7 +15,7 @@
 #if defined(GL_OGLES2) || defined(GL_OGLES1)
 
 #define MAX_TEXTURES_PTR 255
-TexturePtr *sTexturesPtrArray = NULL;
+static TexturePtr *sTexturesPtrArray = NULL;
 
 s32 findFreeTexturePtr();
 
@@ -25,6 +25,7 @@ void initTextures() {
     for (s32 i=0; i<MAX_TEXTURES_PTR; ++i) {
         sTexturesPtrArray[i] = NULL;
     }
+    logInfo(TAG, "Init Textures done [%d]! ", MAX_TEXTURES_PTR);
 }
 
 /// Create a texture and return the index in the TexturePtr array.
@@ -32,7 +33,7 @@ s32 createTexture(s8 filters, s8 clampTypes) {
     u32 texture;
     // search a free TexturePtr
     s32 freeId = findFreeTexturePtr();
-    if (freeId) return -1;
+    if (freeId==-1) return -1;
     // create a texture
     glEnable(GL_TEXTURE_2D);
     glGenTextures(1, &texture);
@@ -73,6 +74,30 @@ s32 createTexture(s8 filters, s8 clampTypes) {
     sTexturesPtrArray[freeId]->mHeight = 0;
     logInfo(TAG, "createTexture tid:%d glid:%d f:%d c:%d", freeId, texture, filters, clampTypes);
     return freeId;
+}
+
+s8 convertGLFilter(s32 GLFilter) {
+    switch (GLFilter) {
+        case GL_NEAREST:
+        return 0;
+        case GL_LINEAR:
+        return 1;
+     default:
+        logError(TAG, "ERROR: filter type unknown %d", GLFilter);
+        return -1;
+    }
+}
+
+s8 convertGLClamp(s32 GLClamp) {
+    switch (GLClamp) {
+    case GL_CLAMP_TO_EDGE:
+        return 0;
+    case GL_REPEAT:
+        return 1;
+    default:
+        logError(TAG, "ERROR: clamp type unknown %d", GLClamp);
+        return -1;
+    }
 }
 
 void setTexture(s32 tId, s32 width, s32 height, s32 format, u8 *data) {
@@ -124,6 +149,12 @@ void setSubTexture(s32 tId, s32 x, s32 y, s32 width, s32 height, u8 *data) {
 /// Texture id
 void destroyTexture(s32 tId) {
     Texture *texture = sTexturesPtrArray[tId];
+    if(texture==NULL) {
+        logError(TAG, "Cannot destroy texture with tid: %d", tId);
+        return;
+    }
+    u32 textureId = texture->mTextureId;
+    glDeleteTextures(1, &textureId);
     free(texture);
     sTexturesPtrArray[tId] = NULL;
 }
@@ -136,17 +167,23 @@ Texture *getTexture(s32 texturePtrId) {
 }
 
 void bindTexture(s32 tId) {
+    logInfo(TAG, "bindTexture: %d", tId);
+    if (tId==0) {
+        glBindTexture(GL_TEXTURE_2D, 0);
+        return;
+    }
     Texture *tex = getTexture(tId);
     if (tex==NULL) return;
     glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
 }
 
 s32 findFreeTexturePtr() {
-    for (s32 i=0; i<MAX_TEXTURES_PTR; ++i) {
+    for (s32 i=1; i<MAX_TEXTURES_PTR; ++i) {
         if (sTexturesPtrArray[i]==NULL) {
             return i;
         }
     }
+    
     return -1;
 }
 

@@ -45,6 +45,7 @@
 
 #include "gfxCommand.h"
 #include "gfxGL.h"
+#include "gfxTexture.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
 // defines
@@ -241,6 +242,7 @@ void CreateScanLines(void)
 //extern HWND      hWnd;
 int GLinitialize() 
 {
+    initTextures();
  //----------------------------------------------------// 
        //initEGL();
 

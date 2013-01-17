@@ -16,7 +16,7 @@ E_CMD_TYPE sDebugCmdType = CMD_TYPE_NOOP;
 Box sViewportBox;
 void setViewport(s32 x, s32 y, s32 width, s32 height) {
 #ifdef DEBUG
-    if (x<=0 || y<=0 || width<=0 || height<=0) logError(TAG, "Invalid viewport [%d %d %d %d]", x, y, width, height);
+    if (x<0 || y<0 || width<=0 || height<=0) logError(TAG, "Invalid viewport [%d %d %d %d]", x, y, width, height);
 #endif
     sViewportBox.mX = x;
     sViewportBox.mY = y;
