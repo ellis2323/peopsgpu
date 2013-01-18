@@ -88,6 +88,19 @@ s8 convertGLFilter(s32 GLFilter) {
     }
 }
 
+s32 convertFilterToGL(s8 filter) {
+    switch (filter) {
+        case 0:
+            return GL_NEAREST;
+        case 1:
+            return GL_LINEAR;
+        default:
+            logError(TAG, "ERROR: GL filter type unknown %d", filter);
+            return -1;
+    }
+}
+
+
 s8 convertGLClamp(s32 GLClamp) {
     switch (GLClamp) {
     case GL_CLAMP_TO_EDGE:

@@ -85,6 +85,9 @@ void setFilterForCurrentTexture(s8 filter);
 /// Convert GL filter constants to gfx cst 
 s8 convertGLFilter(s32 GLFilter);
 
+/// Convert gfx filter to GL
+s32 convertFilterToGL(s8 filter);
+
 /// Convert GL Clamp constants to gfx cst
 s8 convertGLClamp(s32 GLClamp);
 

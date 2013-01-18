@@ -50,6 +50,7 @@
 #include "gpuStdafx.h"
 
 #include "gfxCommand.h"
+#include "gfxTexture.h"
 #include "gfxGL.h"
 
 extern unsigned int CSVERTEX,CSCOLOR,CSTEXTURE;
@@ -2641,10 +2642,10 @@ JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setOptionGL(JNIEnv *env, jobj
   }  
   if ((value&0x200)){
    iFilterType=4;
-   iFilter=GL_LINEAR;
+   iFilter=convertFilterToGL(1);
   }else{
    iFilterType=0;
-   iFilter=GL_NEAREST;
+   iFilter=convertFilterToGL(0);
   } 
   if ((value&0x800)){
    iFrameTexType=3;

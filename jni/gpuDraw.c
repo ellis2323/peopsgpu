@@ -86,11 +86,6 @@
 #define ST_FACVRAM         256.0f
                 
 
-////////////////////////////////////////////////////////////////////////////////////
-// draw globals
-
-void  glBlendEquationEXT(GLenum mode);
-void  glColorTableEXT(GLenum target, GLenum internalFormat, GLsizei width, GLenum format,GLenum type, const GLvoid *data);
 
 // draw globals; most will be initialized again later (by config or checks) 
 
@@ -113,8 +108,8 @@ unsigned long  lSetMask=0;
 // drawing/coord vars
 
 OGLVertex      vertex[4];
-GLubyte        gl_ux[8];
-GLubyte        gl_vy[8];
+u8        gl_ux[8];
+u8        gl_vy[8];
 short          sprtY,sprtX,sprtH,sprtW;
 
 // drawing options
@@ -129,7 +124,7 @@ BOOL           bAdvancedBlend;
 
 int            iDepthFunc=0;
 int            iZBufferDepth;
-GLbitfield     uiBufferBits=GL_COLOR_BUFFER_BIT;
+u32     uiBufferBits=GL_COLOR_BUFFER_BIT;
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////

@@ -606,7 +606,7 @@ void ResetTextureArea(BOOL bDelTex)
    tsx->used=0;
    if(bDelTex && tsx->texname)
     {
-     glDeleteTextures(1,&tsx->texname);glError();
+     destroyTexture(tsx->texname);
      tsx->texname=0;
     }
   }
@@ -627,8 +627,10 @@ void ResetTextureArea(BOOL bDelTex)
   {
    lu=pxSsubtexLeft[i];
    lu->l=0;
-   if(bDelTex && uiStexturePage[i])
-    {glDeleteTextures(1,&uiStexturePage[i]);glError();uiStexturePage[i]=0;}
+    if(bDelTex && uiStexturePage[i]) {
+        destroyTexture(uiStexturePage[i]);
+        uiStexturePage[i]=0;
+        }
   }
 }
 
