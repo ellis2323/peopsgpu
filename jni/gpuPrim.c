@@ -1772,13 +1772,13 @@ if(!(gdata&1)) iSetMask=2;
 bCheckMask=TRUE;
 if(iDepthFunc==0) return;
 iDepthFunc=0;
-glDepthFunc(GL_LESS);glError();
+    setDepthTest(DEPTH_TEST_LESS);
 }
 else
 {
 bCheckMask=FALSE;
 if(iDepthFunc==1) return;
-glDepthFunc(GL_ALWAYS);glError();
+    setDepthTest(DEPTH_TEST_ALWAYS);
 iDepthFunc=1;
 }
 }
@@ -2319,7 +2319,7 @@ r=((GLclampf)RED(gpuData[0]))/255.0f;
 
 useScissor(false);
 setClearColor(r, g, b, 1.0);
-clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
+clearBuffers(clearColorBuffer, clearDepthBuffer, false);
 gl_z=0.0f;
 
 if(gpuData[0]!=0x02000000 &&

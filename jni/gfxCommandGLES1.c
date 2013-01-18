@@ -7,6 +7,35 @@
 
 #if defined(GL_OGLES1)
 
+void initGL() {
+
+    glClearDepthf(1.0f);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+    glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);
+    glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
+    glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST);
+
+    glDisable(GL_FOG);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LINE_SMOOTH);
+    glDisable(GL_POINT_SMOOTH);
+
+    glDisable(GL_CULL_FACE);
+    glDepthFunc(GL_LEQUAL);
+    glFrontFace( GL_CW );
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
+    
+
+}
+
 void setAlphaTest(E_ALPHA_TEST test, f32 value) {
     switch (test) {
         case ALPHA_TEST_NEVER:

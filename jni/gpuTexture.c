@@ -113,7 +113,9 @@ GLuint        gTexFrameName=0;
 int           iTexGarbageCollection=1;
 unsigned long dwTexPageComp=0;
 int           iVRamSize=0;
-int           iClampType=GL_CLAMP_TO_EDGE;
+// replace iClampType by gClampType
+//int           iClampType=GL_CLAMP_TO_EDGE;
+s32     gClampType = 0;
 int iFilter = GL_NEAREST;
 void               (*LoadSubTexFn) (int,int,short,short);
 unsigned long      (*PalTexturedColourFn)  (unsigned long);
@@ -1873,7 +1875,7 @@ GLuint LoadTextureWnd(long pageid,long TextureMode,unsigned long GivenClutId)
 void DefinePackedTextureMovie(void)
 {
     if(gTexMovieName==0) {
-        s8 clampType = convertGLClamp(iClampType);
+        s8 clampType = gClampType;
         s8 filter;
         if(!bUseFastMdec) {
             filter = 1;
@@ -1910,7 +1912,7 @@ void DefinePackedTextureMovie(void)
 void DefineTextureMovie(void)
 {
     if(gTexMovieName==0) {
-        s8 clampType = convertGLClamp(iClampType);
+        s8 clampType = gClampType;
         s8 filter;
         if(!bUseFastMdec) {
             filter = 1;
@@ -2198,7 +2200,7 @@ GLuint BlackFake15BitTexture(void)
     || FastCheckAgainstScreen(x1,y1,x2,y2))
   {
         if(!gTexFrameName) {
-            s8 clampType = convertGLClamp(iClampType);
+            s8 clampType = gClampType;
             s8 filter = convertGLFilter(iFilter);
             gTexFrameName = createTexture(filter, clampType);
             gTexName=gTexFrameName;
@@ -2292,7 +2294,7 @@ GLuint Fake15BitTexture(void)
    else                         iFTex=512; 
 
     
-    s8 clampType = convertGLClamp(iClampType);
+    s8 clampType = gClampType;
     s8 filter = convertGLFilter(iFilter);
     gTexFrameName = createTexture(filter, clampType);
     gTexName=gTexFrameName;
@@ -3392,7 +3394,7 @@ void DefineSubTextureSortHiRes(void)
         gTexName=gTexMovieName;
 
     if(!gTexName) {
-        s8 clampType = convertGLClamp(iClampType);
+        s8 clampType = gClampType;
         s8 filter;
         if(iFilterType) {
             filter = 1;
@@ -3421,7 +3423,7 @@ void DefineSubTextureSort(void)
 {
     logInfo(TAG, "DefineSubTextureSort %d", gTexName);
     if(!gTexName) {
-        s8 clampType = convertGLClamp(iClampType);
+        s8 clampType = gClampType;
         s8 filter;
         if(iFilterType) {
             filter = 1;
@@ -4183,8 +4185,8 @@ glClear(16384);
 glEnable(GL_SCISSOR_TEST);
 glGenTextures(1, &gTexName);
 glBindTexture(GL_TEXTURE_2D, 1);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
@@ -4236,8 +4238,8 @@ glColorPointer(4, GL_UNSIGNED_BYTE, 24, &v2[0].rgba);
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 glGenTextures(1, &gTexName);
 glBindTexture(GL_TEXTURE_2D, 2);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);

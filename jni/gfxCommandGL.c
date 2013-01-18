@@ -93,6 +93,14 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
     glOrthof(left, right, bottom, top, near, far);
 }
 
+void useDithering(bool flag) {
+    if (flag) {
+        glEnable(GL_DITHER);
+    } else {
+        glDisable(GL_DITHER);
+    }
+}
+
 void useBlending(bool flag) {
     if (flag) {
         glEnable(GL_BLEND);
@@ -107,6 +115,49 @@ void useAlphaTest(bool flag) {
         glDisable(GL_ALPHA_TEST);
     }
 }
+
+void useDepthTest(bool flag) {
+    if (flag) {
+        glEnable(GL_DEPTH_TEST);
+    } else {
+        glDisable(GL_DEPTH_TEST);
+    }
+}
+
+void setDepthTest(E_DEPTH_TEST test) {
+    switch (test) {
+        case DEPTH_TEST_NEVER:
+            glDepthFunc(GL_NEVER);
+        break;
+        case DEPTH_TEST_LESS:
+            glDepthFunc(GL_LESS);
+        break;
+        case DEPTH_TEST_EQUAL:
+            glDepthFunc(GL_EQUAL);
+        break;
+        case DEPTH_TEST_LEQUAL:
+            glDepthFunc(GL_LEQUAL);
+        break;
+        case DEPTH_TEST_GREATER:
+            glDepthFunc(GL_GREATER);
+        break;
+        case DEPTH_TEST_NOTEQUAL:
+            glDepthFunc(GL_NOTEQUAL);
+        break;
+        case DEPTH_TEST_GEQUAL:
+            glDepthFunc(GL_GEQUAL);
+        break;
+        case DEPTH_TEST_ALWAYS:
+            glDepthFunc(GL_ALWAYS);
+        break;
+        default:
+            logError(TAG, "Depth Func not supported [%d]", test);
+        break;
+    }
+}
+
+/// Set Depth Test
+void setDepthTest(E_DEPTH_TEST test);
 
 void setClearColor(f32 r, f32 g, f32 b, f32 a) {
     glClearColor(r,g,b,a);
@@ -125,18 +176,6 @@ void clearBuffers(bool colorBuffer, bool depthBuffer, bool stencilBuffer) {
     }
     glClear(flags);
 
-}
-
-bool colorBufferBit(u32 buffersbit) {
-    u32 bits = buffersbit & GL_COLOR_BUFFER_BIT;
-    if (bits!=0) return true;
-    return false;
-}
-
-bool depthBufferBit(u32 buffersbit) {
-    u32 bits = buffersbit & GL_DEPTH_BUFFER_BIT;
-    if (bits!=0) return true;
-    return false;
 }
 
 Material *createMaterial() {

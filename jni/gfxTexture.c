@@ -100,19 +100,6 @@ s32 convertFilterToGL(s8 filter) {
     }
 }
 
-
-s8 convertGLClamp(s32 GLClamp) {
-    switch (GLClamp) {
-    case GL_CLAMP_TO_EDGE:
-        return 0;
-    case GL_REPEAT:
-        return 1;
-    default:
-        logError(TAG, "ERROR: clamp type unknown %d", GLClamp);
-        return -1;
-    }
-}
-
 void setTexture(s32 tId, s32 width, s32 height, s32 format, u8 *data) {
     Texture *tex = getTexture(tId);
     if (tex==NULL) return;

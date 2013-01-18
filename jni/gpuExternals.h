@@ -264,7 +264,10 @@ extern HWND           hWWindow;
 extern BOOL           bIsFirstFrame;
 extern int            iWinSize;
 extern int            iZBufferDepth;
-extern u32            uiBufferBits;
+// replace uiBufferBits by clearColorBuffer & clearDepthBuffer
+//extern u32            uiBufferBits;
+extern bool clearColorBuffer;
+extern bool clearDepthBuffer;
 extern int            iUseMask;
 extern int            iSetMask;
 extern int            iDepthFunc;
@@ -358,7 +361,10 @@ extern BOOL           bUseFastMdec;
 extern BOOL           bUse15bitMdec;
 extern int            iFrameTexType;
 extern int            iFrameReadType;
-extern int            iClampType;
+// replace iClampType by gClampType
+//extern int           iClampType;
+extern s32          gClampType;
+
 extern int            iSortTexCnt;
 extern BOOL           bFakeFrontBuffer;
 extern u32            gTexFrameName;

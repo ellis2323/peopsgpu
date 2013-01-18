@@ -8,6 +8,12 @@
 extern E_TRIBOOL_TYPE sBlendingState;
 extern u32 sCurrentBlendingMode;
 
+
+void initGL() {
+
+}
+
+
 // MARK: New generation code
 
 void drawPointOpaque(OGLVertex *vertices, u16 *indices, s32 count) {

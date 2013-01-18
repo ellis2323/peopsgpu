@@ -44,7 +44,7 @@
 #include <math.h>
 
 #include "gfxCommand.h"
-#include "gfxGL.h"
+//#include "gfxGL.h"
 #include "gfxTexture.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -124,32 +124,16 @@ BOOL           bAdvancedBlend;
 
 int            iDepthFunc=0;
 int            iZBufferDepth;
-u32     uiBufferBits=GL_COLOR_BUFFER_BIT;
+
+// uiBufferBits replaced by clearColorBuffer & clearDepthBuffer
+// u32     uiBufferBits;
+bool clearColorBuffer;
+bool clearDepthBuffer;
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////
-// Set OGL pixel format
-////////////////////////////////////////////////////////////////////////
- 
-
-////////////////////////////////////////////////////////////////////////
-// Get extension infos (f.e. pal textures / packed pixels)
-////////////////////////////////////////////////////////////////////////
-
-void GetExtInfos(void)                              
-{
- //BOOL bPacked=FALSE;                                   // default: no packed pixel support
-
- /*if(strstr((char *)glGetString(GL_EXTENSIONS),         // packed pixels available?
-    "GL_EXT_packed_pixels"))                          
-  bPacked=TRUE;                                        // -> ok
-*/
- 
-    iClampType = GL_CLAMP_TO_EDGE;
-}
 
 ////////////////////////////////////////////////////////////////////////
 // Setup some stuff depending on user settings or in-game toggle
@@ -157,53 +141,52 @@ void GetExtInfos(void)
 
 void SetExtGLFuncs(void)
 {
- //----------------------------------------------------//
-
- SetFixes();                                           // update fix infos
-
- //----------------------------------------------------//
-
-  {
-   if(bAdvancedBlend) bUseMultiPass=TRUE;              // -> pseudo-advanced with 2 passes
-   else               bUseMultiPass=FALSE;             // -> or simple 'bright color' mode
-//   bGLBlend=FALSE;                                     // -> no ext blending!
-	   glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);glError();
-  }
-
- if(bOpaquePass)                                        // opaque mode?
-  {
-   if(dwActFixes&32) 
+    //----------------------------------------------------//
+    
+    SetFixes();                                           // update fix infos
+    
+    //----------------------------------------------------//
+    
     {
-     TCF[0]=CP8RGBA_0;
-     PalTexturedColourFn=CP8RGBA;                      // -> init col func
+        if(bAdvancedBlend) bUseMultiPass=TRUE;              // -> pseudo-advanced with 2 passes
+        else               bUseMultiPass=FALSE;             // -> or simple 'bright color' mode
+        //   bGLBlend=FALSE;                                     // -> no ext blending!
     }
-   else
+    
+    if(bOpaquePass)                                        // opaque mode?
     {
-     TCF[0]=XP8RGBA_0;
-     PalTexturedColourFn=XP8RGBA;                      // -> init col func
+        if(dwActFixes&32)
+        {
+            TCF[0]=CP8RGBA_0;
+            PalTexturedColourFn=CP8RGBA;                      // -> init col func
+        }
+        else
+        {
+            TCF[0]=XP8RGBA_0;
+            PalTexturedColourFn=XP8RGBA;                      // -> init col func
+        }
+        
+        TCF[1]=XP8RGBA_1;
+        setAlphaTest(ALPHA_TEST_GREATER, 0.49f);
+        
     }
-
-   TCF[1]=XP8RGBA_1;
-   setAlphaTest(ALPHA_TEST_GREATER, 0.49f);
-
-  }
- else                                                  // no opaque mode?
-  {
-   TCF[0]=TCF[1]=P8RGBA;
-   PalTexturedColourFn=P8RGBA;                         // -> init col func
-   setAlphaTest(ALPHA_TEST_NOTEQUAL, 0);                        // --> set alpha func
-
-  }
-
- //----------------------------------------------------//
-
- LoadSubTexFn=LoadSubTexturePageSort;                  // init load tex ptr
-
- bBlendEnable=FALSE;                                   // init blending: off
- useBlending(false);
-
-
- SetScanTrans();                                       // init scan lines (if wanted)
+    else                                                  // no opaque mode?
+    {
+        TCF[0]=TCF[1]=P8RGBA;
+        PalTexturedColourFn=P8RGBA;                         // -> init col func
+        setAlphaTest(ALPHA_TEST_NOTEQUAL, 0);                        // --> set alpha func
+        
+    }
+    
+    //----------------------------------------------------//
+    
+    LoadSubTexFn=LoadSubTexturePageSort;                  // init load tex ptr
+    
+    bBlendEnable=FALSE;                                   // init blending: off
+    useBlending(false);
+    
+    
+    SetScanTrans();                                       // init scan lines (if wanted)
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -216,14 +199,14 @@ void SetExtGLFuncs(void)
 #define O_TSP 0x45,0x45,0x45,0xff
 #define N_TSP 0x00,0x00,0x00,0xff
 
-GLuint  gTexScanName=0;
+u32  gTexScanName=0;
 
-GLubyte texscan[4][16]= 
+u8 texscan[4][16]=
 {
-{R_TSP, G_TSP, B_TSP, N_TSP},
-{O_TSP, N_TSP, O_TSP, N_TSP},
-{B_TSP, N_TSP, R_TSP, G_TSP},
-{O_TSP, N_TSP, O_TSP, N_TSP}
+    {R_TSP, G_TSP, B_TSP, N_TSP},
+    {O_TSP, N_TSP, O_TSP, N_TSP},
+    {B_TSP, N_TSP, R_TSP, G_TSP},
+    {O_TSP, N_TSP, O_TSP, N_TSP}
 };
 
 void CreateScanLines(void)
@@ -237,11 +220,11 @@ void CreateScanLines(void)
 //extern HWND      hWnd;
 int GLinitialize() 
 {
+    initGL();
     initTextures();
     //----------------------------------------------------//
     //initEGL();
     
-    glDepthRangef(0.0f, 1.0f);glError();
     
     //----------------------------------------------------//
     setViewport(rRatioRect.left,                           // init viewport by ratio rect
@@ -253,31 +236,29 @@ int GLinitialize()
     useScissor(true);
     setProjectionOrtho(0, PSXDisplay.DisplayMode.x, PSXDisplay.DisplayMode.y, 0, -1, 1);
     
+    clearColorBuffer = true;
     if(iZBufferDepth)                                     // zbuffer?
     {
-        uiBufferBits=GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT;
-        glEnable(GL_DEPTH_TEST);glError();
-        glDepthFunc(GL_ALWAYS);glError();
+        clearDepthBuffer = true;
+        useDepthTest(true);
+        setDepthTest(DEPTH_TEST_ALWAYS);
         iDepthFunc=1;
     }
     else                                                  // no zbuffer?
     {
-        uiBufferBits=GL_COLOR_BUFFER_BIT;
-        glDisable(GL_DEPTH_TEST);glError();
+        clearDepthBuffer = false;
+        useDepthTest(false);
     }
     
     setClearColor(0, 0, 0, 0);
-    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
+    clearBuffers(clearColorBuffer, clearDepthBuffer, false);
     
-    GetExtInfos();                                        // get ext infos
+    gClampType = 0;
     SetExtGLFuncs();                                      // init all kind of stuff (tex function pointers)
     
     useAlphaTest(true);                              // wanna alpha test
     
-    {
-        glDisable(GL_LINE_SMOOTH);glError();
-        glDisable(GL_POINT_SMOOTH);glError();
-    }
+
     
     ubGloAlpha=127;                                       // init some drawing vars
     ubGloColAlpha=127;
@@ -287,17 +268,11 @@ int GLinitialize()
     bTexEnabled=FALSE;
     bUsingTWin=FALSE;
     
-    if(bDrawDither)  glEnable(GL_DITHER);                 // dither mode
-    else             glDisable(GL_DITHER);
-    glError();
-    glDisable(GL_FOG);glError();                                    // turn all (currently) unused modes off
-    glDisable(GL_LIGHTING);glError();
-    glDisable(GL_STENCIL_TEST);glError();
-    glDisable(GL_TEXTURE_2D);glError();
-    glDisable(GL_CULL_FACE);
-    
-    glFlush();glError();                                            // we are done...
-    glFinish();glError();
+    if(bDrawDither) {
+        useDithering(true);
+    } else {
+        useDithering(false);
+    }
     
     CreateScanLines();                                    // setup scanline stuff (if wanted)
     

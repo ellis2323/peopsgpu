@@ -56,8 +56,28 @@ enum ALPHA_TEST {
 };
 typedef enum ALPHA_TEST E_ALPHA_TEST;
 
+enum DEPTH_TEST {
+    DEPTH_TEST_NEVER=0,
+    DEPTH_TEST_LESS,
+    DEPTH_TEST_EQUAL,
+    DEPTH_TEST_LEQUAL,
+    DEPTH_TEST_GREATER,
+    DEPTH_TEST_NOTEQUAL,
+    DEPTH_TEST_GEQUAL,    
+    DEPTH_TEST_ALWAYS,
+};
+typedef enum DEPTH_TEST E_DEPTH_TEST;
+
 // ********************** Public API ********************** 
 
+// INIT
+
+/// Init the OpenGL Device
+void initGL();
+
+// VIEWPORT
+
+/// set Viewport Box
 void setViewport(s32 x, s32 y, s32 width, s32 height);
 
 // SCISSOR
@@ -79,6 +99,11 @@ void setProjectionMatrix(f32 *matrix);
 /// Define an orthogonal projection matrix
 void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far);
 
+// DITHER
+
+/// Use or Not Dither
+void useDithering(bool flag);
+
 // BLENDING
 
 /// Use or Not Blending
@@ -92,6 +117,13 @@ void useAlphaTest(bool flag);
 /// Set Alpha Func
 void setAlphaTest(E_ALPHA_TEST test , f32 value);
 
+// DEPTH TEST
+
+/// Use Depth Test
+void useDepthTest(bool flag);
+
+/// Set Depth Test
+void setDepthTest(E_DEPTH_TEST test);
 
 // BUFFER
 
@@ -100,12 +132,6 @@ void setClearColor(f32 r, f32 g, f32 b, f32 a);
 
 /// Clear Buffers
 void clearBuffers(bool color, bool depth, bool stencil);
-
-/// Color Buffer Bit
-bool colorBufferBit(u32 buffersbit);
-
-/// Depth Buffer Bit
-bool depthBufferBit(u32 buffersbit);
 
 // MATERIAL
 

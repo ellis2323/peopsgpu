@@ -544,7 +544,7 @@ if(PSXDisplay.Disabled)                               // display disabled?
   // moved here
   useScissor(false);
   setClearColor(0, 0, 0, 0.5f);
-  clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
+  clearBuffers(clearColorBuffer, clearDepthBuffer, false);
   useScissor(true);
   gl_z=0.0f;
   bDisplayNotSet = TRUE;
@@ -626,7 +626,7 @@ if(qualcomm==1||lClearOnSwap)                                      // clear buff
   r=((GLclampf)RED(lClearOnSwapColor))/255.0f;
     useScissor(false);
     setClearColor(r, g, b, 0.5f);
-    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
+    clearBuffers(clearColorBuffer, clearDepthBuffer, false);
     useScissor(true);
     lClearOnSwap=0;                                     // -> done
  }
@@ -841,12 +841,12 @@ if(r.bottom<rRatioRect.bottom ||
     rC.bottom=iResY;
     setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
-    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
+    clearBuffers(clearColorBuffer, clearDepthBuffer, false);
     rC.left=iResX-rC.right;
     setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
     
-    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
+    clearBuffers(clearColorBuffer, clearDepthBuffer, false);
    }
 
   if(r.bottom <rRatioRect.bottom)
@@ -858,11 +858,11 @@ if(r.bottom<rRatioRect.bottom ||
     setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
 
-    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
+    clearBuffers(clearColorBuffer, clearDepthBuffer, false);
     rC.top=iResY-rC.bottom;
     setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
-    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
+    clearBuffers(clearColorBuffer, clearDepthBuffer, false);
    }
   
   bSetClip=TRUE;
