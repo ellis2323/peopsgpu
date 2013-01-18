@@ -72,6 +72,19 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
 /// Use or Not Blending
 void useBlending(bool flag);
 
+// BUFFER
+
+/// Set clear color
+void setClearColor(f32 r, f32 g, f32 b, f32 a);
+
+/// Clear Buffers
+void clearBuffers(bool color, bool depth, bool stencil);
+
+/// Color Buffer Bit
+bool colorBufferBit(u32 buffersbit);
+
+/// Depth Buffer Bit
+bool depthBufferBit(u32 buffersbit);
 
 Material *createMaterial();
 void destroyMaterial(Material *mat);

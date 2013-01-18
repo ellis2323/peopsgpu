@@ -2318,8 +2318,8 @@ b=((GLclampf)BLUE(gpuData[0]))/255.0f;
 r=((GLclampf)RED(gpuData[0]))/255.0f;
 
 useScissor(false);
-glClearColor(r,g,b,1.0f);glError();
-glClear(uiBufferBits);glError();
+setClearColor(r, g, b, 1.0);
+clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
 gl_z=0.0f;
 
 if(gpuData[0]!=0x02000000 &&

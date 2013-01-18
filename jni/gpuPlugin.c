@@ -542,8 +542,8 @@ if(PSXDisplay.Disabled)                               // display disabled?
 
   // moved here
   useScissor(false);
-  glClearColor(0,0,0,128);glError();                            // -> clear whole backbuffer
-  glClear(uiBufferBits);glError();
+  setClearColor(0, 0, 0, 0.5f);
+  clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
   useScissor(true);
   gl_z=0.0f;
   bDisplayNotSet = TRUE;
@@ -623,11 +623,11 @@ if(qualcomm==1||lClearOnSwap)                                      // clear buff
   g=((GLclampf)GREEN(lClearOnSwapColor))/255.0f;      // -> get col
   b=((GLclampf)BLUE(lClearOnSwapColor))/255.0f;
   r=((GLclampf)RED(lClearOnSwapColor))/255.0f;
-  useScissor(false);
-  glClearColor(r,g,b,128);glError();                            // -> clear 
-  glClear(uiBufferBits);glError();
-  useScissor(true);
-  lClearOnSwap=0;                                     // -> done
+    useScissor(false);
+    setClearColor(r, g, b, 0.5f);
+    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
+    useScissor(true);
+    lClearOnSwap=0;                                     // -> done
  }
 else 
  {
@@ -636,7 +636,7 @@ else
   if(iZBufferDepth)                                   // clear zbuffer as well (if activated)
    {
     useScissor(false);
-    glClear(GL_DEPTH_BUFFER_BIT);glError();
+    clearBuffers(false, true, false);
     useScissor(true);
    }
  }
@@ -830,7 +830,7 @@ if(r.bottom<rRatioRect.bottom ||
    r.right <rRatioRect.right)
  {
   RECT rC;
-  glClearColor(0,0,0,128);glError();                         
+  setClearColor(0, 0, 0, 0.5f);
 
   if(r.right <rRatioRect.right)
    {
@@ -840,12 +840,12 @@ if(r.bottom<rRatioRect.bottom ||
     rC.bottom=iResY;
     setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
-    glClear(uiBufferBits);glError();
+    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
     rC.left=iResX-rC.right;
     setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
     
-    glClear(uiBufferBits);glError();
+    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
    }
 
   if(r.bottom <rRatioRect.bottom)
@@ -857,11 +857,11 @@ if(r.bottom<rRatioRect.bottom ||
     setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
 
-    glClear(uiBufferBits);glError();
+    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
     rC.top=iResY-rC.bottom;
     setScissor(rC.left,rC.top,rC.right,rC.bottom);
     //LOGE("glScissor(:%d,%d,%d,%d)",rC.left,rC.top,rC.right,rC.bottom);
-    glClear(uiBufferBits);glError();
+    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
    }
   
   bSetClip=TRUE;

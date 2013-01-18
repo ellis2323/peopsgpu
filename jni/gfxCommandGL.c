@@ -101,6 +101,37 @@ void useBlending(bool flag) {
     }
 }
 
+void setClearColor(f32 r, f32 g, f32 b, f32 a) {
+    glClearColor(r,g,b,a);
+}
+
+void clearBuffers(bool colorBuffer, bool depthBuffer, bool stencilBuffer) {
+    GLbitfield flags = 0;
+    if (colorBuffer) {
+        flags |= GL_COLOR_BUFFER_BIT;
+    }
+    if (depthBuffer) {
+        flags |= GL_DEPTH_BUFFER_BIT;
+    }
+    if (stencilBuffer) {
+        flags |= GL_STENCIL_BUFFER_BIT;
+    }
+    glClear(flags);
+
+}
+
+bool colorBufferBit(u32 buffersbit) {
+    u32 bits = buffersbit & GL_COLOR_BUFFER_BIT;
+    if (bits!=0) return true;
+    return false;
+}
+
+bool depthBufferBit(u32 buffersbit) {
+    u32 bits = buffersbit & GL_DEPTH_BUFFER_BIT;
+    if (bits!=0) return true;
+    return false;
+}
+
 Material *createMaterial() {
     Material *mat = (Material *)malloc(sizeof(Material));
     mat->mUid = sMatUID;

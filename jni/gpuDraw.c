@@ -271,8 +271,8 @@ int GLinitialize()
         glDisable(GL_DEPTH_TEST);glError();
     }
     
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);glError();                 // first buffer clear
-    glClear(uiBufferBits);glError();
+    setClearColor(0, 0, 0, 0);
+    clearBuffers(colorBufferBit(uiBufferBits), depthBufferBit(uiBufferBits), false);
     
     GetExtInfos();                                        // get ext infos
     SetExtGLFuncs();                                      // init all kind of stuff (tex function pointers)
