@@ -433,7 +433,10 @@ void PaintBlackBorders(void)
  useScissor(false);
  if(bTexEnabled) {glDisable(GL_TEXTURE_2D);bTexEnabled=FALSE;}glError();
  if(bOldSmoothShaded) {glShadeModel(GL_FLAT);bOldSmoothShaded=FALSE;}glError();
- if(bBlendEnable)     {glDisable(GL_BLEND);bBlendEnable=FALSE;}glError();
+    if(bBlendEnable) {
+        useBlending(false);
+        bBlendEnable=FALSE;
+    }
   glDisable(GL_ALPHA_TEST);
   vertex[0].c.lcol=0xff000000;
  SETCOL(vertex[0]); 

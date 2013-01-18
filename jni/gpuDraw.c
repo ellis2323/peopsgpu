@@ -205,7 +205,7 @@ void SetExtGLFuncs(void)
  LoadSubTexFn=LoadSubTexturePageSort;                  // init load tex ptr
 
  bBlendEnable=FALSE;                                   // init blending: off
- glDisable(GL_BLEND);glError();
+ useBlending(false);
 
 
  SetScanTrans();                                       // init scan lines (if wanted)

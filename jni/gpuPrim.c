@@ -731,16 +731,20 @@ void SetSemiTrans(void)
 
 if(!DrawSemiTrans) // no semi trans at all?
 {
-if(bBlendEnable)
-{glDisable(GL_BLEND);glError();bBlendEnable=FALSE;} // -> don't wanna blend
+    if(bBlendEnable) {
+        useBlending(false);
+        bBlendEnable=FALSE;
+    } // -> don't wanna blend
 ubGloAlpha=ubGloColAlpha=255; // -> full alpha
 return; // -> and bye
 }
 
 ubGloAlpha=ubGloColAlpha=TransSets[GlobalTextABR].alpha;
 
-if(!bBlendEnable)
-{glEnable(GL_BLEND);glError();bBlendEnable=TRUE;} // wanna blend
+if(!bBlendEnable) {
+    useBlending(true);
+    bBlendEnable=TRUE;
+} // wanna blend
 
 if(TransSets[GlobalTextABR].srcFac!=obm1 ||
 TransSets[GlobalTextABR].dstFac!=obm2)
@@ -872,8 +876,10 @@ bm1=GL_ONE;bm2=GL_ONE;
 }
 }
 
-if(!bBlendEnable)
-{glEnable(GL_BLEND);glError();bBlendEnable=TRUE;} // wanna blend
+if(!bBlendEnable) {
+    useBlending(true);
+    bBlendEnable=TRUE;
+} // wanna blend
 
 if(bm1!=obm1 || bm2!=obm2)
 {
@@ -1529,7 +1535,7 @@ if(!PSXDisplay.DisplayMode.y) return;
 useScissor(false);
 glShadeModel(GL_FLAT);glError();
 bOldSmoothShaded=FALSE;
-glDisable(GL_BLEND);glError();
+useBlending(false);
 bBlendEnable=FALSE;
 glDisable(GL_TEXTURE_2D);glError();
 bTexEnabled=FALSE;
