@@ -93,6 +93,14 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
     glOrthof(left, right, bottom, top, near, far);
 }
 
+void useBlending(bool flag) {
+    if (flag) {
+        glEnable(GL_BLEND);
+    } else {
+        glDisable(GL_BLEND);
+    }
+}
+
 Material *createMaterial() {
     Material *mat = (Material *)malloc(sizeof(Material));
     mat->mUid = sMatUID;

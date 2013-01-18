@@ -186,7 +186,7 @@ u32 getBlendingMode() {
     return sBlendingMode;
 }
 
-void useBlending(E_TRIBOOL_TYPE flag) {
+void useBlendingE(E_TRIBOOL_TYPE flag) {
     if (flag==TRIBOOL_TRUE) {
         // activate blending
         if (sBlendingState!=TRIBOOL_TRUE) {

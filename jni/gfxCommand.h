@@ -67,6 +67,12 @@ void setProjectionMatrix(f32 *matrix);
 /// Define an orthogonal projection matrix
 void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far);
 
+// BLENDING
+
+/// Use or Not Blending
+void useBlending(bool flag);
+
+
 Material *createMaterial();
 void destroyMaterial(Material *mat);
 
@@ -101,7 +107,6 @@ void drawGouTexTriTrans(OGLVertex* vertices, u16 *indices, s32 count);
 void setDepthMode(u8 mode);
 void setTransMode(u8 mode);
 
-void useBlending(E_TRIBOOL_TYPE flag);
 void drawDebugPoint(OGLVertex *vertices, u16 *indices, s32 count);
 void drawDebugLine(OGLVertex *vertices, u16 *indices, s32 count);
 void drawDebugTri(OGLVertex *vertices, u16 *indices, s32 count);

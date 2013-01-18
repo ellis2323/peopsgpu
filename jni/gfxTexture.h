@@ -79,6 +79,9 @@ Texture *getTexture(s32 TexturePtrId);
 /// Bind Texture
 void bindTexture(s32 tId);
 
+/// Set Filter for the current Texture
+void setFilterForCurrentTexture(s8 filter);
+
 /// Convert GL filter constants to gfx cst 
 s8 convertGLFilter(s32 GLFilter);
 

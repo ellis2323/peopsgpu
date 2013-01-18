@@ -79,12 +79,12 @@ s32 createTexture(s8 filters, s8 clampTypes) {
 s8 convertGLFilter(s32 GLFilter) {
     switch (GLFilter) {
         case GL_NEAREST:
-        return 0;
+            return 0;
         case GL_LINEAR:
-        return 1;
-     default:
-        logError(TAG, "ERROR: filter type unknown %d", GLFilter);
-        return -1;
+            return 1;
+        default:
+            logError(TAG, "ERROR: filter type unknown %d", GLFilter);
+            return -1;
     }
 }
 
@@ -177,15 +177,22 @@ void bindTexture(s32 tId) {
     glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
 }
 
-s32 findFreeTexturePtr() {
-    for (s32 i=1; i<MAX_TEXTURES_PTR; ++i) {
-        if (sTexturesPtrArray[i]==NULL) {
-            return i;
-        }
+void setFilterForCurrentTexture(s8 filter) {
+    switch (filter) {
+    case 0:
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        break;
+    break;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        break;
+    default:
+        logError(TAG, "Filter for texture not supported %d", filter);
+        break;
     }
-    
-    return -1;
 }
+
 
 bool checkTexture() {
     // get current texture bound
@@ -217,5 +224,16 @@ bool checkTexturePtrId(s32 tid) {
     if (sTexturesPtrArray[tid]==NULL) return false;
     return true;
 }
+
+s32 findFreeTexturePtr() {
+    for (s32 i=1; i<MAX_TEXTURES_PTR; ++i) {
+        if (sTexturesPtrArray[i]==NULL) {
+            return i;
+        }
+    }
+    
+    return -1;
+}
+
 
 #endif

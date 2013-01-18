@@ -153,7 +153,7 @@ void GetExtInfos(void)
   bPacked=TRUE;                                        // -> ok
 */
  
- iClampType=GL_CLAMP_TO_EDGE;
+    iClampType = GL_CLAMP_TO_EDGE;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -243,77 +243,77 @@ void CreateScanLines(void)
 int GLinitialize() 
 {
     initTextures();
- //----------------------------------------------------// 
-       //initEGL();
-
- glDepthRangef(0.0f, 1.0f);glError();
- 
- //----------------------------------------------------// 
- setViewport(rRatioRect.left,                           // init viewport by ratio rect
-            iResY-(rRatioRect.top+rRatioRect.bottom),
-            rRatioRect.right, 
-            rRatioRect.bottom);      
-                                                      
- setScissor(0, 0, iResX, rRatioRect.bottom);                        // init clipping (fullscreen)
- useScissor(true);
-setProjectionOrtho(0, PSXDisplay.DisplayMode.x, PSXDisplay.DisplayMode.y, 0, -1, 1);
-
- if(iZBufferDepth)                                     // zbuffer?
-  {
-   uiBufferBits=GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT;
-   glEnable(GL_DEPTH_TEST);glError();
-   glDepthFunc(GL_ALWAYS);glError();
-   iDepthFunc=1;
-  }
- else                                                  // no zbuffer?
-  {
-   uiBufferBits=GL_COLOR_BUFFER_BIT;
-   glDisable(GL_DEPTH_TEST);glError();
-  }
-
- glClearColor(0.0f, 0.0f, 0.0f, 0.0f);glError();                 // first buffer clear
- glClear(uiBufferBits);glError();
-
- GetExtInfos();                                        // get ext infos
- SetExtGLFuncs();                                      // init all kind of stuff (tex function pointers)
- 
- glEnable(GL_ALPHA_TEST);glError();                              // wanna alpha test
-
-  {
-   glDisable(GL_LINE_SMOOTH);glError();
-   glDisable(GL_POINT_SMOOTH);glError();
-  }
-
- ubGloAlpha=127;                                       // init some drawing vars
- ubGloColAlpha=127;
- TWin.UScaleFactor = 1;
- TWin.VScaleFactor = 1;
- bDrawMultiPass=FALSE;
- bTexEnabled=FALSE;
- bUsingTWin=FALSE;
-      
- if(bDrawDither)  glEnable(GL_DITHER);                 // dither mode
- else             glDisable(GL_DITHER);
-glError(); 
- glDisable(GL_FOG);glError();                                    // turn all (currently) unused modes off
- glDisable(GL_LIGHTING);glError();  
- glDisable(GL_STENCIL_TEST);glError();  
- glDisable(GL_TEXTURE_2D);glError();
- glDisable(GL_CULL_FACE);
-
- glFlush();glError();                                            // we are done...
- glFinish();glError();                           
-
- CreateScanLines();                                    // setup scanline stuff (if wanted)
-
- CheckTextureMemory();                                 // check available tex memory
-
- if(bKeepRatio) SetAspectRatio();                      // set ratio
-
- 
- bIsFirstFrame = FALSE;                                // we have survived the first frame :)
-
- return 0;
+    //----------------------------------------------------//
+    //initEGL();
+    
+    glDepthRangef(0.0f, 1.0f);glError();
+    
+    //----------------------------------------------------//
+    setViewport(rRatioRect.left,                           // init viewport by ratio rect
+                iResY-(rRatioRect.top+rRatioRect.bottom),
+                rRatioRect.right,
+                rRatioRect.bottom);
+    
+    setScissor(0, 0, iResX, rRatioRect.bottom);                        // init clipping (fullscreen)
+    useScissor(true);
+    setProjectionOrtho(0, PSXDisplay.DisplayMode.x, PSXDisplay.DisplayMode.y, 0, -1, 1);
+    
+    if(iZBufferDepth)                                     // zbuffer?
+    {
+        uiBufferBits=GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT;
+        glEnable(GL_DEPTH_TEST);glError();
+        glDepthFunc(GL_ALWAYS);glError();
+        iDepthFunc=1;
+    }
+    else                                                  // no zbuffer?
+    {
+        uiBufferBits=GL_COLOR_BUFFER_BIT;
+        glDisable(GL_DEPTH_TEST);glError();
+    }
+    
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);glError();                 // first buffer clear
+    glClear(uiBufferBits);glError();
+    
+    GetExtInfos();                                        // get ext infos
+    SetExtGLFuncs();                                      // init all kind of stuff (tex function pointers)
+    
+    glEnable(GL_ALPHA_TEST);glError();                              // wanna alpha test
+    
+    {
+        glDisable(GL_LINE_SMOOTH);glError();
+        glDisable(GL_POINT_SMOOTH);glError();
+    }
+    
+    ubGloAlpha=127;                                       // init some drawing vars
+    ubGloColAlpha=127;
+    TWin.UScaleFactor = 1;
+    TWin.VScaleFactor = 1;
+    bDrawMultiPass=FALSE;
+    bTexEnabled=FALSE;
+    bUsingTWin=FALSE;
+    
+    if(bDrawDither)  glEnable(GL_DITHER);                 // dither mode
+    else             glDisable(GL_DITHER);
+    glError();
+    glDisable(GL_FOG);glError();                                    // turn all (currently) unused modes off
+    glDisable(GL_LIGHTING);glError();
+    glDisable(GL_STENCIL_TEST);glError();
+    glDisable(GL_TEXTURE_2D);glError();
+    glDisable(GL_CULL_FACE);
+    
+    glFlush();glError();                                            // we are done...
+    glFinish();glError();
+    
+    CreateScanLines();                                    // setup scanline stuff (if wanted)
+    
+    CheckTextureMemory();                                 // check available tex memory
+    
+    if(bKeepRatio) SetAspectRatio();                      // set ratio
+    
+    
+    bIsFirstFrame = FALSE;                                // we have survived the first frame :)
+    
+    return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -797,8 +797,8 @@ void assignTextureVRAMWrite(void)
 
 }
 
-GLuint  gLastTex=0;
-GLuint  gLastFMode=(GLuint)-1;
+u32  gLastTex=0;
+u32  gLastFMode=0xFFFFFFFF;
 
 ///////////////////////////////////////////////////////// 
 
@@ -825,9 +825,9 @@ void assignTextureSprite(void)
     {
      if(gLastTex!=gTexName || gLastFMode!=0)
       {
-       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glError();
-       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glError();
-       gLastTex=gTexName;gLastFMode=0;
+       setFilterForCurrentTexture(1);
+       gLastTex=gTexName;
+       gLastFMode=0;
       }
     }
   }
@@ -876,8 +876,7 @@ void assignTexture3(void)
     {
      if(gLastTex!=gTexName || gLastFMode!=1)
       {
-       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glError();
-       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glError();
+       setFilterForCurrentTexture(1);
        gLastTex=gTexName;gLastFMode=1;
       }
     }
@@ -936,8 +935,7 @@ void assignTexture4(void)
     {
      if(gLastTex!=gTexName || gLastFMode!=1)
       {
-       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);glError();
-       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);glError();
+       setFilterForCurrentTexture(1);
        gLastTex=gTexName;gLastFMode=1;
       }
     }

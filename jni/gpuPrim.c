@@ -63,7 +63,7 @@ unsigned int start=0,maxtime=0;
 // defines
 ////////////////////////////////////////////////////////////////////////
 
-#define DEFOPAQUEON glAlphaFunc(GL_EQUAL,0.0f);bBlendEnable=FALSE;glDisable(GL_BLEND);
+#define DEFOPAQUEON glAlphaFunc(GL_EQUAL,0.0f);bBlendEnable=FALSE; useBlending(false);
 #define DEFOPAQUEOFF glAlphaFunc(GL_GREATER,0.49f);
 #define fpoint(x) x
 ////////////////////////////////////////////////////////////////////////
