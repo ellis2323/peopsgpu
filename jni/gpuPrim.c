@@ -63,8 +63,8 @@ unsigned int start=0,maxtime=0;
 // defines
 ////////////////////////////////////////////////////////////////////////
 
-#define DEFOPAQUEON glAlphaFunc(GL_EQUAL,0.0f);bBlendEnable=FALSE; useBlending(false);
-#define DEFOPAQUEOFF glAlphaFunc(GL_GREATER,0.49f);
+#define DEFOPAQUEON setAlphaTest(ALPHA_TEST_EQUAL,0.0f);bBlendEnable=FALSE; useBlending(false);
+#define DEFOPAQUEOFF setAlphaTest(ALPHA_TEST_GREATER,0.49f);
 #define fpoint(x) x
 ////////////////////////////////////////////////////////////////////////
 // globals
@@ -1539,7 +1539,7 @@ useBlending(false);
 bBlendEnable=FALSE;
 glDisable(GL_TEXTURE_2D);glError();
 bTexEnabled=FALSE;
-glDisable(GL_ALPHA_TEST);glError();
+useAlphaTest(false);
 
 //glPixelZoom(((float)rRatioRect.right)/((float)PSXDisplay.DisplayMode.x),
 // -1.0f*(((float)rRatioRect.bottom)/((float)PSXDisplay.DisplayMode.y)));
@@ -1603,7 +1603,7 @@ U+=UStep;
 
 // glPixelZoom(1.0F,1.0F);
 
-glEnable(GL_ALPHA_TEST);glError();
+useAlphaTest(true);
 useScissor(true);
 }
 

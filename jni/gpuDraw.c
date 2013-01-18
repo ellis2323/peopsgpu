@@ -189,14 +189,14 @@ void SetExtGLFuncs(void)
     }
 
    TCF[1]=XP8RGBA_1;
-   glAlphaFuncx(GL_GREATER,0.49f);glError();
+   setAlphaTest(ALPHA_TEST_GREATER, 0.49f);
 
   }
  else                                                  // no opaque mode?
   {
    TCF[0]=TCF[1]=P8RGBA;
    PalTexturedColourFn=P8RGBA;                         // -> init col func
-   glAlphaFuncx(GL_NOTEQUAL,0); glError();                        // --> set alpha func
+   setAlphaTest(ALPHA_TEST_NOTEQUAL, 0);                        // --> set alpha func
 
   }
 
@@ -277,7 +277,7 @@ int GLinitialize()
     GetExtInfos();                                        // get ext infos
     SetExtGLFuncs();                                      // init all kind of stuff (tex function pointers)
     
-    glEnable(GL_ALPHA_TEST);glError();                              // wanna alpha test
+    useAlphaTest(true);                              // wanna alpha test
     
     {
         glDisable(GL_LINE_SMOOTH);glError();

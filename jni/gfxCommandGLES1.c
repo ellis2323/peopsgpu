@@ -7,6 +7,39 @@
 
 #if defined(GL_OGLES1)
 
+void setAlphaTest(E_ALPHA_TEST test, f32 value) {
+    switch (test) {
+        case ALPHA_TEST_NEVER:
+            glAlphaFunc(GL_NEVER, value);
+        break;
+        case ALPHA_TEST_LESS:
+            glAlphaFunc(GL_LESS, value);
+        break;
+        case ALPHA_TEST_EQUAL:
+            glAlphaFunc(GL_EQUAL, value);
+        break;
+        case ALPHA_TEST_LEQUAL:
+            glAlphaFunc(GL_LEQUAL, value);
+        break;
+        case ALPHA_TEST_GREATER:
+            glAlphaFunc(GL_GREATER, value);
+        break;
+        case ALPHA_TEST_NOTEQUAL:
+            glAlphaFunc(GL_NOTEQUAL, value);
+        break;
+        case ALPHA_TEST_GEQUAL:
+            glAlphaFunc(GL_GEQUAL, value);
+        break;
+        case ALPHA_TEST_ALWAYS:
+            glAlphaFunc(GL_ALWAYS, value);
+        break;
+        default:
+            logError(TAG, "Alpha Func not supported [%d]", test);
+        break;
+    }
+}
+
+
 // Cache Information
 // - sCSVERTEX is for Client State of Vertices. sCSCOLOR of Colors Vertices. sCSTEXTURE of TexCoord Vertices
 // - sCTextureId is for Texture Id
@@ -179,7 +212,7 @@ void setTransMode(u8 mode) {
 }
 
 extern GLubyte *texturepart;
-void mali400() {
+void mali4000 () {
     glClearDepthf(1.0f);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
     glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);

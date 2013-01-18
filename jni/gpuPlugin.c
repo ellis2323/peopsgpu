@@ -437,7 +437,7 @@ void PaintBlackBorders(void)
         useBlending(false);
         bBlendEnable=FALSE;
     }
-  glDisable(GL_ALPHA_TEST);
+  useAlphaTest(false);
   vertex[0].c.lcol=0xff000000;
  SETCOL(vertex[0]); 
 
@@ -454,7 +454,7 @@ void PaintBlackBorders(void)
    s=PreviousPSXDisplay.Range.y0+1;
    draw_rectangle(0,0,0.99996f, PSXDisplay.DisplayMode.x,s,0.99996f);
   }
- glEnable(GL_ALPHA_TEST);
+ useAlphaTest(true);
  useScissor(true);
 
 }

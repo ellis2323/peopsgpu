@@ -100,6 +100,13 @@ void useBlending(bool flag) {
         glDisable(GL_BLEND);
     }
 }
+void useAlphaTest(bool flag) {
+    if (flag) {
+        glEnable(GL_ALPHA_TEST);
+    } else {
+        glDisable(GL_ALPHA_TEST);
+    }
+}
 
 void setClearColor(f32 r, f32 g, f32 b, f32 a) {
     glClearColor(r,g,b,a);

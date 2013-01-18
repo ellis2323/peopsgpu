@@ -4154,7 +4154,7 @@ GLuint SelectSubTextureS(long TextureMode, unsigned long GivenClutId)
  return (GLuint) gTexName;
 }
 
-/* --
+
 #ifdef MALI
 void mali400(){
 Vertex v[4];
@@ -4274,7 +4274,7 @@ flipEGL();
 
 }
 #endif
-*/
+
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////

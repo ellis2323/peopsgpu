@@ -41,14 +41,6 @@ extern "C" {
    //     #include "psxCommon.h"
 #endif
 
-#ifdef __NANOGL__
-#define glTexParameteri(x,y,z) glTexParameterf(x,y,z)
-#define glAlphaFuncx(x,y) glAlphaFunc(x,y)
-#ifndef APIENTRY
-#define APIENTRY
-#endif
-extern  void ( APIENTRY * glPixelStorei )(GLenum pname, GLint param);
-#endif
 #define MALI 1
 
 #define MIRROR_TEST 1

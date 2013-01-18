@@ -44,6 +44,18 @@ struct SMaterial {
 };
 typedef struct SMaterial Material;
 
+enum ALPHA_TEST {
+    ALPHA_TEST_NEVER=0,
+    ALPHA_TEST_LESS,
+    ALPHA_TEST_EQUAL,
+    ALPHA_TEST_LEQUAL,
+    ALPHA_TEST_GREATER,
+    ALPHA_TEST_NOTEQUAL,
+    ALPHA_TEST_GEQUAL,
+    ALPHA_TEST_ALWAYS,
+};
+typedef enum ALPHA_TEST E_ALPHA_TEST;
+
 // ********************** Public API ********************** 
 
 void setViewport(s32 x, s32 y, s32 width, s32 height);
@@ -72,6 +84,15 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
 /// Use or Not Blending
 void useBlending(bool flag);
 
+// ALPHA TEST
+
+/// Use Alpha Test
+void useAlphaTest(bool flag);
+
+/// Set Alpha Func
+void setAlphaTest(E_ALPHA_TEST test , f32 value);
+
+
 // BUFFER
 
 /// Set clear color
@@ -85,6 +106,8 @@ bool colorBufferBit(u32 buffersbit);
 
 /// Depth Buffer Bit
 bool depthBufferBit(u32 buffersbit);
+
+// MATERIAL
 
 Material *createMaterial();
 void destroyMaterial(Material *mat);
