@@ -111,7 +111,7 @@ signed   long  *psxVsl;
 // macro for easy access to packet information
 #define GPUCOMMAND(x) ((x>>24) & 0xff)
 
-GLfloat         gl_z=0.0f;
+f32         gl_z=0.0f;
 BOOL            bNeedInterlaceUpdate=FALSE;
 BOOL            bNeedRGB24Update=FALSE;
 BOOL            bChangeWinMode=FALSE;
@@ -154,7 +154,7 @@ TWin_t          TWin;
 short           imageX0,imageX1;
 short           imageY0,imageY1;
 BOOL            bDisplayNotSet = TRUE;
-GLuint          uiScanLine=0;
+u32          uiScanLine=0;
 int             iUseScanLines=0;
 long            lSelectedSlot=0;
 unsigned char * pGfxCardScreen=0;
@@ -409,10 +409,8 @@ long CALLBACK GPU_shutdown()
 ////////////////////////////////////////////////////////////////////////
 // paint it black: simple func to clean up optical border garbage
 ////////////////////////////////////////////////////////////////////////
-static void draw_rectangle(float x0, float y0,float z0, float x1, float y1,float z1)
-
-{
-	static  GLfloat verts[12] ; 
+void draw_rectangle(float x0, float y0,float z0, float x1, float y1,float z1) {
+	f32 verts[12];
 	verts[0]=verts[9];
 	verts[1]=verts[7];
 	verts[2]=verts[8];
@@ -421,13 +419,14 @@ static void draw_rectangle(float x0, float y0,float z0, float x1, float y1,float
 	verts[5]=verts[11];
 	if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 	if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
-	if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();	
-	glVertexPointer( 3,GL_FLOAT,0, verts); 
+	if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
+	glVertexPointer( 3,GL_FLOAT,0, verts);
 	glDrawArrays( GL_TRIANGLES, 0, 4 );
 	CSTEXTURE=0;
 	CSVERTEX=1;
 	CSCOLOR=0;
 }
+
 void PaintBlackBorders(void)
 {
  short s;
@@ -616,14 +615,14 @@ iDrawnSomething=0;
 
 if(qualcomm==1||lClearOnSwap)                                      // clear buffer after swap?
  {
-  GLclampf g,b,r;
+  f32 g,b,r;
 
   if(bDisplayNotSet)                                  // -> set new vals
    SetOGLDisplaySettings(1);
 
-  g=((GLclampf)GREEN(lClearOnSwapColor))/255.0f;      // -> get col
-  b=((GLclampf)BLUE(lClearOnSwapColor))/255.0f;
-  r=((GLclampf)RED(lClearOnSwapColor))/255.0f;
+  g=((f32)GREEN(lClearOnSwapColor))/255.0f;      // -> get col
+  b=((f32)BLUE(lClearOnSwapColor))/255.0f;
+  r=((f32)RED(lClearOnSwapColor))/255.0f;
     useScissor(false);
     setClearColor(r, g, b, 0.5f);
     clearBuffers(clearColorBuffer, clearDepthBuffer, false);
@@ -1495,15 +1494,13 @@ void CheckVRamReadEx(int x, int y, int dx, int dy)
 
  if(!pGfxCardScreen)
   {
-   glPixelStorei(GL_PACK_ALIGNMENT,1);glError();
    pGfxCardScreen=(unsigned char *)malloc(iResX*iResY*4);
   }
 
  ps=pGfxCardScreen;
  
  //if(!sArea) glReadBuffer(GL_FRONT);
-
- glReadPixels(x,y,dx,dy,GL_RGB,GL_UNSIGNED_BYTE,ps);glError();
+ readPixels(x, y, dx, dy, 2, ps);
  //if(!sArea) glReadBuffer(GL_BACK);
 
  s=0;
@@ -1642,7 +1639,6 @@ void CheckVRamRead(int x, int y, int dx, int dy, bool bFront)
 
  if(!pGfxCardScreen)
   {
-   glPixelStorei(GL_PACK_ALIGNMENT,1);glError();
    pGfxCardScreen=(unsigned char *)malloc(iResX*iResY*4);
   }
 
@@ -1650,7 +1646,7 @@ void CheckVRamRead(int x, int y, int dx, int dy, bool bFront)
  
 // if(bFront) glReadBuffer(GL_FRONT);
 
- glReadPixels(x,y,dx,dy,GL_RGB,GL_UNSIGNED_BYTE,ps);glError();glError();
+readPixels(x, y, dx, dy, 2, ps);
 // if(bFront) glReadBuffer(GL_BACK);
 
  XS=(float)dx/(float)(udx);
@@ -2445,7 +2441,6 @@ long CALLBACK GPU_getScreenPic(unsigned char * pMem)
 
  if(!pGfxCardScreen)
   {
-   glPixelStorei(GL_PACK_ALIGNMENT,1);glError();
    pGfxCardScreen=(unsigned char *)malloc(iResX*iResY*4);
   }
 
@@ -2453,7 +2448,7 @@ long CALLBACK GPU_getScreenPic(unsigned char * pMem)
 
 // glReadBuffer(GL_FRONT);
 
- glReadPixels(0,0,iResX,iResY,GL_RGB,GL_UNSIGNED_BYTE,ps);glError();
+ readPixels(0,0,iResX,iResY,2,ps);
                
 // glReadBuffer(GL_BACK);
 
@@ -2678,7 +2673,7 @@ JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setOptionGL(JNIEnv *env, jobj
     bUseFrameLimit=0;
     SetAutoFrameCap();
     fastfwrd=1;
-  }else{
+  } else if (fastfwrd==1){
     bUseFrameLimit=1;
     SetAutoFrameCap();
     fastfwrd=0;

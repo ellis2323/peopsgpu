@@ -133,6 +133,11 @@ void setClearColor(f32 r, f32 g, f32 b, f32 a);
 /// Clear Buffers
 void clearBuffers(bool color, bool depth, bool stencil);
 
+// READ PIXELS
+
+/// Read Pixels
+void readPixels(s32 x,s32 y, s32 width, s32 height, s8 format, u8 *dst);
+
 // MATERIAL
 
 Material *createMaterial();

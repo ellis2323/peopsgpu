@@ -178,6 +178,19 @@ void clearBuffers(bool colorBuffer, bool depthBuffer, bool stencilBuffer) {
 
 }
 
+void readPixels(s32 x,s32 y, s32 width, s32 height, s8 format, u8 *dst) {
+    switch(format) {
+        case 2:
+            glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, dst);
+            break;
+        case 3:
+            glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, dst);
+        case 0:
+        default:
+            logError(TAG, "Format not supported or implemented %d", format);
+    }
+}
+
 Material *createMaterial() {
     Material *mat = (Material *)malloc(sizeof(Material));
     mat->mUid = sMatUID;

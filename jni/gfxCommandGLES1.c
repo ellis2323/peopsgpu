@@ -33,7 +33,7 @@ void initGL() {
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
     
-
+    glPixelStorei(GL_PACK_ALIGNMENT,1);
 }
 
 void setAlphaTest(E_ALPHA_TEST test, f32 value) {
