@@ -58,7 +58,9 @@ extern unsigned int CSVERTEX,CSCOLOR,CSTEXTURE;
 extern void mali400();
 #endif
     JNIEnv *env2;
-extern int iFilter;
+// replace iFilter by gFilter
+//extern int iFilter;
+extern s32 gFilter;
 static JavaVM *jniVM = NULL;
 jmethodID FlipGL;
 static jobject FlipGLObj=0;
@@ -2637,10 +2639,10 @@ JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setOptionGL(JNIEnv *env, jobj
   }  
   if ((value&0x200)){
    iFilterType=4;
-   iFilter=convertFilterToGL(1);
+   gFilter=1;
   }else{
    iFilterType=0;
-   iFilter=convertFilterToGL(0);
+   gFilter=0;
   } 
   if ((value&0x800)){
    iFrameTexType=3;

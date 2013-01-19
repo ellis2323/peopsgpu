@@ -76,18 +76,6 @@ s32 createTexture(s8 filters, s8 clampTypes) {
     return freeId;
 }
 
-s8 convertGLFilter(s32 GLFilter) {
-    switch (GLFilter) {
-        case GL_NEAREST:
-            return 0;
-        case GL_LINEAR:
-            return 1;
-        default:
-            logError(TAG, "ERROR: filter type unknown %d", GLFilter);
-            return -1;
-    }
-}
-
 s32 convertFilterToGL(s8 filter) {
     switch (filter) {
         case 0:
@@ -173,7 +161,15 @@ void bindTexture(s32 tId) {
         return;
     }
     Texture *tex = getTexture(tId);
-    if (tex==NULL) return;
+    if (tex==NULL) {
+        logError(TAG, "TexturePtrId %d doesn't exist", tId);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        return;
+    } else if (tex->mFormat<=0) {
+        glBindTexture(GL_TEXTURE_2D, 0);
+        logError(TAG, "TexturePtrId %d is not defined", tId);
+        return;
+    }
     glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
 }
 

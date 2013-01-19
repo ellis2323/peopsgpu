@@ -106,17 +106,19 @@ extern unsigned int start,maxtime;
 // texture conversion buffer .. 
 ////////////////////////////////////////////////////////////////////////
 
-GLubyte       ubPaletteBuffer[256][4];
-GLuint        gTexMovieName=0;
-GLuint        gTexBlurName=0;
-GLuint        gTexFrameName=0;
+u8       ubPaletteBuffer[256][4];
+u32        gTexMovieName=0;
+u32        gTexBlurName=0;
+u32        gTexFrameName=0;
 int           iTexGarbageCollection=1;
 unsigned long dwTexPageComp=0;
 int           iVRamSize=0;
 // replace iClampType by gClampType
 //int           iClampType=GL_CLAMP_TO_EDGE;
 s32     gClampType = 0;
-int iFilter = GL_NEAREST;
+// replace iFilter by gFilter
+//int iFilter = GL_NEAREST;
+s32     gFilter = 0;
 void               (*LoadSubTexFn) (int,int,short,short);
 unsigned long      (*PalTexturedColourFn)  (unsigned long);
 
@@ -853,7 +855,7 @@ void InvalidateTextureArea(long X,long Y,long W, long H)
 void DefineTextureWnd(void)
 {
     if(gTexName==0) {
-        s8 clampType = convertGLFilter(iFilter);
+        s8 clampType = gFilter;
         gTexName = createTexture(1, clampType);
         
     }
@@ -1617,7 +1619,7 @@ void UploadTexWndPal(int mode,short cx,short cy)
 void DefinePalTextureWnd(void)
 {
     if(gTexName==0) {
-        s8 clampType = convertGLFilter(iFilter);
+        s8 clampType = gFilter;
         gTexName = createTexture(1, clampType);
         
     }
@@ -1880,7 +1882,7 @@ void DefinePackedTextureMovie(void)
         if(!bUseFastMdec) {
             filter = 1;
         } else {
-            filter = convertGLFilter(iFilter);
+            filter = gFilter;
         }
         gTexMovieName = createTexture(filter, clampType);
         gTexName=gTexMovieName;
@@ -1917,7 +1919,7 @@ void DefineTextureMovie(void)
         if(!bUseFastMdec) {
             filter = 1;
         } else {
-            filter = convertGLFilter(iFilter);
+            filter = gFilter;
         }
         gTexMovieName = createTexture(filter, clampType);
         gTexName=gTexMovieName;
@@ -2201,7 +2203,7 @@ GLuint BlackFake15BitTexture(void)
   {
         if(!gTexFrameName) {
             s8 clampType = gClampType;
-            s8 filter = convertGLFilter(iFilter);
+            s8 filter = gFilter;
             gTexFrameName = createTexture(filter, clampType);
             gTexName=gTexFrameName;
      
@@ -2295,7 +2297,7 @@ GLuint Fake15BitTexture(void)
 
     
     s8 clampType = gClampType;
-    s8 filter = convertGLFilter(iFilter);
+    s8 filter = gFilter;
     gTexFrameName = createTexture(filter, clampType);
     gTexName=gTexFrameName;
 
@@ -3399,7 +3401,7 @@ void DefineSubTextureSortHiRes(void)
         if(iFilterType) {
             filter = 1;
         } else {
-            filter = convertGLFilter(iFilter);
+            filter = gFilter;
         }
         gTexName = createTexture(filter, clampType);
 
@@ -3428,7 +3430,7 @@ void DefineSubTextureSort(void)
         if(iFilterType) {
             filter = 1;
         } else {
-            filter = convertGLFilter(iFilter);
+            filter = gFilter;
         }
         logInfo(TAG, "createTexture");
         gTexName = createTexture(filter, clampType);
@@ -4158,7 +4160,7 @@ GLuint SelectSubTextureS(long TextureMode, unsigned long GivenClutId)
  return (GLuint) gTexName;
 }
 
-
+/*
 #ifdef MALI
 void mali400(){
 Vertex v[4];
@@ -4278,7 +4280,7 @@ flipEGL();
 
 }
 #endif
-
+*/
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
