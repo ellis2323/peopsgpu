@@ -191,6 +191,14 @@ void readPixels(s32 x,s32 y, s32 width, s32 height, s8 format, u8 *dst) {
     }
 }
 
+bool hasError() {
+    GLenum error = glGetError();
+    if (error == GL_NO_ERROR) {
+        return false;
+    }
+    return true;
+}
+
 Material *createMaterial() {
     Material *mat = (Material *)malloc(sizeof(Material));
     mat->mUid = sMatUID;

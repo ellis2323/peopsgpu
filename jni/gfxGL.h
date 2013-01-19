@@ -23,8 +23,6 @@
     #include <GLES2/gl2ext.h>
     #endif
 
-    #define TAG "ELLIS"
-
 #else
 
 #include <OpenGLES/ES2/gl.h>

@@ -11,6 +11,8 @@
 #include "gfxGL.h"
 #include <math.h>
 
+#define TAG "ELLIS"
+
 Context *sContext;
 
 Context *getContext() {

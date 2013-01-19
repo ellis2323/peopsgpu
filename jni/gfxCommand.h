@@ -138,6 +138,11 @@ void clearBuffers(bool color, bool depth, bool stencil);
 /// Read Pixels
 void readPixels(s32 x,s32 y, s32 width, s32 height, s8 format, u8 *dst);
 
+// ERROR
+
+/// Check error
+bool hasError();
+
 // MATERIAL
 
 Material *createMaterial();

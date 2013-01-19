@@ -78,9 +78,11 @@
 #include <android/log.h>
 #include <sys/time.h>
 
-#include "gfxGL.h"
+//#include "gfxGL.h"
+#include "gfxCommand.h"
 #include "gfxTexture.h"
 
+#define TAG "ellis"
 #define  LOG_TAG    "libfpse"
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 extern unsigned int start,maxtime;
@@ -164,10 +166,10 @@ void            DefineSubTextureSort(void);
 ////////////////////////////////////////////////////////////////////////
 
 long  GlobalTexturePage;
-GLint XTexS;
-GLint YTexS;
-GLint DXTexS;
-GLint DYTexS;
+s32 XTexS;
+s32 YTexS;
+s32 DXTexS;
+s32 DYTexS;
 int   iSortTexCnt=32;
 BOOL  bUseFastMdec=FALSE;
 BOOL  bUse15bitMdec=FALSE;
@@ -195,7 +197,7 @@ typedef struct textureWndCacheEntryTag
  short          Opaque;
  short          used;
  EXLong         pos;
- GLuint         texname;
+ u32         texname;
 } textureWndCacheEntry;
 
 // "standard texture" cache entry (12 byte per entry, as small as possible... we need lots of them)
@@ -221,7 +223,7 @@ typedef struct textureSubCacheEntryTagS
 textureWndCacheEntry     wcWndtexStore[MAXWNDTEXCACHE];
 textureSubCacheEntryS *  pscSubtexStore[3][MAXTPAGES_MAX];
 EXLong *                 pxSsubtexLeft [MAXSORTTEX_MAX];
-GLuint                   uiStexturePage[MAXSORTTEX_MAX];
+u32                   uiStexturePage[MAXSORTTEX_MAX];
 
 unsigned short           usLRUTexPage=0;
 
@@ -229,8 +231,8 @@ int                      iMaxTexWnds=0;
 int                      iTexWndTurn=0;
 int                      iTexWndLimit=MAXWNDTEXCACHE/2;
 
-GLubyte *                texturepart=NULL;
-GLubyte *                texturebuffer=NULL;
+u8 *                texturepart=NULL;
+u8 *                texturebuffer=NULL;
 unsigned long            g_x1,g_y1,g_x2,g_y2;
 unsigned char            ubOpaqueDraw=0;
 
@@ -510,7 +512,7 @@ void InitializeTextureStore()
 
  memset(wcWndtexStore,0,sizeof(textureWndCacheEntry)*
                         MAXWNDTEXCACHE);
- texturepart=(GLubyte *)malloc(256*256*4);
+ texturepart=(u8 *)malloc(256*256*4);
  memset(texturepart,0,256*256*4);
 	 texturebuffer=NULL;
 
@@ -860,13 +862,9 @@ void DefineTextureWnd(void)
         
     }
 
-    bindTexture(gTexName);
- 
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, 
-              TWin.Position.x1, 
-              TWin.Position.y1, 
-              0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
-    glError();
+    //--bindTexture(gTexName);
+    setTexture(gTexName, TWin.Position.x1, TWin.Position.y1, 3, texturepart);
+
 //LOGE("DefineTextureWnd x:%d y:%d",TWin.Position.x1,TWin.Position.y1);
 
 }
@@ -1624,12 +1622,12 @@ void DefinePalTextureWnd(void)
         
     }
     
-    bindTexture(gTexName);
-    
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA,
-              TWin.Position.x1, 
-              TWin.Position.y1, 
-              0, GL_RGBA, GL_UNSIGNED_BYTE,texturepart);
+    //--bindTexture(gTexName);
+    setTexture(gTexName, TWin.Position.x1, TWin.Position.y1, 3, texturepart);
+    /*glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA,
+              TWin.Position.x1,
+              TWin.Position.y1,
+              0, GL_RGBA, GL_UNSIGNED_BYTE,texturepart);*/
     glError();
   //LOGE("DefinePalTextureWnd x:%d y:%d",TWin.Position.x1,TWin.Position.y1);
 }
@@ -1776,7 +1774,7 @@ void LoadStretchPalWndTexturePage(int pageid, int mode, short cx, short cy)
 // tex window: main selecting, cache handler included
 ////////////////////////////////////////////////////////////////////////
 
-GLuint LoadTextureWnd(long pageid,long TextureMode,unsigned long GivenClutId)
+u32 LoadTextureWnd(long pageid,long TextureMode,unsigned long GivenClutId)
 {
  textureWndCacheEntry * ts, * tsx=NULL;
  int i;short cx,cy;
@@ -1887,11 +1885,11 @@ void DefinePackedTextureMovie(void)
         gTexMovieName = createTexture(filter, clampType);
         gTexName=gTexMovieName;
    
-        bindTexture(gTexName);
-        
-        glTexImage2D(GL_TEXTURE_2D, 0, //giWantedRGBA,
+        //--bindTexture(gTexName);
+        setTexture(gTexName, 256, 256, 3, texturepart);
+        /*glTexImage2D(GL_TEXTURE_2D, 0, //giWantedRGBA,
                 GL_RGBA,
-                256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
+                256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();*/
   }
  else 
   {
@@ -1899,12 +1897,13 @@ void DefinePackedTextureMovie(void)
    bindTexture(gTexName);
   }
 
- glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-                 (xrMovieArea.x1-xrMovieArea.x0), 
-                 (xrMovieArea.y1-xrMovieArea.y0), 
+    setSubTexture(gTexMovieName, 0, 0, (xrMovieArea.x1-xrMovieArea.x0), (xrMovieArea.y1-xrMovieArea.y0), 3, texturepart);
+ /*glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+                 (xrMovieArea.x1-xrMovieArea.x0),
+                 (xrMovieArea.y1-xrMovieArea.y0),
                  GL_RGBA,
                  GL_UNSIGNED_SHORT,
-                 texturepart);glError();
+                 texturepart);glError();*/
   //LOGE("DefinePackedTextureMovie x:%d y:%d",(xrMovieArea.x1-xrMovieArea.x0),(xrMovieArea.y1-xrMovieArea.y0));
 
 }
@@ -1924,18 +1923,21 @@ void DefineTextureMovie(void)
         gTexMovieName = createTexture(filter, clampType);
         gTexName=gTexMovieName;
         
-        bindTexture(gTexName);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
+        //--bindTexture(gTexName);
+        setTexture(gTexName, 256, 256, 3, texturepart);
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
   }
  else 
   {
    gTexName=gTexMovieName;bindTexture(gTexName);
   }
 
- glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+    setSubTexture(gTexMovieName, 0, 0, (xrMovieArea.x1-xrMovieArea.x0), (xrMovieArea.y1-xrMovieArea.y0), 3, texturepart);
+
+ /*glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
                  (xrMovieArea.x1-xrMovieArea.x0), 
                  (xrMovieArea.y1-xrMovieArea.y0), 
-                 GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
+                 GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();*/
  //LOGE("DefineTextureMovie x:%d y:%d",(xrMovieArea.x1-xrMovieArea.x0),(xrMovieArea.y1-xrMovieArea.y0));
 }
 
@@ -1999,7 +2001,7 @@ unsigned char * LoadDirectMovieFast(void)
 
 ////////////////////////////////////////////////////////////////////////
 
-GLuint LoadTextureMovieFast(void)
+u32 LoadTextureMovieFast(void)
 {
  long row,column;
  unsigned int startxy;
@@ -2047,7 +2049,7 @@ GLuint LoadTextureMovieFast(void)
 
 ////////////////////////////////////////////////////////////////////////
 
-GLuint LoadTextureMovie(void)
+u32 LoadTextureMovie(void)
 {
  short row,column,dx;
  unsigned int startxy;
@@ -2177,7 +2179,7 @@ GLuint LoadTextureMovie(void)
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
-GLuint BlackFake15BitTexture(void)
+u32 BlackFake15BitTexture(void)
 {
  long pmult;short x1,x2,y1,y2;
 
@@ -2207,7 +2209,7 @@ GLuint BlackFake15BitTexture(void)
             gTexFrameName = createTexture(filter, clampType);
             gTexName=gTexFrameName;
      
-            bindTexture(gTexName);
+            //bindTexture(gTexName);
 
      
      {
@@ -2216,7 +2218,8 @@ GLuint BlackFake15BitTexture(void)
         for(x1=0;x1<=4;x1++)
          *ta++=0xff000000;
       }
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
+      setTexture(gTexName, 4, 4, 3, texturepart);
+     //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
 
     }
    else
@@ -2227,7 +2230,7 @@ GLuint BlackFake15BitTexture(void)
       //LOGE("BlackFake15BitTexture x:%d y:%d",4,4);
    ubOpaqueDraw=0;
 
-   return (GLuint)gTexName;
+   return (u32)gTexName;
   }
  return 0;
 }
@@ -2239,7 +2242,7 @@ BOOL bIgnoreNextTile =FALSE;
 
 int iFTex=512;
 
-GLuint Fake15BitTexture(void)
+u32 Fake15BitTexture(void)
 {
  long pmult;short x1,x2,y1,y2;int iYAdjust;
  float ScaleX,ScaleY;RECT rSrc;
@@ -2288,7 +2291,7 @@ GLuint Fake15BitTexture(void)
 
  if(!gTexFrameName)
   {
-   char * p;
+   u8* p;
 
    if(iResX>1280 || iResY>1024) iFTex=2048;
    else
@@ -2302,15 +2305,16 @@ GLuint Fake15BitTexture(void)
     gTexName=gTexFrameName;
 
 
-   bindTexture(gTexName);
+   //bindTexture(gTexName);
 
 
-   p=(char *)malloc(iFTex*iFTex*4);
+   p=(u8 *)malloc(iFTex*iFTex*4);
    memset(p,0,iFTex*iFTex*4);
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iFTex, iFTex, 0, GL_RGBA, GL_UNSIGNED_BYTE, p);glError();
+   setTexture(gTexName, iFTex, iFTex, 3, p);
+   //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iFTex, iFTex, 0, GL_RGBA, GL_UNSIGNED_BYTE, p);glError();
+   //glGetError();
    free(p);
 
-   glGetError();
   }
  else 
   {
@@ -2384,19 +2388,16 @@ GLuint Fake15BitTexture(void)
  if(y1+iYAdjust>iFTex) y1=iFTex-iYAdjust;
 
 
- glCopyTexSubImage2D( GL_TEXTURE_2D, 0, 
-                      0,
-                      iYAdjust,
-                      rSrc.left+rRatioRect.left,
-                      iResY-rSrc.bottom-rRatioRect.top,
-                      x1,y1);glError();
+ copySubTexture(gTexName, 0, iYAdjust, rSrc.left+rRatioRect.left, iResY-rSrc.bottom-rRatioRect.top, x1,y1);
+ //glError();*/
 
- if(glGetError()) 
+ if(hasError())
   {
-   char * p=(char *)malloc(iFTex*iFTex*4);
+   u8 *p=(u8*)malloc(iFTex*iFTex*4);
    memset(p,0,iFTex*iFTex*4);
-   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, iFTex, iFTex,
-                   GL_RGBA, GL_UNSIGNED_BYTE, p);glError();
+   setSubTexture(gTexName, 0, 0, iFTex, iFTex, 3, p);
+   //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, iFTex, iFTex,
+   //                GL_RGBA, GL_UNSIGNED_BYTE, p);glError();
    free(p);
   }
 
@@ -2409,7 +2410,7 @@ GLuint Fake15BitTexture(void)
    sprtH=-(gl_vy[0]-gl_vy[2]);
   }
 
- return (GLuint)gTexName;
+ return (u32)gTexName;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -3392,9 +3393,8 @@ void Super2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
 
 void DefineSubTextureSortHiRes(void)
 {
-
-        gTexName=gTexMovieName;
-
+    gTexName=gTexMovieName;
+    
     if(!gTexName) {
         s8 clampType = gClampType;
         s8 filter;
@@ -3404,19 +3404,16 @@ void DefineSubTextureSortHiRes(void)
             filter = gFilter;
         }
         gTexName = createTexture(filter, clampType);
-
- 
-   bindTexture(gTexName);
-
-   
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturebuffer);glError();
-  }
- else bindTexture(gTexName);
-
- glTexSubImage2D(GL_TEXTURE_2D, 0, XTexS<<1, YTexS<<1,
-                 DXTexS<<1, DYTexS<<1,
-                 GL_RGBA, GL_UNSIGNED_BYTE, texturebuffer);glError();
-                       //LOGE("DefineSubTextureSortHiRes x:%d y:%d",XTexS<<1,YTexS<<1);
+        
+        
+        //bindTexture(gTexName);
+        setTexture(gTexName, 512, 512, 3, texturebuffer);
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturebuffer);glError();
+    }
+    //else  { bindTexture(gTexName); }
+    
+    setSubTexture(gTexName, XTexS<<1, YTexS<<1, DXTexS<<1, DYTexS<<1, 3, texturebuffer); //glError();
+    //LOGE("DefineSubTextureSortHiRes x:%d y:%d",XTexS<<1,YTexS<<1);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -3434,17 +3431,15 @@ void DefineSubTextureSort(void)
         }
         logInfo(TAG, "createTexture");
         gTexName = createTexture(filter, clampType);
+        //bindTexture(gTexName);
+        setTexture(gTexName, 256, 256, 3, texturepart);
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
+    } /*else {
         bindTexture(gTexName);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
-    } else {
-        bindTexture(gTexName);
-    }
+    }*/
                                         //LOGE("DefineSubTextureSort x:%d y:%d w:%d h:%d",XTexS,YTexS,DXTexS,DYTexS);
 
- glTexSubImage2D(GL_TEXTURE_2D, 0, XTexS, YTexS,
-                 DXTexS, DYTexS,
-                 GL_RGBA, GL_UNSIGNED_BYTE, texturepart);glError();
+    setSubTexture(gTexName, XTexS, YTexS, DXTexS, DYTexS, 3, texturepart);//glError();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -4083,7 +4078,7 @@ void CompressTextureSpace(void)
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
-GLuint SelectSubTextureS(long TextureMode, unsigned long GivenClutId) 
+u32 SelectSubTextureS(long TextureMode, unsigned long GivenClutId)
 {
  unsigned char * OPtr;unsigned short iCache;short cx,cy;
 
@@ -4115,7 +4110,7 @@ GLuint SelectSubTextureS(long TextureMode, unsigned long GivenClutId)
    GivenClutId=CLUTUSED|(DrawSemiTrans<<30);cx=cy=0;
  
    if(iFrameTexType && Fake15BitTexture()) 
-    return (GLuint)gTexName;
+    return (u32)gTexName;
   }           
  else 
   {
@@ -4157,11 +4152,14 @@ GLuint SelectSubTextureS(long TextureMode, unsigned long GivenClutId)
  LoadSubTexFn(GlobalTexturePage,TextureMode,cx,cy);
  uiStexturePage[iCache]=gTexName;
  *OPtr=ubOpaqueDraw;
- return (GLuint) gTexName;
+ return (u32) gTexName;
 }
 
-/*
+
 #ifdef MALI
+
+#include "gfxGL.h"
+
 void mali400(){
 Vertex v[4];
 Vertex2 v2[4];
@@ -4280,7 +4278,7 @@ flipEGL();
 
 }
 #endif
-*/
+
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////

@@ -11,6 +11,8 @@
 #include "gfxContext.h"
 #include "gfxGL.h"
 
+#define TAG "ELLIS"
+
 static FBO *sFBOUsed = NULL;
 
 // !!!: OGLES1

@@ -64,11 +64,14 @@ void initTextures();
 /// Create a texture and return the index in the TexturePtr array.
 s32 createTexture(s8 filters, s8 clampTypes);
 
-/// Define Texture
+/// Define Texture (1:RGB 16bits 2:RGB 24bits 3:32bits)
 void setTexture(s32 tId, s32 width, s32 height, s32 format, u8 *data);
 
 /// Define SubTexture
-void setSubTexture(s32 tId, s32 x, s32 y, s32 width, s32 height, u8 *data);
+void setSubTexture(s32 tId, s32 x, s32 y, s32 width, s32 height, s32 format, u8 *data);
+
+/// Copy part of Texture into the same Texture
+void copySubTexture(s32 tId, s32 offsetX, s32 offsetY, s32 x, s32 y, s32 width, s32 height);
 
 /// Destroy a texture
 void destroyTexture(s32 tId);

@@ -112,11 +112,12 @@ void setTexture(s32 tId, s32 width, s32 height, s32 format, u8 *data) {
     logInfo(TAG, "setTexture tid:%d [%d %d %d]", tId, width, height, format);
 }
 
-void setSubTexture(s32 tId, s32 x, s32 y, s32 width, s32 height, u8 *data) {
+void setSubTexture(s32 tId, s32 x, s32 y, s32 width, s32 height, s32 format, u8 *data) {
     Texture *tex = getTexture(tId);
     if (tex==NULL) return;
-    glBindTexture(GL_TEXTURE_2D, tex->mTextureId);    
-    switch (tex->mFormat) {
+    glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
+    tex->mFormat = format;
+    switch (format) {
         case 1:
             glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data);
             break;
@@ -124,7 +125,7 @@ void setSubTexture(s32 tId, s32 x, s32 y, s32 width, s32 height, u8 *data) {
             glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);        
             break;
         case 3:
-            glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_SHORT, data);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
             break;
         case 0:
         default:
@@ -133,6 +134,12 @@ void setSubTexture(s32 tId, s32 x, s32 y, s32 width, s32 height, u8 *data) {
     }
 }
 
+void copySubTexture(s32 tId, s32 offsetX, s32 offsetY, s32 x, s32 y, s32 width, s32 height) {
+    Texture *tex = getTexture(tId);
+    if (tex==NULL) return;
+    glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
+    glCopyTexSubImage2D( GL_TEXTURE_2D, 0, offsetX, offsetY, x, y, width, height);
+}
 
 /// Texture id
 void destroyTexture(s32 tId) {

@@ -5,6 +5,8 @@
 #include "gpuPlugin.h"
 #include "gfxGL.h"
 
+#define TAG "ELLIS"
+
 #if defined(GL_OGLES1)
 
 void initGL() {
@@ -241,7 +243,7 @@ void setTransMode(u8 mode) {
 }
 
 extern GLubyte *texturepart;
-void mali400 () {
+void mali4000 () {
     glClearDepthf(1.0f);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
     glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);
