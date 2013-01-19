@@ -70,6 +70,44 @@ void setAlphaTest(E_ALPHA_TEST test, f32 value) {
     }
 }
 
+f32 sMatrixProjection[16];
+void setProjectionMatrix(f32 *matrix) {
+    memcpy(sMatrixProjection, matrix, 16*sizeof(f32));
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(sMatrixProjection);
+}
+
+void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far) {
+    if (((right-left)==0) || ((top-bottom)==0) || ((far-near)==0)) {
+        logError(TAG, "Invalid projection Reset");
+        left=0; right=256;
+        bottom=256; top=0;
+        near=-1; far=1;
+    }
+    sMatrixProjection[0] = 2.0f / (right-left);
+    sMatrixProjection[1] = 0;
+    sMatrixProjection[2] = 0;
+    sMatrixProjection[3] = 0;
+    
+    sMatrixProjection[4] = 0;
+    sMatrixProjection[5] = 2.0f / (top-bottom);
+    sMatrixProjection[6] = 0;
+    sMatrixProjection[7] = 0;
+    
+    sMatrixProjection[8] = 0;
+    sMatrixProjection[9] = 0;
+    sMatrixProjection[10] = -2.0f / (far - near);
+    sMatrixProjection[11] = 0;
+    
+    sMatrixProjection[12] = - (right+left) / (right-left);
+    sMatrixProjection[13] = - (top+bottom) / (top-bottom);
+    sMatrixProjection[14] = - (far+near) / (far-near);
+    sMatrixProjection[15] = 1.0f;
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrthof(left, right, bottom, top, near, far);
+}
+
 
 // Cache Information
 // - sCSVERTEX is for Client State of Vertices. sCSCOLOR of Colors Vertices. sCSTEXTURE of TexCoord Vertices

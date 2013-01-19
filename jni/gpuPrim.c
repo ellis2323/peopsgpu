@@ -81,13 +81,13 @@ int iDrawnSomething=0;
 
 BOOL bRenderFrontBuffer=FALSE; // flag for front buffer rendering
 
-GLubyte ubGloAlpha; // texture alpha
-GLubyte ubGloColAlpha; // color alpha
+u8 ubGloAlpha; // texture alpha
+u8 ubGloColAlpha; // color alpha
 int iFilterType; // type of filter
 BOOL bFullVRam=FALSE; // sign for tex win
 BOOL bDrawDither; // sign for dither
 BOOL bUseMultiPass; // sign for multi pass
-GLuint gTexName; // binded texture
+u32 gTexName; // binded texture
 BOOL bTexEnabled; // texture enable flag
 BOOL bBlendEnable; // blend enable flag
 PSXRect_t xrUploadArea; // rect to upload
@@ -700,22 +700,22 @@ CSCOLOR=0;
 // Transparent blending settings
 ////////////////////////////////////////////////////////////////////////
 
-static GLenum obm1=GL_ZERO;
-static GLenum obm2=GL_ZERO;
+static u32 obm1=BF_ZERO;
+static u32 obm2=BF_ZERO;
 
 typedef struct SEMITRANSTAG
 {
-GLenum srcFac;
-GLenum dstFac;
-GLubyte alpha;
+    u32 srcFac;
+    u32 dstFac;
+    u8 alpha;
 } SemiTransParams;
 
 SemiTransParams TransSets[4]=
 {
-{GL_SRC_ALPHA,GL_SRC_ALPHA, 127},
-{GL_ONE, GL_ONE, 255},
-{GL_ZERO, GL_ONE_MINUS_SRC_COLOR,255},
-{GL_ONE_MINUS_SRC_ALPHA,GL_ONE, 192}
+    {BF_SRC_ALPHA,BF_SRC_ALPHA, 127},
+    {BF_ONE, BF_ONE, 255},
+    {BF_ZERO, BF_ONE_MINUS_SRC_COLOR,255},
+    {BF_ONE_MINUS_SRC_ALPHA,BF_ONE, 192}
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -753,7 +753,7 @@ TransSets[GlobalTextABR].dstFac!=obm2)
 {
 obm1=TransSets[GlobalTextABR].srcFac;
 obm2=TransSets[GlobalTextABR].dstFac;
-glBlendFunc(obm1,obm2);glError(); // set blend func
+setBlendFunc(obm1,obm2);glError(); // set blend func
 }
 /*else
 if(TransSets[GlobalTextABR].dstFac !=GL_ONE_MINUS_SRC_COLOR)
@@ -784,7 +784,7 @@ glBlendEquationEXTEx(FUNC_ADD_EXT);
 */
 obm1=TransSets[0].srcFac;
 obm2=TransSets[0].dstFac;
-glBlendFunc(obm1,obm2);glError(); // set blend func
+setBlendFunc(obm1,obm2);glError(); // set blend func
 }
 
 void SetScanTexTrans(void) // blending for scan mask texture
@@ -797,7 +797,7 @@ glBlendEquationEXTEx(FUNC_ADD_EXT);
 */
 obm1=TransSets[2].srcFac;
 obm2=TransSets[2].dstFac;
-glBlendFunc(obm1,obm2);glError(); // set blend func
+setBlendFunc(obm1,obm2);glError(); // set blend func
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -807,20 +807,20 @@ glBlendFunc(obm1,obm2);glError(); // set blend func
 SemiTransParams MultiTexTransSets[4][2]=
 {
 {
-{GL_ONE ,GL_SRC_ALPHA, 127},
-{GL_SRC_ALPHA,GL_ONE, 127}
+{BF_ONE ,BF_SRC_ALPHA, 127},
+{BF_SRC_ALPHA,BF_ONE, 127}
 },
 {
-{GL_ONE, GL_SRC_ALPHA, 255},
-{GL_SRC_ALPHA,GL_ONE, 255}
+{BF_ONE, BF_SRC_ALPHA, 255},
+{BF_SRC_ALPHA,BF_ONE, 255}
 },
 {
-{GL_ZERO, GL_ONE_MINUS_SRC_COLOR,255},
-{GL_ZERO, GL_ONE_MINUS_SRC_COLOR,255}
+{BF_ZERO, BF_ONE_MINUS_SRC_COLOR,255},
+{BF_ZERO, BF_ONE_MINUS_SRC_COLOR,255}
 },
 {
-{GL_SRC_ALPHA,GL_ONE, 127},
-{GL_ONE_MINUS_SRC_ALPHA,GL_ONE, 255}
+{BF_SRC_ALPHA, BF_ONE, 127},
+{BF_ONE_MINUS_SRC_ALPHA, BF_ONE, 255}
 }
 };
 
@@ -828,18 +828,18 @@ SemiTransParams MultiTexTransSets[4][2]=
 
 SemiTransParams MultiColTransSets[4]=
 {
-{GL_ONE_MINUS_SRC_ALPHA,GL_SRC_ALPHA,127},
-{GL_ONE, GL_ONE, 255},
-{GL_ZERO, GL_ONE_MINUS_SRC_COLOR,255},
-{GL_SRC_ALPHA,GL_ONE, 127}
+{BF_ONE_MINUS_SRC_ALPHA, BF_SRC_ALPHA,127},
+{BF_ONE, BF_ONE, 255},
+{BF_ZERO, BF_ONE_MINUS_SRC_COLOR,255},
+{BF_SRC_ALPHA, BF_ONE, 127}
 };
 
 ////////////////////////////////////////////////////////////////////////
 
 void SetSemiTransMulti(int Pass)
 {
-static GLenum bm1=GL_ZERO;
-static GLenum bm2=GL_ONE;
+static u32 bm1=BF_ZERO;
+static u32 bm2=BF_ONE;
 
 ubGloAlpha=255;
 ubGloColAlpha=255;
@@ -867,12 +867,12 @@ else
 if(Pass==0)
 {
 // disable blending
-bm1=GL_ONE;bm2=GL_ZERO;
+bm1=BF_ONE; bm2=BF_ZERO;
 }
 else
 {
 // disable blending, but add src col a second time
-bm1=GL_ONE;bm2=GL_ONE;
+bm1=BF_ONE; bm2=BF_ONE;
 }
 }
 
@@ -883,7 +883,7 @@ if(!bBlendEnable) {
 
 if(bm1!=obm1 || bm2!=obm2)
 {
-glBlendFunc(bm1,bm2); glError();// set blend func
+setBlendFunc(bm1,bm2); glError();// set blend func
 obm1=bm1;obm2=bm2;
 }
 }
@@ -1018,7 +1018,7 @@ else {bDrawMultiPass = FALSE;SetSemiTrans();}
 
 if(bDrawTextured) // texture ? build it/get it from cache
 {
-GLuint currTex;
+u32 currTex;
 if(bUsingTWin) currTex=LoadTextureWnd(GlobalTexturePage,GlobalTextTP, ulClutID);
 else if(bUsingMovie) currTex=LoadTextureMovie();
 else currTex=SelectSubTextureS(GlobalTextTP,ulClutID);
@@ -1029,11 +1029,11 @@ if(gTexName!=currTex) {
 }
 
 if(!bTexEnabled) // -> turn texturing on
-{bTexEnabled=TRUE;glEnable(GL_TEXTURE_2D);glError();}
+{bTexEnabled=TRUE;useTexturing(true);}
 }
 else // no texture ?
 if(bTexEnabled)
-{bTexEnabled=FALSE;glDisable(GL_TEXTURE_2D);glError();} // -> turn texturing off
+{bTexEnabled=FALSE;useTexturing(false);} // -> turn texturing off
 
 if(bSCol) // also set color ?
 {
@@ -1057,8 +1057,8 @@ SETCOL(vertex[0]); // texture alpha
 
 if(bDrawSmoothShaded!=bOldSmoothShaded) // shading changed?
 {
-if(bDrawSmoothShaded) glShadeModel(GL_SMOOTH); // -> set actual shading
-else glShadeModel(GL_FLAT);
+if(bDrawSmoothShaded) setDrawMode(DRAWTYPE_SMOOTH); // -> set actual shading
+else setDrawMode(DRAWTYPE_FLAT);
 glError();
 bOldSmoothShaded=bDrawSmoothShaded;
 }
@@ -1533,11 +1533,11 @@ if(!PSXDisplay.DisplayMode.x) return;
 if(!PSXDisplay.DisplayMode.y) return;
 
 useScissor(false);
-glShadeModel(GL_FLAT);glError();
+setDrawMode(DRAWTYPE_FLAT);
 bOldSmoothShaded=FALSE;
 useBlending(false);
 bBlendEnable=FALSE;
-glDisable(GL_TEXTURE_2D);glError();
+useTexturing(false);
 bTexEnabled=FALSE;
 useAlphaTest(false);
 
@@ -2312,10 +2312,10 @@ if ((lx0 <= pd->DisplayPosition.x+16) &&
 (lx2 >= pd->DisplayEnd.x-16) &&
 (ly2 >= pd->DisplayEnd.y-16))
 {
-GLclampf g,b,r;
-g=((GLclampf)GREEN(gpuData[0]))/255.0f;
-b=((GLclampf)BLUE(gpuData[0]))/255.0f;
-r=((GLclampf)RED(gpuData[0]))/255.0f;
+f32 g,b,r;
+g=((f32)GREEN(gpuData[0]))/255.0f;
+b=((f32)BLUE(gpuData[0]))/255.0f;
+r=((f32)RED(gpuData[0]))/255.0f;
 
 useScissor(false);
 setClearColor(r, g, b, 1.0);

@@ -61,37 +61,7 @@ void setScissor(s32 x, s32 y, s32 width, s32 height) {
     glScissor(x, y, width, height);
 }
 
-f32 sMatrixProjection[16];
-void setProjectionMatrix(f32 *matrix) {
-    memcpy(sMatrixProjection, matrix, 16*sizeof(f32));
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(sMatrixProjection);
-}
 
-void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far) {
-    sMatrixProjection[0] = 2.0f / (right-left);
-    sMatrixProjection[1] = 0;
-    sMatrixProjection[2] = 0;
-    sMatrixProjection[3] = 0;
-    
-    sMatrixProjection[4] = 0;
-    sMatrixProjection[5] = 2.0f / (top-bottom);
-    sMatrixProjection[6] = 0;
-    sMatrixProjection[7] = 0;
-    
-    sMatrixProjection[8] = 0;
-    sMatrixProjection[9] = 0;
-    sMatrixProjection[10] = -2.0f / (far - near);
-    sMatrixProjection[11] = 0;
-    
-    sMatrixProjection[12] = - (right+left) / (right-left);
-    sMatrixProjection[13] = - (top+bottom) / (top-bottom);
-    sMatrixProjection[14] = - (far+near) / (far-near);
-    sMatrixProjection[15] = 1.0f;
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrthof(left, right, bottom, top, near, far);
-}
 
 void useDithering(bool flag) {
     if (flag) {
@@ -108,6 +78,31 @@ void useBlending(bool flag) {
         glDisable(GL_BLEND);
     }
 }
+
+GLenum convertBlendFactor(E_BLEND_FACTOR f) {
+    switch (f) {
+        case BF_ZERO:
+            return GL_ZERO;
+        case BF_ONE:
+            return GL_ONE;
+        case BF_SRC_ALPHA:
+            return GL_SRC_ALPHA;
+        case BF_ONE_MINUS_SRC_COLOR:
+            return GL_ONE_MINUS_SRC_COLOR;
+        case BF_ONE_MINUS_SRC_ALPHA:
+            return GL_ONE_MINUS_SRC_ALPHA;
+        default:
+            logError(TAG, "Unknown blend factor %d", f);
+            return BF_ZERO;
+    }
+}
+
+void setBlendFunc(E_BLEND_FACTOR src, E_BLEND_FACTOR dst) {
+    GLenum s = convertBlendFactor(src);
+    GLenum d = convertBlendFactor(dst);
+    glBlendFunc(s,d);
+}
+
 void useAlphaTest(bool flag) {
     if (flag) {
         glEnable(GL_ALPHA_TEST);
@@ -188,6 +183,20 @@ void readPixels(s32 x,s32 y, s32 width, s32 height, s8 format, u8 *dst) {
         case 0:
         default:
             logError(TAG, "Format not supported or implemented %d", format);
+    }
+}
+
+void setDrawMode(E_DRAWTYPE m) {
+    switch (m) {
+        case DRAWTYPE_FLAT:
+            glShadeModel(GL_FLAT);
+            return;
+        case DRAWTYPE_SMOOTH:
+            glShadeModel(GL_SMOOTH);
+            return;
+        default:
+            logError(TAG, "DrawType not supported or implemented %d", m);
+            break;
     }
 }
 

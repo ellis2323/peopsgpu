@@ -180,6 +180,14 @@ void bindTexture(s32 tId) {
     glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
 }
 
+void useTexturing(bool flag) {
+    if (flag) {
+        glEnable(GL_TEXTURE_2D);
+    } else {
+        glDisable(GL_TEXTURE_2D);
+    }
+}
+
 void setFilterForCurrentTexture(s8 filter) {
     switch (filter) {
     case 0:

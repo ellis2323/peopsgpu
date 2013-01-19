@@ -82,6 +82,9 @@ Texture *getTexture(s32 TexturePtrId);
 /// Bind Texture
 void bindTexture(s32 tId);
 
+/// Use Texturing
+void useTexturing(bool flag);
+
 /// Set Filter for the current Texture
 void setFilterForCurrentTexture(s8 filter);
 

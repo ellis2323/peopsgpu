@@ -68,7 +68,21 @@ enum DEPTH_TEST {
 };
 typedef enum DEPTH_TEST E_DEPTH_TEST;
 
-// ********************** Public API ********************** 
+enum BLEND_FACTOR {
+    BF_ZERO=0,
+    BF_ONE,
+    BF_SRC_ALPHA,
+    BF_ONE_MINUS_SRC_COLOR,
+    BF_ONE_MINUS_SRC_ALPHA,
+};
+typedef enum BLEND_FACTOR E_BLEND_FACTOR;
+
+enum DRAWTYPE {
+    DRAWTYPE_FLAT = 0,
+    DRAWTYPE_SMOOTH = 1,
+};
+typedef enum DRAWTYPE E_DRAWTYPE;
+// ********************** Public API **********************
 
 // INIT
 
@@ -109,6 +123,9 @@ void useDithering(bool flag);
 /// Use or Not Blending
 void useBlending(bool flag);
 
+/// Set blending function
+void setBlendFunc(E_BLEND_FACTOR src, E_BLEND_FACTOR dst);
+
 // ALPHA TEST
 
 /// Use Alpha Test
@@ -138,6 +155,11 @@ void clearBuffers(bool color, bool depth, bool stencil);
 /// Read Pixels
 void readPixels(s32 x,s32 y, s32 width, s32 height, s8 format, u8 *dst);
 
+// GOURAUD
+
+/// FLAT or SMOOTH
+void setDrawMode(E_DRAWTYPE m);
+
 // ERROR
 
 /// Check error
@@ -151,6 +173,9 @@ void destroyMaterial(Material *mat);
 void debugCommand(bool flag);
 void changeDebuggedCommand();
 bool isDebuggedCommand(E_CMD_TYPE type);
+
+
+
 
 // Public API: primitives
 
