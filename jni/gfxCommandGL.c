@@ -6,14 +6,35 @@
 
 #if defined(GL_OGLES2) || defined(GL_OGLES1)
 
+#define MAX_MATERIAL_QTY 1024
+
 u32 sMatUID = 1;
+Material *sMaterials;
 
 u32 sCurrentBlendingMode = 7;
 E_TRIBOOL_TYPE sBlendingState = TRIBOOL_UNKNOWN;
 bool sDebugCmdFlag = false;
 E_CMD_TYPE sDebugCmdType = CMD_TYPE_NOOP;
-
 Box sViewportBox;
+
+void initCommonGL() {
+    sMaterials = (Material*)malloc(sizeof(Material)*MAX_MATERIAL_QTY);
+    for (s32 i=0; i<MAX_MATERIAL_QTY; ++i) {
+        sMaterials[i].mUID = i;
+        sMaterials[i].mVersion = 0;
+        sMaterials[i].mTexturePtrId = 0;
+    }
+}
+
+s32 findFreeMaterial() {
+    for (s32 i=1; i<MAX_MATERIAL_QTY; ++i) {
+        if (sMaterials[i].mVersion==0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 void setViewport(s32 x, s32 y, s32 width, s32 height) {
 #ifdef DEBUG
     if (x<0 || y<0 || width<=0 || height<=0) logError(TAG, "Invalid viewport [%d %d %d %d]", x, y, width, height);
@@ -208,10 +229,13 @@ bool hasError() {
     return true;
 }
 
+
+
 Material *createMaterial() {
-    Material *mat = (Material *)malloc(sizeof(Material));
-    mat->mUid = sMatUID;
-    sMatUID ++;
+    s32 index = findFreeMaterial();
+    if (index<1) return NULL;
+    Material *mat = &(sMaterials[index]);
+    mat->mUID = index;
     mat->mVersion = 1;
     mat->mType = 0;
     mat->mDepthMode = 0;
@@ -220,8 +244,17 @@ Material *createMaterial() {
     return mat;
 }
 
-void destroyMaterial(Material *mat) {
-    free(mat);
+Material *getMaterial(s32 index) {
+    Material *mat = &(sMaterials[index]);
+    if (mat->mVersion==0) return NULL;
+    return mat;
+}
+
+void destroyMaterial(s32 index) {
+    Material *mat = &(sMaterials[index]);
+    if (mat) {
+        mat->mVersion = 0;
+    }
 }
 
 

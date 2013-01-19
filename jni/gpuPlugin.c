@@ -51,7 +51,6 @@
 
 #include "gfxCommand.h"
 #include "gfxTexture.h"
-#include "gfxGL.h"
 
 extern unsigned int CSVERTEX,CSCOLOR,CSTEXTURE;
 #ifdef MALI
@@ -81,6 +80,7 @@ extern unsigned int start,maxtime;
 #else
 #define glError() 
 #endif
+
             
 short g_m1=255,g_m2=255,g_m3=255;
 short DrawSemiTrans=FALSE;
@@ -411,8 +411,48 @@ long CALLBACK GPU_shutdown()
 ////////////////////////////////////////////////////////////////////////
 // paint it black: simple func to clean up optical border garbage
 ////////////////////////////////////////////////////////////////////////
-void draw_rectangle(float x0, float y0,float z0, float x1, float y1,float z1) {
-	f32 verts[12];
+void draw_rectangle(float x0, float y0, float z0, float x1, float y1, float z1) {
+    GLSLVertex vertices[4];
+    u16 indices[6];
+    
+    vertices[0].x = x0;
+    vertices[0].y = y0;
+    vertices[0].z = z0;
+    vertices[0].c.lcol = 0;
+    
+    vertices[1].x = x1;
+    vertices[1].y = y0;
+    vertices[1].z = z0;
+    vertices[1].c.lcol = 0;
+
+    vertices[2].x = x1;
+    vertices[2].y = y1;
+    vertices[2].z = z1;
+    vertices[2].c.lcol = 0;
+
+    vertices[3].x = x0;
+    vertices[3].y = y1;
+    vertices[3].z = z1;
+    vertices[3].c.lcol = 0;
+    
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+    indices[3] = 0;
+    indices[4] = 2;
+    indices[5] = 3;
+    
+    Material *mat = createMaterial();
+    
+    mat->mType = 0;
+    mat->mTransMode = 0;
+    mat->mDepthMode = 0;
+    mat->mTexturePtrId = -1;
+    // FIXME: This method made a black screen
+    //drawTriangles(mat, vertices, indices, 2);
+    destroyMaterial(mat->mUID);
+    
+/*	f32 verts[12];
 	verts[0]=verts[9];
 	verts[1]=verts[7];
 	verts[2]=verts[8];
@@ -426,22 +466,22 @@ void draw_rectangle(float x0, float y0,float z0, float x1, float y1,float z1) {
 	glDrawArrays( GL_TRIANGLES, 0, 4 );
 	CSTEXTURE=0;
 	CSVERTEX=1;
-	CSCOLOR=0;
+	CSCOLOR=0;*/
 }
 
 void PaintBlackBorders(void)
 {
  short s;
  useScissor(false);
- if(bTexEnabled) {glDisable(GL_TEXTURE_2D);bTexEnabled=FALSE;}glError();
- if(bOldSmoothShaded) {glShadeModel(GL_FLAT);bOldSmoothShaded=FALSE;}glError();
+ if(bTexEnabled) {useTexturing(false);bTexEnabled=FALSE;}
+ if(bOldSmoothShaded) {setDrawMode(DRAWTYPE_FLAT);bOldSmoothShaded=FALSE;}
     if(bBlendEnable) {
         useBlending(false);
         bBlendEnable=FALSE;
     }
   useAlphaTest(false);
   vertex[0].c.lcol=0xff000000;
- SETCOL(vertex[0]); 
+setColor(vertex[0].c);
 
  if(PreviousPSXDisplay.Range.x0)
   {

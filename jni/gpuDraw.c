@@ -219,6 +219,7 @@ void CreateScanLines(void)
 //extern HWND      hWnd;
 int GLinitialize() 
 {
+    initCommonGL();
     initGL();
     initTextures();
     //----------------------------------------------------//

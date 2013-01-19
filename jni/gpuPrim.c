@@ -42,6 +42,9 @@ web : www.pbernert.com
 #include "gfxCommand.h"
 #include "gfxTexture.h"
 
+
+#define SETCOL(x)  if(x.c.lcol!=ulOLDCOL) {ulOLDCOL=x.c.lcol;glColor4ub(x.c.col[0],x.c.col[1],x.c.col[2],x.c.col[3]);}
+
 extern int nbft4;
 unsigned int start=0,maxtime=0;
 #if 0

@@ -108,6 +108,13 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
     glOrthof(left, right, bottom, top, near, far);
 }
 
+u32 sCurrentColor;
+void setColor(GLSLColor color) {
+    sCurrentColor=color.lcol;
+    glColor4ub(color.col[0],color.col[1],color.col[2],color.col[3]);
+}
+
+
 
 // Cache Information
 // - sCSVERTEX is for Client State of Vertices. sCSCOLOR of Colors Vertices. sCSTEXTURE of TexCoord Vertices
@@ -281,32 +288,17 @@ void setTransMode(u8 mode) {
 }
 
 extern GLubyte *texturepart;
-void mali4000 () {
-    glClearDepthf(1.0f);
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-    glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);
-    glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
-    glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST);
-    glDepthFunc(GL_LEQUAL);
-    glFrontFace( GL_CW );
 
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
-
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-
-return;
-/*    Vertex v[4];
+void mali400() {
+    Vertex v[4];
     Vertex2 v2[4];
+    //Vec3f v3[4];
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glAlphaFuncx(GL_NOTEQUAL,0);
     glDisable(GL_BLEND);
     glBlendFunc(770,770);
     glLoadIdentity();
-    glOrtho(0,256,256, 0, -1, 1);
+    glOrtho(0,256,0, 0, -1, 1);
     glScissor(0,0,iResX,iResY);
     glDisable(GL_SCISSOR_TEST);
     glClearColor(0,0,0,1.0f);
@@ -322,8 +314,8 @@ return;
     glEnable(GL_SCISSOR_TEST);
     glGenTextures(1, &gTexName);
     glBindTexture(GL_TEXTURE_2D, 1);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
@@ -375,8 +367,8 @@ return;
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glGenTextures(1, &gTexName);
     glBindTexture(GL_TEXTURE_2D, 2);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, iClampType);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, iClampType);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
@@ -410,9 +402,8 @@ return;
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_SCISSOR_TEST);
-    flipEGL();*/
+    flipEGL();
 }
-
 
 #endif // GL_OGLES1
 

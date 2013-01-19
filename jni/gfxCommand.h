@@ -25,19 +25,19 @@ typedef struct SBox Box;
 
 
 /*
- Depth Mode:
- - 0: No ZBuffer
- 
  Type:
  - 0: Flat
  
  Transparency Mode:
  - 0: Opaque
+ 
+ Depth Mode:
+ - 0: No Depth test
 */
 struct SMaterial {
-    u16 mUid;
-    u16 mVersion;
     s32 mTexturePtrId;
+    s16 mUID;
+    s16 mVersion;
     u8 mType;
     u8 mDepthMode;
     u8 mTransMode;
@@ -86,7 +86,10 @@ typedef enum DRAWTYPE E_DRAWTYPE;
 
 // INIT
 
-/// Init the OpenGL Device
+/// Init the OpenGL Device [Common]
+void initCommonGL();
+
+/// Init the OpenGL Device [OGLES1 or OGLES2]
 void initGL();
 
 // VIEWPORT
@@ -155,11 +158,6 @@ void clearBuffers(bool color, bool depth, bool stencil);
 /// Read Pixels
 void readPixels(s32 x,s32 y, s32 width, s32 height, s8 format, u8 *dst);
 
-// GOURAUD
-
-/// FLAT or SMOOTH
-void setDrawMode(E_DRAWTYPE m);
-
 // ERROR
 
 /// Check error
@@ -167,35 +165,29 @@ bool hasError();
 
 // MATERIAL
 
+/// Create a material
 Material *createMaterial();
-void destroyMaterial(Material *mat);
+
+/// Get Material
+Material *getMaterial(s32 uid);
+
+/// Destroy a material
+void destroyMaterial(s32 uid);
+
+/// Set Draw Mode FLAT or SMOOTH
+void setDrawMode(E_DRAWTYPE m);
+
+/// Color
+void setColor(GLSLColor color);
 
 void debugCommand(bool flag);
 void changeDebuggedCommand();
 bool isDebuggedCommand(E_CMD_TYPE type);
 
-
-
-
-// Public API: primitives
-
+/// Draw a triangle
 void drawTriangles(Material *mat, OGLVertex *vertices, u16 *indices, s16 count);
 
 
-void drawPointOpaque(OGLVertex* vertices, u16 *indices, s32 count);
-void drawPointTrans(OGLVertex* vertices, u16 *indices, s32 count);
-
-void drawLineOpaque(OGLVertex* vertices, u16 *indices, s32 count);
-void drawLineTrans(OGLVertex* vertices, u16 *indices, s32 count);
-
-void drawTriTrans(OGLVertex* vertices, u16 *indices, s32 count);
-void drawTriOpaque(OGLVertex* vertices, u16 *indices, s32 count);
-
-void drawTexTriOpaque(OGLVertex* vertices, u16 *indices, s32 count);
-void drawTexTriTrans(OGLVertex* vertices, u16 *indices, s32 count);
-
-void drawGouTexTriOpaque(OGLVertex* vertices, u16 *indices, s32 count);
-void drawGouTexTriTrans(OGLVertex* vertices, u16 *indices, s32 count);
 
 
 
