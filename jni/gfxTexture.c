@@ -16,6 +16,7 @@
 
 #define MAX_TEXTURES_PTR 255
 static TexturePtr *sTexturesPtrArray = NULL;
+static s32 sLastTidUsed = 0;
 
 s32 findFreeTexturePtr();
 
@@ -73,6 +74,7 @@ s32 createTexture(s8 filters, s8 clampTypes) {
     sTexturesPtrArray[freeId]->mWidth = 0;
     sTexturesPtrArray[freeId]->mHeight = 0;
     logInfo(TAG, "createTexture tid:%d glid:%d f:%d c:%d", freeId, texture, filters, clampTypes);
+    sLastTidUsed = freeId;
     return freeId;
 }
 
@@ -89,6 +91,7 @@ s32 convertFilterToGL(s8 filter) {
 }
 
 void setTexture(s32 tId, s32 width, s32 height, s32 format, u8 *data) {
+    sLastTidUsed = tId;
     Texture *tex = getTexture(tId);
     if (tex==NULL) return;
     glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
@@ -113,6 +116,7 @@ void setTexture(s32 tId, s32 width, s32 height, s32 format, u8 *data) {
 }
 
 void setSubTexture(s32 tId, s32 x, s32 y, s32 width, s32 height, s32 format, u8 *data) {
+    sLastTidUsed = tId;
     Texture *tex = getTexture(tId);
     if (tex==NULL) return;
     glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
@@ -132,9 +136,12 @@ void setSubTexture(s32 tId, s32 x, s32 y, s32 width, s32 height, s32 format, u8 
             logError(TAG, "ERROR: seTexture invalid format");
             break;
     }
+    glBindTexture(GL_TEXTURE_2D, 0);
+    logInfo(TAG, "setSubTexture tid:%d [%d %d %d]", tId, width, height, format);
 }
 
 void copySubTexture(s32 tId, s32 offsetX, s32 offsetY, s32 x, s32 y, s32 width, s32 height) {
+    sLastTidUsed = tId;
     Texture *tex = getTexture(tId);
     if (tex==NULL) return;
     glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
@@ -155,29 +162,41 @@ void destroyTexture(s32 tId) {
 }
 
 Texture *getTexture(s32 texturePtrId) {
-    if (texturePtrId<0 && texturePtrId>=MAX_TEXTURES_PTR) {
-        return NULL;
+    Texture *res = NULL;
+    if (texturePtrId>=0 && texturePtrId<MAX_TEXTURES_PTR) {
+        res = sTexturesPtrArray[texturePtrId];
     }
-    return sTexturesPtrArray[texturePtrId];
+#ifdef DEBUG
+    if (res==NULL) logInfo(TAG, "Texture not found tid: %d", texturePtrId);
+#endif
+    return res;
 }
 
 void bindTexture(s32 tId) {
     logInfo(TAG, "bindTexture: %d", tId);
     if (tId==0) {
+        sLastTidUsed = 0;
         glBindTexture(GL_TEXTURE_2D, 0);
         return;
     }
     Texture *tex = getTexture(tId);
     if (tex==NULL) {
         logError(TAG, "TexturePtrId %d doesn't exist", tId);
+        sLastTidUsed = 0;
         glBindTexture(GL_TEXTURE_2D, 0);
         return;
     } else if (tex->mFormat<=0) {
+        sLastTidUsed = 0;
         glBindTexture(GL_TEXTURE_2D, 0);
         logError(TAG, "TexturePtrId %d is not defined", tId);
         return;
     }
+    sLastTidUsed = tId;
     glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
+}
+
+s32 getCurrentTid() {
+    return sLastTidUsed;
 }
 
 void useTexturing(bool flag) {
@@ -211,7 +230,7 @@ bool checkTexture() {
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture);
     // Check FBO Texture is not bound texture
     FBO *fbo = getFBOUsed();
-    if (checkFBO(fbo)) {
+    if (fbo && checkFBO(fbo)) {
         if (getTexture(fbo->mTexturePtrId)->mTextureId==current_texture) {
             glBindTexture(GL_TEXTURE_2D, 0);
             logError(TAG, "checkTexture failed because Texture Bound is the FBO texture!!!");

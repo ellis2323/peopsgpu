@@ -38,12 +38,12 @@ web : www.pbernert.com
 #include "gpuPrim.h"
 #include <sys/time.h>
 
-#include "gfxGL.h"
+//#include "gfxGL.h"
 #include "gfxCommand.h"
 #include "gfxTexture.h"
 
 
-#define SETCOL(x)  if(x.c.lcol!=ulOLDCOL) {ulOLDCOL=x.c.lcol;glColor4ub(x.c.col[0],x.c.col[1],x.c.col[2],x.c.col[3]);}
+//#define SETCOL(x)  if(x.c.lcol!=ulOLDCOL) {ulOLDCOL=x.c.lcol;glColor4ub(x.c.col[0],x.c.col[1],x.c.col[2],x.c.col[3]);}
 
 extern int nbft4;
 unsigned int start=0,maxtime=0;
@@ -212,36 +212,58 @@ return ((BGR>>3)&0x1f)|((BGR&0xf80000)>>9)|((BGR&0xf800)>>6);
 // OpenGL primitive drawing commands
 ////////////////////////////////////////////////////////////////////////
 
-void PRIMdrawTexturedQuad(OGLVertex* vertex1, OGLVertex* vertex2,
-OGLVertex* vertex3, OGLVertex* vertex4)
+
+
+void PRIMdrawTexturedQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OGLVertex* vertex4)
 {
 
+    OGLVertex v[4];
+    u16 indices[6];
+    
+    GLSLColor c = getColor();
+    
+    v[0].x = vertex1->x;
+    v[0].y = vertex1->y;
+    v[0].z = vertex1->z;
+    v[0].sow = vertex1->sow;
+    v[0].tow = vertex1->tow;
+    v[0].c = c;
 
-Vertex v[4];
+    v[1].x = vertex2->x;
+    v[1].y = vertex2->y;
+    v[1].z = vertex2->z;
+    v[1].sow = vertex2->sow;
+    v[1].tow = vertex2->tow;
+    v[1].c = c;
 
-v[0].xyz.x = fpoint(vertex1->x);
-v[0].xyz.y = fpoint(vertex1->y);
-v[0].xyz.z = fpoint(vertex1->z);
-v[0].st.x = fpoint(vertex1->sow);
-v[0].st.y = fpoint(vertex1->tow);
+    v[2].x = vertex4->x;
+    v[2].y = vertex4->y;
+    v[2].z = vertex4->z;
+    v[2].sow = vertex4->sow;
+    v[2].tow = vertex4->tow;
+    v[2].c = c;
 
-v[1].xyz.x = fpoint(vertex2->x);
-v[1].xyz.y = fpoint(vertex2->y);
-v[1].xyz.z = fpoint(vertex2->z);
-v[1].st.x = fpoint(vertex2->sow);
-v[1].st.y = fpoint(vertex2->tow);
+    v[3].x = vertex3->x;
+    v[3].y = vertex3->y;
+    v[3].z = vertex3->z;
+    v[3].sow = vertex3->sow;
+    v[3].tow = vertex3->tow;
+    v[3].c = c;
 
-v[2].xyz.x = fpoint(vertex4->x);
-v[2].xyz.y = fpoint(vertex4->y);
-v[2].xyz.z = fpoint(vertex4->z);
-v[2].st.x = fpoint(vertex4->sow);
-v[2].st.y = fpoint(vertex4->tow);
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+    indices[3] = 1;
+    indices[4] = 2;
+    indices[5] = 3;
 
-v[3].xyz.x = fpoint(vertex3->x);
-v[3].xyz.y = fpoint(vertex3->y);
-v[3].xyz.z = fpoint(vertex3->z);
-v[3].st.x = fpoint(vertex3->sow);
-v[3].st.y = fpoint(vertex3->tow);
+    Material *mat = createMaterial();
+    mat->mType = 1;
+    mat->mTexturePtrId = getCurrentTid();
+    drawTriangles(mat, v, indices, 2);
+    destroyMaterial(mat->mUID);
+    
+/*
 if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
 if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
@@ -250,33 +272,52 @@ glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].xyz);glError();
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
 CSTEXTURE=CSVERTEX=1;
 CSCOLOR=0;
+*/
 }
 
 /////////////////////////////////////////////////////////
 
-void PRIMdrawTexturedTri(OGLVertex* vertex1, OGLVertex* vertex2,
-OGLVertex* vertex3)
+void PRIMdrawTexturedTri(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3)
 {
-Vertex v[3];
-if (vertex1->x==0&&vertex1->y==0&&vertex2->x==0&&vertex2->y==0&&vertex3->x==0&&vertex3->y==0) return;
+    if (vertex1->x==0&&vertex1->y==0&&vertex2->x==0&&vertex2->y==0&&vertex3->x==0&&vertex3->y==0) return;
 
-v[0].xyz.x = fpoint(vertex1->x);
-v[0].xyz.y = fpoint(vertex1->y);
-v[0].xyz.z = fpoint(vertex1->z);
-v[0].st.x = fpoint(vertex1->sow);
-v[0].st.y = fpoint(vertex1->tow);
+    OGLVertex v[3];
+    u16 indices[3];
+    
+    GLSLColor c = getColor();
+    
+    v[0].x = vertex1->x;
+    v[0].y = vertex1->y;
+    v[0].z = vertex1->z;
+    v[0].sow = vertex1->sow;
+    v[0].tow = vertex1->tow;
+    v[0].c = c;
+    
+    v[1].x = vertex2->x;
+    v[1].y = vertex2->y;
+    v[1].z = vertex2->z;
+    v[1].sow = vertex2->sow;
+    v[1].tow = vertex2->tow;
+    v[1].c = c;
+    
+    v[2].x = vertex3->x;
+    v[2].y = vertex3->y;
+    v[2].z = vertex3->z;
+    v[2].sow = vertex3->sow;
+    v[2].tow = vertex3->tow;
+    v[2].c = c;
 
-v[1].xyz.x = fpoint(vertex2->x);
-v[1].xyz.y = fpoint(vertex2->y);
-v[1].xyz.z = fpoint(vertex2->z);
-v[1].st.x = fpoint(vertex2->sow);
-v[1].st.y = fpoint(vertex2->tow);
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+    
+    Material *mat = createMaterial();
+    mat->mType = 1;
+    mat->mTexturePtrId = getCurrentTid();
+    drawTriangles(mat, v, indices, 1);
+    destroyMaterial(mat->mUID);
 
-v[2].xyz.x = fpoint(vertex3->x);
-v[2].xyz.y = fpoint(vertex3->y);
-v[2].xyz.z = fpoint(vertex3->z);
-v[2].st.x = fpoint(vertex3->sow);
-v[2].st.y = fpoint(vertex3->tow);
+/*
 if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
 if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
@@ -285,48 +326,50 @@ glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].xyz);glError();
 glDrawArrays(GL_TRIANGLES, 0, 3);glError();
 CSTEXTURE=CSVERTEX=1;
 CSCOLOR=0;
-
+*/
 }
 
 /////////////////////////////////////////////////////////
 
-void PRIMdrawTexGouraudTriColor(OGLVertex* vertex1, OGLVertex* vertex2,
-OGLVertex* vertex3)
+void PRIMdrawTexGouraudTriColor(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3)
 {
+    if (vertex1->x==0&&vertex1->y==0&&vertex2->x==0&&vertex2->y==0&&vertex3->x==0&&vertex3->y==0) return;
 
-Vertex2 v[3];
-if (vertex1->x==0&&vertex1->y==0&&vertex2->x==0&&vertex2->y==0&&vertex3->x==0&&vertex3->y==0) return;
+    OGLVertex v[3];
+    u16 indices[3];
+    
+    v[0].x = vertex1->x;
+    v[0].y = vertex1->y;
+    v[0].z = vertex1->z;
+    v[0].sow = vertex1->sow;
+    v[0].tow = vertex1->tow;
+    v[0].c = vertex1->c;
+    
+    v[1].x = vertex2->x;
+    v[1].y = vertex2->y;
+    v[1].z = vertex2->z;
+    v[1].sow = vertex2->sow;
+    v[1].tow = vertex2->tow;
+    v[1].c = vertex2->c;
+    
+    v[2].x = vertex3->x;
+    v[2].y = vertex3->y;
+    v[2].z = vertex3->z;
+    v[2].sow = vertex3->sow;
+    v[2].tow = vertex3->tow;
+    v[2].c = vertex3->c;
 
-v[0].xyz.x = fpoint(vertex1->x);
-v[0].xyz.y = fpoint(vertex1->y);
-v[0].xyz.z = fpoint(vertex1->z);
-v[0].st.x = fpoint(vertex1->sow);
-v[0].st.y = fpoint(vertex1->tow);
-v[0].rgba.r = vertex1->c.col[0];
-v[0].rgba.g = vertex1->c.col[1];
-v[0].rgba.b = vertex1->c.col[2];
-v[0].rgba.a = vertex1->c.col[3];
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+    
+    Material *mat = createMaterial();
+    mat->mType = 1;
+    mat->mTexturePtrId = getCurrentTid();
+    drawTriangles(mat, v, indices, 1);
+    destroyMaterial(mat->mUID);
 
-v[1].xyz.x = fpoint(vertex2->x);
-v[1].xyz.y = fpoint(vertex2->y);
-v[1].xyz.z = fpoint(vertex2->z);
-v[1].st.x = fpoint(vertex2->sow);
-v[1].st.y = fpoint(vertex2->tow);
-v[1].rgba.r = vertex2->c.col[0];
-v[1].rgba.g = vertex2->c.col[1];
-v[1].rgba.b = vertex2->c.col[2];
-v[1].rgba.a = vertex2->c.col[3];
-
-v[2].xyz.x = fpoint(vertex3->x);
-v[2].xyz.y = fpoint(vertex3->y);
-v[2].xyz.z = fpoint(vertex3->z);
-v[2].st.x = fpoint(vertex3->sow);
-v[2].st.y = fpoint(vertex3->tow);
-v[2].rgba.r = vertex3->c.col[0];
-v[2].rgba.g = vertex3->c.col[1];
-v[2].rgba.b = vertex3->c.col[2];
-v[2].rgba.a = vertex3->c.col[3];
-
+/*
 if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
@@ -337,6 +380,8 @@ glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].rgba);glError();
 
 glDrawArrays(GL_TRIANGLES, 0, 3);glError();
 CSTEXTURE=CSVERTEX=CSCOLOR=1;
+*/
+
 }
 
 /////////////////////////////////////////////////////////
@@ -344,49 +389,54 @@ CSTEXTURE=CSVERTEX=CSCOLOR=1;
 void PRIMdrawTexGouraudTriColorQuad(OGLVertex* vertex1, OGLVertex* vertex2,
 OGLVertex* vertex3, OGLVertex* vertex4)
 {
-Vertex2 v[4];
 if (vertex1->x==0&&vertex1->y==0&&vertex2->x==0&&vertex2->y==0&&vertex3->x==0&&vertex3->y==0&&vertex4->x==0&&vertex4->y==0) return;
 
-v[0].xyz.x = fpoint(vertex1->x);
-v[0].xyz.y = fpoint(vertex1->y);
-v[0].xyz.z = fpoint(vertex1->z);
-v[0].st.x = fpoint(vertex1->sow);
-v[0].st.y = fpoint(vertex1->tow);
-v[0].rgba.r = vertex1->c.col[0];
-v[0].rgba.g = vertex1->c.col[1];
-v[0].rgba.b = vertex1->c.col[2];
-v[0].rgba.a = vertex1->c.col[3];
+    OGLVertex v[4];
+    u16 indices[6];
 
-v[1].xyz.x = fpoint(vertex2->x);
-v[1].xyz.y = fpoint(vertex2->y);
-v[1].xyz.z = fpoint(vertex2->z);
-v[1].st.x = fpoint(vertex2->sow);
-v[1].st.y = fpoint(vertex2->tow);
-v[1].rgba.r = vertex2->c.col[0];
-v[1].rgba.g = vertex2->c.col[1];
-v[1].rgba.b = vertex2->c.col[2];
-v[1].rgba.a = vertex2->c.col[3];
 
-v[2].xyz.x = fpoint(vertex4->x);
-v[2].xyz.y = fpoint(vertex4->y);
-v[2].xyz.z = fpoint(vertex4->z);
-v[2].st.x = fpoint(vertex4->sow);
-v[2].st.y = fpoint(vertex4->tow);
-v[2].rgba.r = vertex4->c.col[0];
-v[2].rgba.g = vertex4->c.col[1];
-v[2].rgba.b = vertex4->c.col[2];
-v[2].rgba.a = vertex4->c.col[3];
+    v[0].x = vertex1->x;
+    v[0].y = vertex1->y;
+    v[0].z = vertex1->z;
+    v[0].sow = vertex1->sow;
+    v[0].tow = vertex1->tow;
+    v[0].c = vertex1->c;
 
-v[3].xyz.x = fpoint(vertex3->x);
-v[3].xyz.y = fpoint(vertex3->y);
-v[3].xyz.z = fpoint(vertex3->z);
-v[3].st.x = fpoint(vertex3->sow);
-v[3].st.y = fpoint(vertex3->tow);
-v[3].rgba.r = vertex3->c.col[0];
-v[3].rgba.g = vertex3->c.col[1];
-v[3].rgba.b = vertex3->c.col[2];
-v[3].rgba.a = vertex3->c.col[3];
+    v[1].x = vertex2->x;
+    v[1].y = vertex2->y;
+    v[1].z = vertex2->z;
+    v[1].sow = vertex2->sow;
+    v[1].tow = vertex2->tow;
+    v[1].c = vertex2->c;
 
+    v[2].x = vertex4->x;
+    v[2].y = vertex4->y;
+    v[2].z = vertex4->z;
+    v[2].sow = vertex4->sow;
+    v[2].tow = vertex4->tow;
+    v[2].c = vertex4->c;
+
+    v[3].x = vertex3->x;
+    v[3].y = vertex3->y;
+    v[3].z = vertex3->z;
+    v[3].sow = vertex3->sow;
+    v[3].tow = vertex3->tow;
+    v[3].c = vertex3->c;
+    
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+    indices[3] = 1;
+    indices[4] = 2;
+    indices[5] = 3;
+
+    Material *mat = createMaterial();
+    mat->mType = 1;
+    mat->mTexturePtrId = getCurrentTid();
+    drawTriangles(mat, v, indices, 2);
+    destroyMaterial(mat->mUID);
+
+/*
 if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
@@ -397,27 +447,45 @@ glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].rgba);glError();
 
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
 CSTEXTURE=CSVERTEX=CSCOLOR=1;
+*/
 }
 
 /////////////////////////////////////////////////////////
 
 void PRIMdrawTri(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3)
 {
-Vec3f v[3];
-if (vertex1->x==0&&vertex1->y==0&&vertex2->x==0&&vertex2->y==0&&vertex3->x==0&&vertex3->y==0) return;
+    if (vertex1->x==0&&vertex1->y==0&&vertex2->x==0&&vertex2->y==0&&vertex3->x==0&&vertex3->y==0) return;
 
-v[0].x = fpoint(vertex1->x);
-v[0].y = fpoint(vertex1->y);
-v[0].z = fpoint(vertex1->z);
+    OGLVertex v[4];
+    u16 indices[6];
+    
+    GLSLColor c = getColor();
+    
+    v[0].x = vertex1->x;
+    v[0].y = vertex1->y;
+    v[0].z = vertex1->z;
+    v[0].c = c;
 
-v[1].x = fpoint(vertex2->x);
-v[1].y = fpoint(vertex2->y);
-v[1].z = fpoint(vertex2->z);
+    v[1].x = vertex2->x;
+    v[1].y = vertex2->y;
+    v[1].z = vertex2->z;
+    v[1].c = c;
 
-v[2].x = fpoint(vertex3->x);
-v[2].y = fpoint(vertex3->y);
-v[2].z = fpoint(vertex3->z);
+    v[2].x = vertex3->x;
+    v[2].y = vertex3->y;
+    v[2].z = vertex3->z;
+    v[2].c = c;
 
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+
+    Material *mat = createMaterial();
+    mat->mType = 0;
+    drawTriangles(mat, v, indices, 1);
+    destroyMaterial(mat->mUID);
+
+/*
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
@@ -426,33 +494,34 @@ glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0]);glError();
 glDrawArrays(GL_TRIANGLES, 0, 3);glError();
 CSVERTEX=1;
 CSTEXTURE=CSCOLOR=0;
-
+*/
 }
 
 /////////////////////////////////////////////////////////
 
-void PRIMdrawTri2(OGLVertex* vertex1, OGLVertex* vertex2,
-OGLVertex* vertex3, OGLVertex* vertex4)
+void PRIMdrawTri2(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OGLVertex* vertex4)
 {
-Vec3f v[4];
-if (vertex1->x==0&&vertex1->y==0&&vertex2->x==0&&vertex2->y==0&&vertex3->x==0&&vertex3->y==0&&vertex4->x==0&&vertex4->y==0) return;
+    if (vertex1->x==0&&vertex1->y==0&&vertex2->x==0&&vertex2->y==0&&vertex3->x==0&&vertex3->y==0&&vertex4->x==0&&vertex4->y==0) return;
+    
+    OGLVertex v[4];
 
-v[0].x = fpoint(vertex1->x);
-v[0].y = fpoint(vertex1->y);
-v[0].z = fpoint(vertex1->z);
+    v[0].x = (vertex1->x);
+    v[0].y = (vertex1->y);
+    v[0].z = (vertex1->z);
 
-v[1].x = fpoint(vertex3->x);
-v[1].y = fpoint(vertex3->y);
-v[1].z = fpoint(vertex3->z);
+    v[1].x = (vertex3->x);
+    v[1].y = (vertex3->y);
+    v[1].z = (vertex3->z);
+    
+    v[2].x = (vertex2->x);
+    v[2].y = (vertex2->y);
+    v[2].z = (vertex2->z);
+    
+    v[3].x = (vertex4->x);
+    v[3].y = (vertex4->y);
+    v[3].z = (vertex4->z);
 
-v[2].x = fpoint(vertex2->x);
-v[2].y = fpoint(vertex2->y);
-v[2].z = fpoint(vertex2->z);
-
-v[3].x = fpoint(vertex4->x);
-v[3].y = fpoint(vertex4->y);
-v[3].z = fpoint(vertex4->z);
-
+/*
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
@@ -461,6 +530,7 @@ glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0]);glError();
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
 CSVERTEX=1;
 CSTEXTURE=CSCOLOR=0;
+*/
 }
 
 /////////////////////////////////////////////////////////
@@ -495,6 +565,8 @@ v[2].rgba.g = vertex3->c.col[1];
 v[2].rgba.b = vertex3->c.col[2];
 v[2].rgba.a = vertex3->c.col[3];
 
+
+/*
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
 if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
@@ -505,6 +577,7 @@ glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].rgba);glError();
 glDrawArrays(GL_TRIANGLES, 0, 3);glError();
 CSVERTEX=CSCOLOR=1;
 CSTEXTURE=0;
+*/
 }
 
 /////////////////////////////////////////////////////////
@@ -547,6 +620,7 @@ v[3].rgba.g = vertex4->c.col[1];
 v[3].rgba.b = vertex4->c.col[2];
 v[3].rgba.a = vertex4->c.col[3];
 
+/*
 if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
@@ -557,6 +631,7 @@ glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].rgba);glError();
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
 CSTEXTURE=0;
 CSVERTEX=CSCOLOR=1;
+*/
 }
 
 /////////////////////////////////////////////////////////
@@ -598,6 +673,7 @@ v[3].rgba.g = vertex1->c.col[1];
 v[3].rgba.b = vertex1->c.col[2];
 v[3].rgba.a = vertex1->c.col[3];
 
+/*
 if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
@@ -609,7 +685,7 @@ glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
 
 CSTEXTURE=0;
 CSVERTEX=CSCOLOR=1;
-
+*/
 
 }
 
@@ -652,6 +728,7 @@ v[2].rgba.g = vertex4->c.col[1];
 v[2].rgba.b = vertex4->c.col[2];
 v[2].rgba.a = vertex4->c.col[3];
 
+/*
 if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);glError();
@@ -662,6 +739,7 @@ glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].rgba);glError();
 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
 CSTEXTURE=0;
 CSVERTEX=CSCOLOR=1;
+*/
 }
 
 /////////////////////////////////////////////////////////
@@ -688,6 +766,7 @@ v[3].x = fpoint(vertex3->x);
 v[3].y = fpoint(vertex3->y);
 v[3].z = fpoint(vertex3->z);
 
+/*
 if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);glError();
 if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);glError();
 if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);glError();
@@ -697,6 +776,7 @@ glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);glError();
 CSTEXTURE=0;
 CSVERTEX=1;
 CSCOLOR=0;
+*/
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1055,7 +1135,7 @@ vertex[0].c.lcol=DoubleBGR2RGB(DrawAttributes);
  //else vertex[0].c.lcol=DrawAttributes;
 }
 vertex[0].c.col[3]=ubGloAlpha; // -> set color with
-SETCOL(vertex[0]); // texture alpha
+setColor(vertex[0].c); // texture alpha
 }
 
 if(bDrawSmoothShaded!=bOldSmoothShaded) // shading changed?
@@ -1077,7 +1157,7 @@ if(bDrawNonShaded) return; // no shading? bye
 
 DrawAttributes=DoubleBGR2RGB(DrawAttributes); // multipass is just half color, so double it on opaque pass
 vertex[0].c.lcol=DrawAttributes|0xff000000;
-SETCOL(vertex[0]); // set color
+setColor(vertex[0].c); // set color
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1640,7 +1720,7 @@ bDrawSmoothShaded = FALSE;
 
 /* if(bGLBlend) vertex[0].c.lcol=0xff7f7f7f; // set solid col
 else */vertex[0].c.lcol=0xffffffff;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 SetOGLDisplaySettings(0);
 
@@ -2334,7 +2414,7 @@ bDrawSmoothShaded = FALSE;
 SetRenderState((unsigned long)0x01000000);
 SetRenderMode((unsigned long)0x01000000, FALSE);
 vertex[0].c.lcol=0xff000000;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 if(ly0>pd->DisplayPosition.y)
 {
 vertex[0].x=0;vertex[0].y=0;
@@ -2362,7 +2442,7 @@ bDrawSmoothShaded = FALSE;
 SetRenderState((unsigned long)0x01000000);
 SetRenderMode((unsigned long)0x01000000, FALSE);
 vertex[0].c.lcol=gpuData[0]|0xff000000;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 useScissor(false);
 PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 useScissor(true);
@@ -2688,7 +2768,7 @@ if(bIgnoreNextTile) {bIgnoreNextTile=FALSE;return;}
 
 vertex[0].c.lcol=gpuData[0];
 vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 
@@ -2735,7 +2815,7 @@ SetRenderMode(gpuData[0], FALSE);
 SetZMask4NT();
 
 vertex[0].c.lcol=gpuData[0];vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 
@@ -2782,7 +2862,7 @@ SetZMask4NT();
 
 vertex[0].c.lcol=gpuData[0];
 vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 
@@ -2829,7 +2909,7 @@ SetZMask4NT();
 
 vertex[0].c.lcol=gpuData[0];
 vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 
@@ -2886,7 +2966,7 @@ return;
 lABR=GlobalTextABR;
 lDST=DrawSemiTrans;
 vertex[0].c.col[3]=ubGloAlpha/2; // -> set color with
-SETCOL(vertex[0]); // texture alpha
+setColor(vertex[0].c); // texture alpha
 PRIMdrawTexturedQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 vertex[0].x+=POFF;vertex[1].x+=POFF;
 vertex[2].x+=POFF;vertex[3].x+=POFF;
@@ -3489,7 +3569,7 @@ SetRenderMode(gpuData[0], FALSE);
 SetZMask4NT();
 
 vertex[0].c.lcol=gpuData[0];vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawTri2(&vertex[0], &vertex[1], &vertex[2],&vertex[3]);
 
@@ -4239,7 +4319,7 @@ if(bDrawNonShaded)
 /* if(bGLBlend) vertex[0].c.lcol=0x7f7f7f;
 else */vertex[0].c.lcol=vertex[1].c.lcol=vertex[2].c.lcol=0xffffff;
 vertex[0].c.col[3]=vertex[1].c.col[3]=vertex[2].c.col[3]=ubGloAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawTexGouraudTriColor(&vertex[0], &vertex[1], &vertex[2]);
 
@@ -4400,7 +4480,7 @@ if(bDrawNonShaded)
 /* if(bGLBlend) vertex[0].c.lcol=0x7f7f7f;
 else */vertex[0].c.lcol=vertex[1].c.lcol=vertex[2].c.lcol=vertex[3].c.lcol=0xffffff;
 vertex[0].c.col[3]=vertex[1].c.col[3]=vertex[2].c.col[3]=vertex[3].c.col[3]=ubGloAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawTexGouraudTriColorQuad(&vertex[0], &vertex[1], &vertex[3], &vertex[2]);
 
@@ -4497,7 +4577,7 @@ SetZMask3NT();
 
 vertex[0].c.lcol=gpuData[0];
 vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawTri(&vertex[0], &vertex[1], &vertex[2]);
 

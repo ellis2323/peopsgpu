@@ -82,6 +82,9 @@ Texture *getTexture(s32 TexturePtrId);
 /// Bind Texture
 void bindTexture(s32 tId);
 
+/// Get last current tId
+s32 getCurrentTid();
+
 /// Use Texturing
 void useTexturing(bool flag);
 

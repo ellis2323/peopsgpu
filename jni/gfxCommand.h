@@ -177,8 +177,11 @@ void destroyMaterial(s32 uid);
 /// Set Draw Mode FLAT or SMOOTH
 void setDrawMode(E_DRAWTYPE m);
 
-/// Color
+/// Set color
 void setColor(GLSLColor color);
+
+/// Get color
+GLSLColor getColor();
 
 void debugCommand(bool flag);
 void changeDebuggedCommand();
