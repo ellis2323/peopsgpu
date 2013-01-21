@@ -215,7 +215,7 @@ typedef struct textureSubCacheEntryTagS
 //---------------------------------------------
 
 #define MAXTPAGES_MAX 64
-#define MAXSORTTEX_MAX 256
+#define MAXSORTTEX_MAX 196
 
 //---------------------------------------------
 
@@ -238,7 +238,7 @@ unsigned char            ubOpaqueDraw=0;
 unsigned short MAXTPAGES     = 32;
 unsigned short CLUTMASK      = 0x7fff;
 unsigned short CLUTYMASK     = 0x1ff;
-unsigned short MAXSORTTEX    = 256;
+unsigned short MAXSORTTEX    = 196;
 
 ////////////////////////////////////////////////////////////////////////
 // Texture color conversions... all my ASM funcs are removed for easier
@@ -499,7 +499,7 @@ void InitializeTextureStore()
    MAXTPAGES     = 32;
    CLUTMASK      = 0x7fff;
    CLUTYMASK     = 0x1ff;
-   MAXSORTTEX    = 256;
+   MAXSORTTEX    = 196;
   }
 
  memset(vertex,0,4*sizeof(OGLVertex));                 // init vertices
