@@ -242,28 +242,28 @@ GLSLPrograms* getGLSLPrograms() {
     return sGLSLProgramsInstance;
 }
 
-void useAlphaTest(GLSLPrograms* obj, bool use) {
+void useAlphaTestForPrg(GLSLPrograms* obj, bool use) {
     obj->mUseAlphaTest = use;
 }
 
-void setAlphaTest(GLSLPrograms* obj, E_ALPHA_TEST_TYPE type, f32 value) {
+void setAlphaTestForPrg(GLSLPrograms* obj, E_ALPHA_TEST type, f32 value) {
     obj->mAlphaTestType = type;
     obj->mAlphaTestValue = value;
 }
 
-void setGlobalColor(GLSLPrograms* obj, u32 color) {
+void setColorForPrg(GLSLPrograms* obj, u32 color) {
     obj->mColor = color;
 }
 
-void setGlobalTexture(GLSLPrograms* obj, u32 textureName) {
+void setTextureForPrg(GLSLPrograms* obj, u32 textureName) {
     obj->mTextureName = textureName;
 }
 
-void setModelView(GLSLPrograms* obj, const GLfloat* mv) {
+void setModelViewForPrg(GLSLPrograms* obj, const GLfloat* mv) {
     copyMatrix(obj->mMmv, mv);
 }
 
-void setProjection(GLSLPrograms* obj, const GLfloat* mproj) {
+void setProjectionForPrg(GLSLPrograms* obj, const GLfloat* mproj) {
     copyMatrix(obj->mMproj, mproj);
 }
 

@@ -61,7 +61,11 @@ void checkScissor() {
     }
     glGetIntegerv(GL_VIEWPORT,vp);
     logInfo(TAG, "View port: %d %d %d %d", vp[0], vp[1], vp[2], vp[3]);
+#ifdef GL_OGLES1
     glGetIntegerv(GL_FRAMEBUFFER_BINDING_OES, &fbo);
+#elif defined(GL_OGLES2)
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+#endif
     logInfo(TAG, "FBO: %d", fbo);
     glGetBooleanv(GL_BLEND, &b);
     logInfo(TAG, "Blend:%d", b);
@@ -124,13 +128,7 @@ void setBlendFunc(E_BLEND_FACTOR src, E_BLEND_FACTOR dst) {
     glBlendFunc(s,d);
 }
 
-void useAlphaTest(bool flag) {
-    if (flag) {
-        glEnable(GL_ALPHA_TEST);
-    } else {
-        glDisable(GL_ALPHA_TEST);
-    }
-}
+
 
 void useDepthTest(bool flag) {
     if (flag) {
@@ -207,19 +205,6 @@ void readPixels(s32 x,s32 y, s32 width, s32 height, s8 format, u8 *dst) {
     }
 }
 
-void setDrawMode(E_DRAWTYPE m) {
-    switch (m) {
-        case DRAWTYPE_FLAT:
-            glShadeModel(GL_FLAT);
-            return;
-        case DRAWTYPE_SMOOTH:
-            glShadeModel(GL_SMOOTH);
-            return;
-        default:
-            logError(TAG, "DrawType not supported or implemented %d", m);
-            break;
-    }
-}
 
 bool hasError() {
     GLenum error = glGetError();

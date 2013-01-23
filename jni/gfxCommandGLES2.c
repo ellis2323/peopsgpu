@@ -1,9 +1,11 @@
 #include "gfxCommand.h"
+#include "gfxShader.h"
+#include "gfxGL.h"
+
+#define TAG "ELLIS"
 
 #if defined(GL_OGLES2)
 
-#include "gpuShader.h"
-#include "gfxGL.h"
 
 extern E_TRIBOOL_TYPE sBlendingState;
 extern u32 sCurrentBlendingMode;
@@ -12,6 +14,7 @@ extern u32 sCurrentBlendingMode;
 void initGL() {
 
 }
+
 
 
 // MARK: New generation code

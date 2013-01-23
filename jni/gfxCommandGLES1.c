@@ -40,6 +40,14 @@ void initGL() {
     glPixelStorei(GL_PACK_ALIGNMENT,1);
 }
 
+void useAlphaTest(bool flag) {
+    if (flag) {
+        glEnable(GL_ALPHA_TEST);
+    } else {
+        glDisable(GL_ALPHA_TEST);
+    }
+}
+
 void setAlphaTest(E_ALPHA_TEST test, f32 value) {
     switch (test) {
         case ALPHA_TEST_NEVER:
@@ -122,6 +130,19 @@ GLSLColor getColor() {
     return v;
 }
 
+void setDrawMode(E_DRAWTYPE m) {
+    switch (m) {
+        case DRAWTYPE_FLAT:
+            glShadeModel(GL_FLAT);
+            return;
+        case DRAWTYPE_SMOOTH:
+            glShadeModel(GL_SMOOTH);
+            return;
+        default:
+            logError(TAG, "DrawType not supported or implemented %d", m);
+            break;
+    }
+}
 
 // Cache Information
 // - sCSVERTEX is for Client State of Vertices. sCSCOLOR of Colors Vertices. sCSTEXTURE of TexCoord Vertices

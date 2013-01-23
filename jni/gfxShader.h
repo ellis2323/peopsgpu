@@ -10,9 +10,12 @@
 //
 
 #include "gfxCommon.h"
-#include "gpuExternals.h"
+#include "gfxCommand.h"
 
 #if defined (GL_OGLES2)
+
+#include "gfxGL.h"
+#include "gpuExternals.h"
 
 struct SGLSLProgram {
 
@@ -42,13 +45,6 @@ struct SGLSLProgram {
 
 typedef struct SGLSLProgram GLSLProgram;
 
-enum ALPHA_TEST_TYPE {
-    ALPHA_TEST_EQUAL = 0, ALPHA_TEST_NOT_EQUAL, ALPHA_TEST_GREATER,
-
-};
-
-typedef enum ALPHA_TEST_TYPE E_ALPHA_TEST_TYPE;
-
 struct SGLSLPrograms {
     GLSLProgram *mDebugProgram;
     GLSLProgram *mFlatProgram;
@@ -66,7 +62,7 @@ struct SGLSLPrograms {
     u32 mTextureName;
     
     bool mUseAlphaTest;
-    E_ALPHA_TEST_TYPE mAlphaTestType;
+    E_ALPHA_TEST mAlphaTestType;
     f32 mAlphaTestValue;
     
     GLfloat *mMvp;
@@ -113,17 +109,17 @@ typedef OGLColor GLSLColor;
     
 // MARK: GLSLColor functions 
     
-    void setGlobalColor(GLSLPrograms* obj, u32 color);
+    void setColorForPrg(GLSLPrograms* obj, u32 color);
     
-    void useAlphaTest(GLSLPrograms* obj, bool use);
+    void useAlphaTestForPrg(GLSLPrograms* obj, bool use);
 
-    void setAlphaTest(GLSLPrograms* obj, E_ALPHA_TEST_TYPE type, f32 value);
+    void setAlphaTestForPrg(GLSLPrograms* obj, E_ALPHA_TEST type, f32 value);
     
-    void setGlobalTexture(GLSLPrograms* obj, u32 textureName);
+    void setTextureForPrg(GLSLPrograms* obj, u32 textureName);
     
-    void setModelView(GLSLPrograms* obj, const GLfloat* mv);
+    void setModelViewForPrg(GLSLPrograms* obj, const GLfloat* mv);
     
-    void setProjection(GLSLPrograms* obj, const GLfloat* mproj);
+    void setProjectionForPrg(GLSLPrograms* obj, const GLfloat* mproj);
 
 // MARK: counter
 
