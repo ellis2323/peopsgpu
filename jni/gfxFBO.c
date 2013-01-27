@@ -31,6 +31,7 @@ FBO *createFBO(s32 width, s32 height, bool hd) {
 
     s32 texturePtrId = createTexture(0, 0);
     setTexture(texturePtrId, width, height, 1, NULL);
+    Texture *tex = getTexture(texturePtrId);
     
     // create depth renderbuffer
     glGenRenderbuffersOES(1, &depthRenderbuffer);
@@ -67,14 +68,16 @@ void destroyFBO(FBO *fbo) {
         logError(TAG, "Cannot destroy Default FBO");
         return;
     }
+    GLuint drbId = fbo->mDepthRenderBuffer;
+    GLuint fboId = fbo->mFBO;
     // switch to default FBO
     glBindFramebufferOES(GL_FRAMEBUFFER, 0);
     // delete texture
     destroyTexture(fbo->mTexturePtrId);
     // delete depth buffer
-    glDeleteRenderbuffersOES(1, &fbo->mDepthRenderBuffer);
+    glDeleteRenderbuffersOES(1, &drbId);
     // delete framebuffer
-    glDeleteFramebuffersOES(1, &fbo->mFBO);
+    glDeleteFramebuffersOES(1, &fboId);
 }
 
 void useFBO(FBO *fbo) {
@@ -118,6 +121,7 @@ FBO *createFBO(s32 width, s32 height, bool hd) {
 
     s32 texturePtrId = createTexture(0, 0);
     setTexture(texturePtrId, width, height, 1, NULL);
+    Texture *tex = getTexture(texturePtrId);
     
     // create depth renderbuffer
     glGenRenderbuffers(1, &depthRenderbuffer);
@@ -152,14 +156,16 @@ void destroyFBO(FBO *fbo) {
         logError(TAG, "Cannot destroy Default FBO");
         return;
     }
+    GLuint drbId = fbo->mDepthRenderBuffer;
+    GLuint fboId = fbo->mFBO;
     // switch to default FBO
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     // delete texture
     destroyTexture(fbo->mTexturePtrId);
     // delete depth buffer
-    glDeleteRenderbuffers(1, &fbo->mDepthRenderBuffer);
+    glDeleteRenderbuffers(1, &drbId);
     // delete framebuffer
-    glDeleteFramebuffers(1, &fbo->mFBO);
+    glDeleteFramebuffers(1, &fboId);
 }
 
 void useFBO(FBO *fbo) {
