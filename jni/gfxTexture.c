@@ -136,8 +136,6 @@ void setSubTexture(s32 tId, s32 x, s32 y, s32 width, s32 height, s32 format, u8 
             logError(TAG, "ERROR: seTexture invalid format");
             break;
     }
-    glBindTexture(GL_TEXTURE_2D, 0);
-    logInfo(TAG, "setSubTexture tid:%d [%d %d %d]", tId, width, height, format);
 }
 
 void copySubTexture(s32 tId, s32 offsetX, s32 offsetY, s32 x, s32 y, s32 width, s32 height) {
@@ -175,18 +173,15 @@ Texture *getTexture(s32 texturePtrId) {
 void bindTexture(s32 tId) {
     logInfo(TAG, "bindTexture: %d", tId);
     if (tId==0) {
-        sLastTidUsed = 0;
         glBindTexture(GL_TEXTURE_2D, 0);
         return;
     }
     Texture *tex = getTexture(tId);
     if (tex==NULL) {
         logError(TAG, "TexturePtrId %d doesn't exist", tId);
-        sLastTidUsed = 0;
         glBindTexture(GL_TEXTURE_2D, 0);
         return;
     } else if (tex->mFormat<=0) {
-        sLastTidUsed = 0;
         glBindTexture(GL_TEXTURE_2D, 0);
         logError(TAG, "TexturePtrId %d is not defined", tId);
         return;

@@ -10,6 +10,7 @@
 #if defined(GL_OGLES1)
 
 void initGL() {
+
     glClearDepthf(1.0f);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
     glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);
@@ -26,8 +27,6 @@ void initGL() {
     glDisable(GL_CULL_FACE);
     glDepthFunc(GL_LEQUAL);
     glFrontFace( GL_CW );
-    
-    glShadeModel(GL_SMOOTH);
 
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
@@ -37,14 +36,6 @@ void initGL() {
     glDisableClientState(GL_NORMAL_ARRAY);
     
     glPixelStorei(GL_PACK_ALIGNMENT,1);
-}
-
-void useAlphaTest(bool flag) {
-    if (flag) {
-        glEnable(GL_ALPHA_TEST);
-    } else {
-        glDisable(GL_ALPHA_TEST);
-    }
 }
 
 void setAlphaTest(E_ALPHA_TEST test, f32 value) {
@@ -105,7 +96,6 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
         bottom=256; top=0;
         near=-1; far=1;
     }
-/*    projectionMatrix(sMatrixProjection, left, right, bottom, top, near, far);
     sMatrixProjection[0] = 2.0f / (right-left);
     sMatrixProjection[1] = 0;
     sMatrixProjection[2] = 0;
@@ -124,7 +114,7 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
     sMatrixProjection[12] = - (right+left) / (right-left);
     sMatrixProjection[13] = - (top+bottom) / (top-bottom);
     sMatrixProjection[14] = - (far+near) / (far-near);
-    sMatrixProjection[15] = 1.0f;*/
+    sMatrixProjection[15] = 1.0f;
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrthof(left, right, bottom, top, near, far);
@@ -140,20 +130,6 @@ GLSLColor getColor() {
     GLSLColor v;
     v.lcol = sCurrentColor;
     return v;
-}
-
-void setDrawMode(E_DRAWTYPE m) {
-    switch (m) {
-        case DRAWTYPE_FLAT:
-            glShadeModel(GL_FLAT);
-            return;
-        case DRAWTYPE_SMOOTH:
-            glShadeModel(GL_SMOOTH);
-            return;
-        default:
-            logError(TAG, "DrawType not supported or implemented %d", m);
-            break;
-    }
 }
 
 // Cache Information
@@ -205,20 +181,19 @@ void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
     /*if (sCSVERTEX) glEnableClientState(GL_VERTEX_ARRAY);
     if (sCSCOLOR) glEnableClientState(GL_COLOR_ARRAY);
     if (sCSTEXTURE) glEnableClientState(GL_TEXTURE_COORD_ARRAY);*/
-    glShadeModel(GL_SMOOTH);
-    glDisable(GL_BLEND);
+    
+    glEnable(GL_TEXTURE_2D);
     Texture *tex = getTexture(mat->mTexturePtrId);
     // bind to texture if needed
     //if (mat->mTexture.mTextureId != sCTextureId) {
-    sCTextureId = tex->mTextureId;
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, sCTextureId);
+        sCTextureId = tex->mTextureId;
+        glBindTexture(GL_TEXTURE_2D, sCTextureId);
     //}
     
     // change Min&Mag filters
     //if (mat->mTexture.mFilters != sCTextureFilters) {
         sCTextureFilters = tex->mFilters;
-    /*    switch (sCTextureFilters) {
+        switch (sCTextureFilters) {
             case 0:
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -229,12 +204,12 @@ void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
                 break;
             default:
                 logError(TAG, "filter mode unknown");
-        }*/
+        }
     //}
     
     //if (mat->mTexture.mClampTypes != sCTextureClampTypes) {
         sCTextureClampTypes = tex->mClampTypes;
-     /*   switch (sCTextureClampTypes) {
+        switch (sCTextureClampTypes) {
             case 0:
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -245,35 +220,21 @@ void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
                 break;
         default:
             logError(TAG, "clamp types");
-        }*/
+        }
     //}
     
     // change
-    //glDisable(GL_TEXTURE_2D);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisable(GL_SCISSOR_TEST);
     
     glVertexPointer(3, GL_FLOAT, sizeof(OGLVertex), &vertices[0].x);
     glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(OGLVertex), &vertices[0].c.lcol);
     glTexCoordPointer(2, GL_FLOAT, sizeof(OGLVertex), &vertices[0].sow);
     
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisable(GL_SCISSOR_TEST);
-    glDisable(GL_ALPHA_TEST);
-    glColor4f(1,1,1,1);
-    glDisable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
-    glAlphaFunc(GL_ALWAYS, 0);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_FOG);
-    glDisable(GL_LIGHTING);
-    glScissor(0,0,256,256);
-    //checkTexture();
+    
+    checkTexture();
     
     glDrawElements(GL_TRIANGLES, 3*count, GL_UNSIGNED_SHORT, indices);
     
@@ -282,10 +243,6 @@ void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
     glDisableClientState(GL_COLOR_ARRAY);
     
     glDisable(GL_TEXTURE_2D);
-    
-        glClear(16384);
-    glFinish();
-
     
     //logInfo(TAG, "draw drawTexTriGou");
     sCSVERTEX=1;
@@ -349,36 +306,119 @@ void setTransMode(u8 mode) {
 extern GLubyte *texturepart;
 
 void mali400() {
-    //Vertex v[4];
+    Vertex v[4];
     Vertex2 v2[4];
-
+    //Vec3f v3[4];
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glAlphaFuncx(GL_NOTEQUAL,0);
+    glDisable(GL_BLEND);
+    glBlendFunc(770,770);
+    glLoadIdentity();
+    glOrtho(0,256,0, 0, -1, 1);
+    glScissor(0,0,iResX,iResY);
+    glDisable(GL_SCISSOR_TEST);
+    glClearColor(0,0,0,1.0f);
+    glClear(16384);
+    glEnable(GL_SCISSOR_TEST);
+    glLoadIdentity();
+    glOrtho(0,256,251, 0, -1, 1);
+    glLoadIdentity();
+    glOrtho(0,368,502, 0, -1, 1);
+    glDisable(GL_SCISSOR_TEST);
+    glClearColor(0,0,0,128);
+    glClear(16384);
+    glEnable(GL_SCISSOR_TEST);
     glGenTextures(1, &gTexName);
     glBindTexture(GL_TEXTURE_2D, 1);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
     glEnable(GL_TEXTURE_2D);
-
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
-        
-
+    glBindTexture(GL_TEXTURE_2D, 1);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0,196,128,33,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
+    v2[0].st.x=0.005207f;
+    v2[0].st.y=0.770862f;
+    v2[1].st.x=0.490906f;
+    v2[1].st.y=0.770862f;
+    v2[2].st.x=0.005207f;
+    v2[2].st.y=0.885453f;
+    v2[3].st.x=0.490906f;
+    v2[3].st.y=0.885453f;
+    v2[0].xyz.x=33.000000f;
+    v2[0].xyz.y=70.000000f;
+    v2[0].xyz.z=0.000000f;
+    v2[1].xyz.x=159.000000f;
+    v2[1].xyz.y=70.000000f;
+    v2[1].xyz.z=0.000000f;
+    v2[2].xyz.x=33.000000f;
+    v2[2].xyz.y=100.000000f;
+    v2[2].xyz.z=0.000000f;
+    v2[3].xyz.x=159.000000f;
+    v2[3].xyz.y=100.000000f;
+    v2[3].xyz.z=0.000000f;
+    v2[0].rgba.r=0;
+    v2[0].rgba.g=0;
+    v2[0].rgba.b=0;
+    v2[0].rgba.a=0;
+    v2[1].rgba.r=0;
+    v2[1].rgba.g=0;
+    v2[1].rgba.b=0;
+    v2[1].rgba.a=0;
+    v2[2].rgba.r=0;
+    v2[2].rgba.g=0;
+    v2[2].rgba.b=0;
+    v2[2].rgba.a=0;
+    v2[3].rgba.r=0;
+    v2[3].rgba.g=0;
+    v2[3].rgba.b=0;
+    v2[3].rgba.a=0;
     glTexCoordPointer(2, GL_FLOAT, 24, &v2[0].st);
     glVertexPointer(3, GL_FLOAT, 24, &v2[0].xyz);
     glColorPointer(4, GL_UNSIGNED_BYTE, 24, &v2[0].rgba);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-  
     glGenTextures(1, &gTexName);
     glBindTexture(GL_TEXTURE_2D, 2);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0,0,20,78,GL_RGBA, GL_UNSIGNED_BYTE, texturepart);
+    glShadeModel(GL_FLAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glDisableClientState(GL_COLOR_ARRAY);
+    v[0].st.x=0.003906f;
+    v[0].st.y=0.003906f;
+    v[1].st.x=0.074222f;
+    v[1].st.y=0.003906f;
+    v[2].st.x=0.003906f;
+    v[2].st.y=0.300793f;
+    v[3].st.x=0.074222f;
+    v[3].st.y=0.300793f;
+    v[0].xyz.x=27.000000f;
+    v[0].xyz.y=385.000000f;
+    v[0].xyz.z=0.000000f;
+    v[1].xyz.x=45.000000f;
+    v[1].xyz.y=385.000000f;
+    v[1].xyz.z=0.000000f;
+    v[2].xyz.x=27.000000f;
+    v[2].xyz.y=461.000000f;
+    v[2].xyz.z=0.000000f;
+    v[3].xyz.x=45.000000f;
+    v[3].xyz.y=461.000000f;
+    v[3].xyz.z=0.000000f;
+    glTexCoordPointer(2, GL_FLOAT, 20, &v[0].st);
+    glVertexPointer(3, GL_FLOAT, 20, &v[0].xyz);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_SCISSOR_TEST);
+    flipEGL();
 }
 
 #endif // GL_OGLES1

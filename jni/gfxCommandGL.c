@@ -128,7 +128,13 @@ void setBlendFunc(E_BLEND_FACTOR src, E_BLEND_FACTOR dst) {
     glBlendFunc(s,d);
 }
 
-
+void useAlphaTest(bool flag) {
+    if (flag) {
+        glEnable(GL_ALPHA_TEST);
+    } else {
+        glDisable(GL_ALPHA_TEST);
+    }
+}
 
 void useDepthTest(bool flag) {
     if (flag) {
@@ -205,6 +211,19 @@ void readPixels(s32 x,s32 y, s32 width, s32 height, s8 format, u8 *dst) {
     }
 }
 
+void setDrawMode(E_DRAWTYPE m) {
+    switch (m) {
+        case DRAWTYPE_FLAT:
+            glShadeModel(GL_FLAT);
+            return;
+        case DRAWTYPE_SMOOTH:
+            glShadeModel(GL_SMOOTH);
+            return;
+        default:
+            logError(TAG, "DrawType not supported or implemented %d", m);
+            break;
+    }
+}
 
 bool hasError() {
     GLenum error = glGetError();
