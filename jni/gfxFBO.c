@@ -71,7 +71,7 @@ void destroyFBO(FBO *fbo) {
     GLuint drbId = fbo->mDepthRenderBuffer;
     GLuint fboId = fbo->mFBO;
     // switch to default FBO
-    glBindFramebufferOES(GL_FRAMEBUFFER, 0);
+    glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
     // delete texture
     destroyTexture(fbo->mTexturePtrId);
     // delete depth buffer
