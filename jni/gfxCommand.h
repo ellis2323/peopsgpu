@@ -110,6 +110,15 @@ void checkScissor();
 
 // TRANSFORMATION
 
+/// Write the modelview matrix into a 4x4 matrix ie array of 16 float
+void getModelViewMatrix(f32 *matrix);
+
+/// Define the modelview matrix by 4x4 matrix ie array of 16 float
+void setModelViewMatrix(f32 *matrix);
+
+/// Write the projection matrix into a 4x4 matrix (Allocated)
+void getProjectionMatrix(f32 *matrix);
+
 /// Define the projection matrix by a 4x4 matrix ie array of 16 float
 void setProjectionMatrix(f32 *matrix);
 

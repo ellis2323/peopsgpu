@@ -21,7 +21,7 @@ endif
 LOCAL_SRC_FILES :=  gpuDraw.c gpuFPS.c \
                     gpuPrim.c gpuPlugin.c \
                     gpupsemu.c gpusoft.c gpuTexture.c  \
-                    gfxCommon.c gfxShader.c gfxInput.c  \
+                    gfxCommon.c gfxMatrix.c gfxShader.c gfxInput.c  \
                     gfxCommandGL.c gfxCommandGLES2.c gfxCommandGLES1.c gfxCommandLog.c \
                     gfxTexture.c gfxFBO.c gfxContext.c \
 					rmalloc.c

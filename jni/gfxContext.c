@@ -6,6 +6,7 @@
 //  Copyright (c) 2013 Mallet Laurent. All rights reserved.
 //
 
+#include "gfxMatrix.h"
 #include "gfxContext.h"
 #include "gfxFBO.h"
 #include "gfxGL.h"
@@ -102,18 +103,19 @@ void swapContext1() {
         indices[5] = 3;
         
 
-        glGetFloatv(GL_MODELVIEW_MATRIX, mv);
-        glGetFloatv(GL_PROJECTION_MATRIX, proj);
+        getModelViewMatrix(mv);
+        getProjectionMatrix(proj);
         
         useFBO(NULL);
-        glFinish();
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
+
         
+        f32 modelView[16];
+        identityMatrix(modelView);
+        setModelViewMatrix(modelView);
         // init projection with psx resolution
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrthof(-1, 1, 1, -1, -1, 1);
+        f32 projection[16];
+        projectionMatrix(projection, -1, 1, 1, -1, -1, 1);
+        setProjectionMatrix(projection);
         
         color += .01;
         color = fmod(color, 1.);
@@ -131,10 +133,8 @@ void swapContext2() {
         glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
     
-        glMatrixMode(GL_PROJECTION);
-        glLoadMatrixf(proj);
-        glMatrixMode(GL_MODELVIEW);
-        glLoadMatrixf(mv);
+        setProjectionMatrix(proj);
+        setModelViewMatrix(mv);
 }
 
 
