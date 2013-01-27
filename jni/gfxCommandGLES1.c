@@ -10,7 +10,6 @@
 #if defined(GL_OGLES1)
 
 void initGL() {
-
     glClearDepthf(1.0f);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
     glHint(GL_GENERATE_MIPMAP_HINT, GL_FASTEST);
@@ -80,13 +79,25 @@ void setAlphaTest(E_ALPHA_TEST test, f32 value) {
     }
 }
 
-f32 sMatrixProjection[16];
-void setProjectionMatrix(f32 *matrix) {
-    memcpy(sMatrixProjection, matrix, 16*sizeof(f32));
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(sMatrixProjection);
+void getModelViewMatrix(f32 *matrix) {
+    glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
 }
 
+void setModelViewMatrix(f32 *matrix) {
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixf(matrix);
+}
+
+void getProjectionMatrix(f32 *matrix) {
+    glGetFloatv(GL_PROJECTION, matrix);
+}
+
+void setProjectionMatrix(f32 *matrix) {
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(matrix);
+}
+
+f32 sMatrixProjection[16];
 void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far) {
     if (((right-left)==0) || ((top-bottom)==0) || ((far-near)==0)) {
         logError(TAG, "Invalid projection Reset");
@@ -94,6 +105,7 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
         bottom=256; top=0;
         near=-1; far=1;
     }
+/*    projectionMatrix(sMatrixProjection, left, right, bottom, top, near, far);
     sMatrixProjection[0] = 2.0f / (right-left);
     sMatrixProjection[1] = 0;
     sMatrixProjection[2] = 0;
@@ -112,7 +124,7 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
     sMatrixProjection[12] = - (right+left) / (right-left);
     sMatrixProjection[13] = - (top+bottom) / (top-bottom);
     sMatrixProjection[14] = - (far+near) / (far-near);
-    sMatrixProjection[15] = 1.0f;
+    sMatrixProjection[15] = 1.0f;*/
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrthof(left, right, bottom, top, near, far);
