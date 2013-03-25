@@ -199,8 +199,18 @@ bool isDebuggedCommand(E_CMD_TYPE type);
 /// Draw a triangle
 void drawTriangles(Material *mat, OGLVertex *vertices, u16 *indices, s16 count);
 
-
-
+void SETCOL(OGLVertex x);
+void PRIMdrawTexturedQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OGLVertex* vertex4);
+void PRIMdrawTexturedTri(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3);
+void PRIMdrawTexGouraudTriColor(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3);
+void PRIMdrawTexGouraudTriColorQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OGLVertex* vertex4);
+void PRIMdrawTri(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3);
+void PRIMdrawTri2(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OGLVertex* vertex4);
+void PRIMdrawGouraudTriColor(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3);
+void PRIMdrawGouraudTri2Color(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OGLVertex* vertex4);
+void PRIMdrawFlatLine(OGLVertex* vertex1, OGLVertex* vertex2,OGLVertex* vertex3, OGLVertex* vertex4);
+void PRIMdrawGouraudLine(OGLVertex* vertex1, OGLVertex* vertex2,OGLVertex* vertex3, OGLVertex* vertex4);
+void PRIMdrawQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OGLVertex* vertex4);
 
 
 

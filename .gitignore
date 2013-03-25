@@ -7,3 +7,4 @@
 libs/armeabi/
 fpse/**/*
 obj
+dist/**
