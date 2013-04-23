@@ -42,9 +42,6 @@ typedef double f64;
 #endif // DEBUG
 #endif // ANDROID
 
-#if !defined(_WINDOWS) && !defined(__NANOGL__)
-#define glOrtho(x,y,z,xx,yy,zz) glOrthof(x,y,z,xx,yy,zz)
-#endif
 
 /*#if 0
 #define glError() { \

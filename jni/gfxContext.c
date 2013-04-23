@@ -14,7 +14,7 @@
 
 #define TAG "ELLIS"
 
-Context *sContext;
+Context *sContext = NULL;
 
 Context *getContext() {
 #ifdef DEBUG
@@ -28,17 +28,18 @@ Context *getContext() {
 
 void createContext(s32 width, s32 height) {
     sContext = (Context*)malloc(sizeof(Context));
-    sContext->mFBO = createFBO(width, height, false);
     sContext->mSwapMat = createMaterial();
     sContext->mSwapMat->mType = 1;
-    sContext->mSwapMat->mTexturePtrId = sContext->mFBO->mTexturePtrId;
     sContext->mWidth = width;
     sContext->mHeight = height;
+    sContext->mFBO = createFBO(width, height, false);
+    sContext->mSwapMat->mTexturePtrId = sContext->mFBO->mTexturePtrId;
     useFBO(sContext->mFBO);
-    //useFBO(NULL);
+    logInfo(TAG, "Create Context -- %d %d", width, height);
 }
 
 void resizeContext(s32 width, s32 height) {
+    logInfo(TAG, "Resize Context %d %d", width, height);
 #ifdef DEBUG
     if (sContext==NULL) {
         logInfo(TAG, "No context created");
@@ -123,7 +124,6 @@ void swapContext1() {
         glClear(GL_COLOR_BUFFER_BIT);
  
         drawTriangles(sContext->mSwapMat, v, indices, 2);
-
     }
 }
 
@@ -132,7 +132,7 @@ void swapContext2() {
         useFBO(sContext->mFBO);
         glClearColor(0,0,0,0);
         glClear(GL_COLOR_BUFFER_BIT);
-    
+ 
         setProjectionMatrix(proj);
         setModelViewMatrix(mv);
 }

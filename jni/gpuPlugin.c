@@ -50,6 +50,7 @@
 #include "gpuStdafx.h"
 
 #include "gfxCommand.h"
+#include "gfxContext.h"
 #include "gfxTexture.h"
 
 extern unsigned int CSVERTEX,CSCOLOR,CSTEXTURE;
@@ -762,9 +763,9 @@ bRenderFrontBuffer=FALSE;
 // if(gTexPicName) DisplayPic();
 // if(ulKeybits&KEY_SHOWFPS) DisplayText();
 
-if(iDrawnSomething)                                   // linux:
-      flipEGL();
-
+if(iDrawnSomething)  { // linux:
+    flipEGL();
+}
 
 //if(iBlurBuffer) UnBlurBackBuffer();
 }
@@ -937,9 +938,8 @@ if ((PSXDisplay.DisplayMode.y == PSXDisplay.DisplayModeNew.y) &&
 else                                                  // some res change?
  {
    // -> new psx resolution
-  setProjectionOrtho(0,PSXDisplay.DisplayModeNew.x,
-            PSXDisplay.DisplayModeNew.y, 0, -1, 1);
-            //LOGE("PSXDisplay.DisplayModeNew.x:%d ,PSXDisplay.DisplayModeNew.y:%d");              // -> new psx resolution
+  setProjectionOrtho(0, PSXDisplay.DisplayModeNew.x, PSXDisplay.DisplayModeNew.y, 0, -1, 1);
+  //LOGE("PSXDisplay.DisplayModeNew.x:%d ,PSXDisplay.DisplayModeNew.y:%d");              // -> new psx resolution
   if(bKeepRatio&&iResX>iResY) SetAspectRatio();
  }
 
@@ -2730,8 +2730,11 @@ JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setResizeGL(JNIEnv *env, jobj
 }
 
 void flipEGL()
-{    (*env2)->CallVoidMethod(env2, FlipGLObj, FlipGL);
-      nbft4=0;
+{
+    swapContext1();
+    (*env2)->CallVoidMethod(env2, FlipGLObj, FlipGL);
+    nbft4=0;
+    swapContext2();
 }
 
 

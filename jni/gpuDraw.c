@@ -85,8 +85,9 @@
 #define ST_FACVRAM         256.0f
                 
 
+extern void createContext(s32 width, s32 height);
 
-// draw globals; most will be initialized again later (by config or checks) 
+// draw globals; most will be initialized again later (by config or checks)
 
 BOOL           bIsFirstFrame=TRUE;
 // resolution/ratio vars
@@ -222,6 +223,8 @@ int GLinitialize()
     initCommonGL();
     initGL();
     initTextures();
+    createContext(640, 480);
+
     //----------------------------------------------------//
     //initEGL();
     
@@ -279,7 +282,6 @@ int GLinitialize()
     CheckTextureMemory();                                 // check available tex memory
     
     if(bKeepRatio) SetAspectRatio();                      // set ratio
-    
     
     bIsFirstFrame = FALSE;                                // we have survived the first frame :)
     

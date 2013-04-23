@@ -38,6 +38,28 @@ void initGL() {
     glPixelStorei(GL_PACK_ALIGNMENT,1);
 }
 
+void setDrawMode(E_DRAWTYPE m) {
+    switch (m) {
+        case DRAWTYPE_FLAT:
+            glShadeModel(GL_FLAT);
+            return;
+        case DRAWTYPE_SMOOTH:
+            glShadeModel(GL_SMOOTH);
+            return;
+        default:
+            logError(TAG, "DrawType not supported or implemented %d", m);
+            break;
+    }
+}
+
+void useAlphaTest(bool flag) {
+    if (flag) {
+        glEnable(GL_ALPHA_TEST);
+    } else {
+        glDisable(GL_ALPHA_TEST);
+    }
+}
+
 void setAlphaTest(E_ALPHA_TEST test, f32 value) {
     switch (test) {
         case ALPHA_TEST_NEVER:
@@ -90,6 +112,7 @@ void setProjectionMatrix(f32 *matrix) {
 
 f32 sMatrixProjection[16];
 void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far) {
+    logInfo(TAG, "Projection %f %f %f %f %f %f", left, right, bottom, top, near, far);
     if (((right-left)==0) || ((top-bottom)==0) || ((far-near)==0)) {
         logError(TAG, "Invalid projection Reset");
         left=0; right=256;
@@ -584,16 +607,16 @@ void mali400() {
     glDisable(GL_BLEND);
     glBlendFunc(770,770);
     glLoadIdentity();
-    glOrtho(0,256,0, 0, -1, 1);
+    glOrthof(0,256,0, 0, -1, 1);
     glScissor(0,0,iResX,iResY);
     glDisable(GL_SCISSOR_TEST);
     glClearColor(0,0,0,1.0f);
     glClear(16384);
     glEnable(GL_SCISSOR_TEST);
     glLoadIdentity();
-    glOrtho(0,256,251, 0, -1, 1);
+    glOrthof(0,256,251, 0, -1, 1);
     glLoadIdentity();
-    glOrtho(0,368,502, 0, -1, 1);
+    glOrthof(0,368,502, 0, -1, 1);
     glDisable(GL_SCISSOR_TEST);
     glClearColor(0,0,0,128);
     glClear(16384);

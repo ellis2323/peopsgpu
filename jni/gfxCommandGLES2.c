@@ -4,6 +4,7 @@
 
 #if defined(GL_OGLES2)
 
+#define TAG "GLES2"
 
 
 extern E_TRIBOOL_TYPE sBlendingState;

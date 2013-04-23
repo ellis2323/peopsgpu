@@ -85,10 +85,17 @@ void useFBO(FBO *fbo) {
     if(fbo) {
         glBindFramebufferOES(GL_FRAMEBUFFER_OES, fbo->mFBO);
         glViewport(0,0,fbo->mWidth, fbo->mHeight);
+//        glMatrixMode(GL_PROJECTION);
+//        glLoadIdentity();
+//        glOrthof(0, 1, 0, 1, -1, 1);
     } else {
         glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
         Context  *ctx = getContext();
         glViewport(0, 0, ctx->mWidth, ctx->mHeight);
+//        logInfo(TAG, "Ctx %d %d", ctx->mWidth, ctx->mHeight),
+//        glMatrixMode(GL_PROJECTION);
+//        glLoadIdentity();
+//        glOrthof(0, 1, 0, 1, -1, 1);
     }
 }
 
