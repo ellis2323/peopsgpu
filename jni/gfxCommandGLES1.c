@@ -4,10 +4,13 @@
 #include "gpuExternals.h"
 #include "gpuPlugin.h"
 #include "gfxGL.h"
+#include <math.h>
 
 #define TAG "ELLIS"
 
 #if defined(GL_OGLES1)
+
+static f32 sMatrixProjection[16];
 
 void initGL() {
 
@@ -102,22 +105,29 @@ void setModelViewMatrix(f32 *matrix) {
 }
 
 void getProjectionMatrix(f32 *matrix) {
-    glGetFloatv(GL_PROJECTION, matrix);
+    // replace this instruction
+    // glGetFloatv(GL_PROJECTION, matrix);
+    for (s32 i=0; i<16; ++i) {
+        matrix[i] = sMatrixProjection[i];
+    }
 }
 
 void setProjectionMatrix(f32 *matrix) {
+    for (s32 i=0; i<16; ++i) {
+        sMatrixProjection[i] = matrix[i];
+    }
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(matrix);
 }
 
-f32 sMatrixProjection[16];
 void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far) {
-    logInfo(TAG, "Projection %f %f %f %f %f %f", left, right, bottom, top, near, far);
-    if (((right-left)==0) || ((top-bottom)==0) || ((far-near)==0)) {
+    logProjection("Projection ", left, right, bottom, top, near, far);
+    if ((fabsf(right-left)<0.01f) || (fabsf(top-bottom)<0.01f) || (fabsf(far-near)<0.01f)) {
         logError(TAG, "Invalid projection Reset");
-        left=0; right=256;
-        bottom=256; top=0;
-        near=-1; far=1;
+        if (fabsf(right-left)<0.01f) { left=0; right=256; }
+        if (fabsf(top-bottom)<0.01f) { bottom=256; top=0; }
+        if (fabsf(far-near)<0.01f)   { near=-1; far=1; }
+        logProjection("Fix", left, right, bottom, top, near, far);
     }
     sMatrixProjection[0] = 2.0f / (right-left);
     sMatrixProjection[1] = 0;
@@ -599,6 +609,7 @@ void PRIMdrawQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OG
 extern GLubyte *texturepart;
 
 void mali400() {
+return;
     Vertex v[4];
     Vertex2 v2[4];
     //Vec3f v3[4];
@@ -607,7 +618,7 @@ void mali400() {
     glDisable(GL_BLEND);
     glBlendFunc(770,770);
     glLoadIdentity();
-    glOrthof(0,256,0, 0, -1, 1);
+    glOrthof(0,256,1, 0, -1, 1);
     glScissor(0,0,iResX,iResY);
     glDisable(GL_SCISSOR_TEST);
     glClearColor(0,0,0,1.0f);
