@@ -98,5 +98,6 @@ typedef enum TRIBOOL_TYPE E_TRIBOOL_TYPE;
 void initVertex(GLSLVertex *v);
 void initVertices(GLSLVertex *v, s32 count);
 void logVertex(const GLSLVertex *v);
+void logProjection(const c8 *msg, f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far);
 
 #endif // GFX_COMMON_H

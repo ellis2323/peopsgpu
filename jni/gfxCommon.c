@@ -39,3 +39,13 @@ void logVertex(const GLSLVertex *v) {
     c8 vv[20]; unitV(vv, v->tow);
     logInfo(TAG, "x:%s y:%s z:%s u:%s v:%s r:%d g:%d b:%d a:%d", vx, vy, vz, vu, vv, v->c.col[0], v->c.col[1], v->c.col[2], v->c.col[3]);
 }
+
+void logProjection(const c8 *msg, f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far) {
+    c8 vl[20]; floatV(vl, left);
+    c8 vr[20]; floatV(vr, right);
+    c8 vb[20]; floatV(vb, bottom);
+    c8 vt[20]; floatV(vt, top);
+    c8 vn[20]; floatV(vn, near);
+    c8 vf[20]; floatV(vf, far);
+    logInfo(TAG, "%s: %s %s %s %s %s %s", msg, vl, vr, vb, vt, vn ,vf);
+}
