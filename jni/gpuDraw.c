@@ -45,6 +45,7 @@
 
 #include "gfxCommand.h"
 #include "gfxTexture.h"
+#include "gfxContext.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
 // defines
@@ -85,7 +86,6 @@
 #define ST_FACVRAM         256.0f
                 
 
-extern void createContext(s32 width, s32 height);
 
 // draw globals; most will be initialized again later (by config or checks)
 
@@ -223,7 +223,7 @@ int GLinitialize()
     initCommonGL();
     initGL();
     initTextures();
-    createContext(640, 480);
+    createContext(640, 480, 320,  240);
 
     //----------------------------------------------------//
     //initEGL();

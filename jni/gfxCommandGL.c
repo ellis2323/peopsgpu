@@ -18,6 +18,7 @@ E_CMD_TYPE sDebugCmdType = CMD_TYPE_NOOP;
 Box sViewportBox;
 
 void initCommonGL() {
+    logInfo(TAG, "Init common GL: create %d materials", MAX_MATERIAL_QTY);
     sMaterials = (Material*)malloc(sizeof(Material)*MAX_MATERIAL_QTY);
     for (s32 i=0; i<MAX_MATERIAL_QTY; ++i) {
         sMaterials[i].mUID = i;
@@ -236,6 +237,7 @@ Material *getMaterial(s32 index) {
 }
 
 void destroyMaterial(s32 index) {
+    logInfo(TAG, "destroyMaterial %d", index);
     Material *mat = &(sMaterials[index]);
     if (mat) {
         mat->mVersion = 0;

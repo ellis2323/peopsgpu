@@ -4,13 +4,26 @@
 #include "gpuExternals.h"
 #include "gpuPlugin.h"
 #include "gfxGL.h"
+#include "gfxMatrix.h"
 #include <math.h>
 
 #define TAG "ELLIS"
 
 #if defined(GL_OGLES1)
 
-static f32 sMatrixProjection[16];
+static f32 *sMatrixProjection;
+static f32 *sMatrixModelView;
+
+// PSX Context
+static Material* sPrevMaterial = NULL;
+static E_DRAWTYPE sPrevDrawType = DRAWTYPE_FLAT;
+static bool sUsePrevAlphaTest = false;
+static E_ALPHA_TEST sPrevAlphaTestEnum = ALPHA_TEST_ALWAYS;
+static f32 sPrevAlphaTestValue = 1.0;
+static u32 sCurrentColor;
+// in material
+static u8 sLastDepthMode;
+static u8 sLastTransMode;
 
 void initGL() {
 
@@ -39,9 +52,15 @@ void initGL() {
     glDisableClientState(GL_NORMAL_ARRAY);
     
     glPixelStorei(GL_PACK_ALIGNMENT,1);
+    
+    sMatrixModelView = createIdentityMatrix();
+    sMatrixProjection = createIdentityMatrix();
 }
 
+
+
 void setDrawMode(E_DRAWTYPE m) {
+    sPrevDrawType = m;
     switch (m) {
         case DRAWTYPE_FLAT:
             glShadeModel(GL_FLAT);
@@ -56,6 +75,7 @@ void setDrawMode(E_DRAWTYPE m) {
 }
 
 void useAlphaTest(bool flag) {
+    sUsePrevAlphaTest = flag;
     if (flag) {
         glEnable(GL_ALPHA_TEST);
     } else {
@@ -64,6 +84,8 @@ void useAlphaTest(bool flag) {
 }
 
 void setAlphaTest(E_ALPHA_TEST test, f32 value) {
+    sPrevAlphaTestEnum = test;
+    sPrevAlphaTestValue = value;
     switch (test) {
         case ALPHA_TEST_NEVER:
             glAlphaFunc(GL_NEVER, value);
@@ -96,10 +118,17 @@ void setAlphaTest(E_ALPHA_TEST test, f32 value) {
 }
 
 void getModelViewMatrix(f32 *matrix) {
-    glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
+    // replace this instruction
+    // glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
+    for (s32 i=0; i<16; ++i) {
+        matrix[i] = sMatrixModelView[i];
+    }
 }
 
 void setModelViewMatrix(f32 *matrix) {
+    for (s32 i=0; i<16; ++i) {
+        sMatrixModelView[i] = matrix[i];
+    }    
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(matrix);
 }
@@ -153,7 +182,6 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
     glOrthof(left, right, bottom, top, near, far);
 }
 
-u32 sCurrentColor;
 void setColor(GLSLColor color) {
     sCurrentColor=color.lcol;
     glColor4ub(color.col[0],color.col[1],color.col[2],color.col[3]);
@@ -186,6 +214,7 @@ void drawTriGou(OGLVertex *vertices, u16 *indices, s16 count) {
     if (sCSTEXTURE) glDisableClientState(GL_TEXTURE_COORD_ARRAY);*/
     
     glDisable(GL_TEXTURE_2D);
+    if (count == 0 || vertices == NULL || indices == NULL) return;
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
@@ -256,6 +285,8 @@ void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
         }
     //}
     
+    if (count == 0 || vertices == NULL || indices == NULL) return;
+
     // change
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
@@ -283,7 +314,47 @@ void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
     sCSTEXTURE=1;
 }
 
+void loadMaterial() {
+    // restore ctx
+//   setDrawMode(sPrevDrawType);
+//    useAlphaTest(sUsePrevAlphaTest);
+//    setAlphaTest(sPrevAlphaTestEnum, sPrevAlphaTestValue);
+    GLSLColor v;
+    v.lcol = sCurrentColor;
+    setColor(v);
+    // restore material
+    Material* mat = sPrevMaterial;
+    if (mat == NULL) return;
+    setDepthMode(mat->mDepthMode);
+    setTransMode(mat->mTransMode);
+    
+    switch (mat->mType) {
+        case 0:
+            drawTriGou(NULL, NULL, 0);
+            break;
+        case 1:
+            drawTexTriGou(mat, NULL, NULL, 0);
+            break;
+        default:
+            logInfo(TAG, "Unkown type of material");
+    }
+}
+
+void saveMaterial(Material* mat) {
+    if (mat == NULL) return;
+    sPrevMaterial = mat;
+}
+
+
 void drawTriangles(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) {
+    Context* ctx = getContext();
+    if (ctx && ctx->mFBO) {
+        saveMaterial(mat);
+    }
+    drawTrianglesOutOfContext(mat, vertices, indices, count);
+}
+
+void drawTrianglesOutOfContext(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) {
     setDepthMode(mat->mDepthMode);
     setTransMode(mat->mTransMode);
     
@@ -299,9 +370,9 @@ void drawTriangles(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
     }
 }
 
+
 // MARK: Private
 
-static u8 sLastDepthMode;
 void setDepthMode(u8 mode) {
     //if (mode==sLastDepthMode) return;
     sLastDepthMode = mode;
@@ -319,7 +390,6 @@ void setDepthMode(u8 mode) {
     }
 }
 
-static u8 sLastTransMode;
 void setTransMode(u8 mode) {
     //if (mode==sLastTransMode) return;
     sLastTransMode = mode;

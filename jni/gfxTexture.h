@@ -88,6 +88,9 @@ s32 getCurrentTid();
 /// Use Texturing
 void useTexturing(bool flag);
 
+/// Use or not texturing now
+bool usingTexturing();
+
 /// Set Filter for the current Texture
 void setFilterForCurrentTexture(s8 filter);
 

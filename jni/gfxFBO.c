@@ -30,7 +30,7 @@ FBO *createFBO(s32 width, s32 height, bool hd) {
     height = height;
 
     s32 texturePtrId = createTexture(0, 0);
-    setTexture(texturePtrId, width, height, 1, NULL);
+    setTexture(texturePtrId, width, height, 3, NULL);
     Texture *tex = getTexture(texturePtrId);
     
     // create depth renderbuffer
@@ -85,17 +85,10 @@ void useFBO(FBO *fbo) {
     if(fbo) {
         glBindFramebufferOES(GL_FRAMEBUFFER_OES, fbo->mFBO);
         glViewport(0,0,fbo->mWidth, fbo->mHeight);
-//        glMatrixMode(GL_PROJECTION);
-//        glLoadIdentity();
-//        glOrthof(0, 1, 0, 1, -1, 1);
     } else {
         glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
         Context  *ctx = getContext();
-        glViewport(0, 0, ctx->mWidth, ctx->mHeight);
-//        logInfo(TAG, "Ctx %d %d", ctx->mWidth, ctx->mHeight),
-//        glMatrixMode(GL_PROJECTION);
-//        glLoadIdentity();
-//        glOrthof(0, 1, 0, 1, -1, 1);
+        glViewport(0, 0, ctx->mScreenWidth, ctx->mScreenHeight);
     }
 }
 
@@ -127,7 +120,7 @@ FBO *createFBO(s32 width, s32 height, bool hd) {
     height = height;
 
     s32 texturePtrId = createTexture(0, 0);
-    setTexture(texturePtrId, width, height, 1, NULL);
+    setTexture(texturePtrId, width, height, 3, NULL);
     Texture *tex = getTexture(texturePtrId);
     
     // create depth renderbuffer

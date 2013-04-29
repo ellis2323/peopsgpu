@@ -183,6 +183,12 @@ Material *getMaterial(s32 uid);
 /// Destroy a material
 void destroyMaterial(s32 uid);
 
+//! load last Material saved
+void loadMaterial();
+
+//! save last Material used
+void saveMaterial(Material* mat);
+
 /// Set Draw Mode FLAT or SMOOTH
 void setDrawMode(E_DRAWTYPE m);
 

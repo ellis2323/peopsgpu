@@ -187,6 +187,7 @@ void ResizeWindow()
  } else {
     rRatioRect.bottom = iResY;
  }
+ 
  setViewport(rRatioRect.left,                           // init viewport by ratio rect
             iResY-(rRatioRect.top+rRatioRect.bottom),
             rRatioRect.right, 
@@ -195,8 +196,9 @@ void ResizeWindow()
  setScissor(0, 0, iResX, iResY);                        // init clipping (fullscreen)
  useScissor(true);
 
-
-
+ // resize screen
+ resizeViewPortContext(rRatioRect.left, iResY-(rRatioRect.top+rRatioRect.bottom), rRatioRect.right, rRatioRect.bottom);
+ 
  // init projection with psx resolution
  setProjectionOrtho(0, PSXDisplay.DisplayMode.x, PSXDisplay.DisplayMode.y, 0, -1, 1);
  if (bKeepRatio&&iResX>iResY)
@@ -918,6 +920,9 @@ setViewport(rRatioRect.left,
            iResY-(rRatioRect.top+rRatioRect.bottom),
            rRatioRect.right,
            rRatioRect.bottom);glError();                         // init viewport
+
+ resizeViewPortContext(0, 0, rRatioRect.right, rRatioRect.bottom);
+
 }
 
 ////////////////////////////////////////////////////////////////////////

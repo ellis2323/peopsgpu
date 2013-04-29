@@ -17,6 +17,7 @@
 #define MAX_TEXTURES_PTR 255
 static TexturePtr *sTexturesPtrArray = NULL;
 static s32 sLastTidUsed = 0;
+static bool sUseTexturing;
 
 s32 findFreeTexturePtr();
 
@@ -171,7 +172,7 @@ Texture *getTexture(s32 texturePtrId) {
 }
 
 void bindTexture(s32 tId) {
-    logInfo(TAG, "bindTexture: %d", tId);
+    // FIXME: logInfo(TAG, "bindTexture: %d", tId);
     if (tId==0) {
         glBindTexture(GL_TEXTURE_2D, 0);
         return;
@@ -195,11 +196,16 @@ s32 getCurrentTid() {
 }
 
 void useTexturing(bool flag) {
+    sUseTexturing = flag;
     if (flag) {
         glEnable(GL_TEXTURE_2D);
     } else {
         glDisable(GL_TEXTURE_2D);
     }
+}
+
+bool usingTexturing() {
+    return sUseTexturing;
 }
 
 void setFilterForCurrentTexture(s8 filter) {
