@@ -182,11 +182,11 @@ void ResizeWindow()
 {
  rRatioRect.left   = rRatioRect.top=0;
  rRatioRect.right  = iResX;
- if (iResX<iResY) {
+/* if (iResX<iResY) {
     rRatioRect.bottom = (iResX*3)/4;
- } else {
+ } else {*/
     rRatioRect.bottom = iResY;
- }
+// }
  
  setViewport(rRatioRect.left,                           // init viewport by ratio rect
             iResY-(rRatioRect.top+rRatioRect.bottom),
@@ -359,8 +359,9 @@ InitFPS();
 
  rRatioRect.left   = rRatioRect.top=0;
  rRatioRect.right  = iResX;
- if (iResX<iResY) rRatioRect.bottom = (iResX*3)/4;
- else rRatioRect.bottom = iResY;
+ /*if (iResX<iResY) rRatioRect.bottom = (iResX*3)/4;
+ else*/
+ rRatioRect.bottom = iResY;
 
  bDisplayNotSet = TRUE; 
  bSetClip=TRUE;
@@ -943,6 +944,8 @@ if ((PSXDisplay.DisplayMode.y == PSXDisplay.DisplayModeNew.y) &&
 else                                                  // some res change?
  {
    // -> new psx resolution
+    resizeViewPortContext(0, 0, rRatioRect.right, rRatioRect.bottom);
+ 
   setProjectionOrtho(0, PSXDisplay.DisplayModeNew.x, PSXDisplay.DisplayModeNew.y, 0, -1, 1);
   //LOGE("PSXDisplay.DisplayModeNew.x:%d ,PSXDisplay.DisplayModeNew.y:%d");              // -> new psx resolution
   if(bKeepRatio&&iResX>iResY) SetAspectRatio();

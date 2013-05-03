@@ -351,10 +351,6 @@ void drawTriangles(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
     if (ctx && ctx->mFBO) {
         saveMaterial(mat);
     }
-    drawTrianglesOutOfContext(mat, vertices, indices, count);
-}
-
-void drawTrianglesOutOfContext(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) {
     setDepthMode(mat->mDepthMode);
     setTransMode(mat->mTransMode);
     

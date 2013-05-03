@@ -170,7 +170,6 @@ void swapContext1() {
         glTexCoordPointer(2, GL_FLOAT, sizeof(OGLVertex), &v[0].sow);
     
         glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_SHORT, indices);
-        //drawTrianglesOutOfContext(sContext->mSwapMat, v, indices, 2);
 
     }
 }
