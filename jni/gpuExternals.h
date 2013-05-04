@@ -56,8 +56,6 @@ extern "C" {
 /////////////////////////////////////////////////////////////////////////////
 
 #define CLUTUSED     0x80000000
-//glColor4ubv(x.c.col)
-//#define SETPCOL(x)  if(x->c.lcol!=ulOLDCOL) {ulOLDCOL=x->c.lcol;glColor4ub(x->c.col[0],x->c.col[1],x->c.col[2],x->c.col[3]);}
 
 #define INFO_TW        0
 #define INFO_DRAWSTART 1
@@ -320,7 +318,6 @@ extern u8            ubGloAlpha;
 extern short         sSprite_ux2;
 extern short         sSprite_vy2;
 extern BOOL          bRenderFrontBuffer;
-extern unsigned long ulOLDCOL;
 extern unsigned long ulClutID;
 extern void (*primTableJ[256])(unsigned char *);
 extern void (*primTableSkip[256])(unsigned char *);

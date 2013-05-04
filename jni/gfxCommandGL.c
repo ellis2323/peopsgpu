@@ -21,6 +21,9 @@ s32 findFreeMaterial(void);
 GLenum convertBlendFactor(E_BLEND_FACTOR f);
 bool hasError(void);
 
+static bool sUseDepthTest = false;
+static s32  sDepthTestMode = -1;
+static bool sUseBlending = false;
 
 void initCommonGL() {
     logInfo(TAG, "Init common GL: create %d materials", MAX_MATERIAL_QTY);
@@ -104,9 +107,35 @@ void useDithering(bool flag) {
 
 void useBlending(bool flag) {
     if (flag) {
+        sUseBlending = true;
         glEnable(GL_BLEND);
     } else {
+        sUseBlending = false;
         glDisable(GL_BLEND);
+    }
+}
+
+void setTransMode(u8 mode) {
+    switch (mode) {
+        case 0:
+            sUseBlending = false;
+            glDisable(GL_BLEND);
+            break;
+        case 1:
+            sUseBlending = true;
+            glEnable(GL_BLEND);
+            break;
+        default:
+            logInfo(TAG, "Trans Mode unkown");
+            break;
+    }
+}
+
+void restoreUseBlending(void) {
+    if (sUseBlending) {
+        glDisable(GL_BLEND);
+    } else {
+        glEnable(GL_BLEND);
     }
 }
 
@@ -134,11 +163,12 @@ void setBlendFunc(E_BLEND_FACTOR src, E_BLEND_FACTOR dst) {
     glBlendFunc(s,d);
 }
 
-
 void useDepthTest(bool flag) {
     if (flag) {
+        sUseDepthTest = true;
         glEnable(GL_DEPTH_TEST);
     } else {
+        sUseDepthTest = false;
         glDisable(GL_DEPTH_TEST);
     }
 }
@@ -146,27 +176,35 @@ void useDepthTest(bool flag) {
 void setDepthTest(E_DEPTH_TEST test) {
     switch (test) {
         case DEPTH_TEST_NEVER:
+            sDepthTestMode = 0;
             glDepthFunc(GL_NEVER);
         break;
         case DEPTH_TEST_LESS:
+            sDepthTestMode = 1;
             glDepthFunc(GL_LESS);
         break;
         case DEPTH_TEST_EQUAL:
+            sDepthTestMode = 2;
             glDepthFunc(GL_EQUAL);
         break;
         case DEPTH_TEST_LEQUAL:
+            sDepthTestMode = 3;
             glDepthFunc(GL_LEQUAL);
         break;
         case DEPTH_TEST_GREATER:
+            sDepthTestMode = 4;
             glDepthFunc(GL_GREATER);
         break;
         case DEPTH_TEST_NOTEQUAL:
+            sDepthTestMode = 5;
             glDepthFunc(GL_NOTEQUAL);
         break;
         case DEPTH_TEST_GEQUAL:
+            sDepthTestMode = 6;
             glDepthFunc(GL_GEQUAL);
         break;
         case DEPTH_TEST_ALWAYS:
+            sDepthTestMode = 7;
             glDepthFunc(GL_ALWAYS);
         break;
         default:
@@ -175,8 +213,28 @@ void setDepthTest(E_DEPTH_TEST test) {
     }
 }
 
-/// Set Depth Test
-void setDepthTest(E_DEPTH_TEST test);
+void setDepthMode(u8 mode) {
+    switch (mode) {
+        case 0:
+            sUseDepthTest = false;
+            sDepthTestMode = 0;
+            glDisable(GL_DEPTH_TEST);
+            break;
+        case 1:
+            sDepthTestMode = 4;
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_GREATER);
+            break;
+        default:
+            logInfo(TAG, "Depth Mode unkown");
+            break;
+    }
+}
+
+void restoreDepthTest(void) {
+    useDepthTest(sUseDepthTest);
+    setDepthTest(sDepthTestMode);
+}
 
 void setClearColor(f32 r, f32 g, f32 b, f32 a) {
     glClearColor(r,g,b,a);

@@ -106,7 +106,6 @@ BOOL bUsingMovie=FALSE; // movie active flag
 PSXRect_t xrMovieArea; // rect for movie upload
 short sSprite_ux2; // needed for sprire adjust
 short sSprite_vy2; //
-unsigned long ulOLDCOL=0; // active color
 unsigned long ulClutID; // clut
 
 unsigned long dwCfgFixes; // game fixes
@@ -639,7 +638,7 @@ vertex[0].c.lcol=DoubleBGR2RGB(DrawAttributes);
  //else vertex[0].c.lcol=DrawAttributes;
 }
 vertex[0].c.col[3]=ubGloAlpha; // -> set color with
-SETCOL(vertex[0]); // texture alpha
+setColor(vertex[0].c); // texture alpha
 }
 
 if(bDrawSmoothShaded!=bOldSmoothShaded) // shading changed?
@@ -661,7 +660,7 @@ if(bDrawNonShaded) return; // no shading? bye
 
 DrawAttributes=DoubleBGR2RGB(DrawAttributes); // multipass is just half color, so double it on opaque pass
 vertex[0].c.lcol=DrawAttributes|0xff000000;
-SETCOL(vertex[0]); // set color
+setColor(vertex[0].c); // set color
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1224,7 +1223,7 @@ bDrawSmoothShaded = FALSE;
 
 /* if(bGLBlend) vertex[0].c.lcol=0xff7f7f7f; // set solid col
 else */vertex[0].c.lcol=0xffffffff;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 SetOGLDisplaySettings(0);
 
@@ -1918,7 +1917,7 @@ bDrawSmoothShaded = FALSE;
 SetRenderState((unsigned long)0x01000000);
 SetRenderMode((unsigned long)0x01000000, FALSE);
 vertex[0].c.lcol=0xff000000;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 if(ly0>pd->DisplayPosition.y)
 {
 vertex[0].x=0;vertex[0].y=0;
@@ -1946,7 +1945,7 @@ bDrawSmoothShaded = FALSE;
 SetRenderState((unsigned long)0x01000000);
 SetRenderMode((unsigned long)0x01000000, FALSE);
 vertex[0].c.lcol=gpuData[0]|0xff000000;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 useScissor(false);
 PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 useScissor(true);
@@ -2270,7 +2269,7 @@ if(bIgnoreNextTile) {bIgnoreNextTile=FALSE;return;}
 
 vertex[0].c.lcol=gpuData[0];
 vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 
@@ -2317,7 +2316,7 @@ SetRenderMode(gpuData[0], FALSE);
 SetZMask4NT();
 
 vertex[0].c.lcol=gpuData[0];vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 
@@ -2364,7 +2363,7 @@ SetZMask4NT();
 
 vertex[0].c.lcol=gpuData[0];
 vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 
@@ -2411,7 +2410,7 @@ SetZMask4NT();
 
 vertex[0].c.lcol=gpuData[0];
 vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 
@@ -2468,7 +2467,7 @@ return;
 lABR=GlobalTextABR;
 lDST=DrawSemiTrans;
 vertex[0].c.col[3]=ubGloAlpha/2; // -> set color with
-SETCOL(vertex[0]); // texture alpha
+setColor(vertex[0].c); // texture alpha
 PRIMdrawTexturedQuad(&vertex[0], &vertex[1], &vertex[2], &vertex[3]);
 vertex[0].x+=POFF;vertex[1].x+=POFF;
 vertex[2].x+=POFF;vertex[3].x+=POFF;
@@ -3071,7 +3070,7 @@ SetRenderMode(gpuData[0], FALSE);
 SetZMask4NT();
 
 vertex[0].c.lcol=gpuData[0];vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawTri2(&vertex[0], &vertex[1], &vertex[2],&vertex[3]);
 
@@ -3821,7 +3820,7 @@ if(bDrawNonShaded)
 /* if(bGLBlend) vertex[0].c.lcol=0x7f7f7f;
 else */vertex[0].c.lcol=vertex[1].c.lcol=vertex[2].c.lcol=0xffffff;
 vertex[0].c.col[3]=vertex[1].c.col[3]=vertex[2].c.col[3]=ubGloAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawTexGouraudTriColor(&vertex[0], &vertex[1], &vertex[2]);
 
@@ -3982,7 +3981,7 @@ if(bDrawNonShaded)
 /* if(bGLBlend) vertex[0].c.lcol=0x7f7f7f;
 else */vertex[0].c.lcol=vertex[1].c.lcol=vertex[2].c.lcol=vertex[3].c.lcol=0xffffff;
 vertex[0].c.col[3]=vertex[1].c.col[3]=vertex[2].c.col[3]=vertex[3].c.col[3]=ubGloAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawTexGouraudTriColorQuad(&vertex[0], &vertex[1], &vertex[3], &vertex[2]);
 
@@ -4079,7 +4078,7 @@ SetZMask3NT();
 
 vertex[0].c.lcol=gpuData[0];
 vertex[0].c.col[3]=ubGloColAlpha;
-SETCOL(vertex[0]);
+setColor(vertex[0].c);
 
 PRIMdrawTri(&vertex[0], &vertex[1], &vertex[2]);
 

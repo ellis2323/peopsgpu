@@ -21,9 +21,7 @@ static bool sUsePrevAlphaTest = false;
 static E_ALPHA_TEST sPrevAlphaTestEnum = ALPHA_TEST_ALWAYS;
 static f32 sPrevAlphaTestValue = 1.0;
 static u32 sCurrentColor;
-// in material
-static u8 sLastDepthMode;
-static u8 sLastTransMode;
+
 
 void drawTriGou(OGLVertex *vertices, u16 *indices, s16 count);
 void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count);
@@ -121,6 +119,11 @@ void setAlphaTest(E_ALPHA_TEST test, f32 value) {
     }
 }
 
+void restoreAlphaTest(void) {
+    useAlphaTest(sUsePrevAlphaTest);
+    setAlphaTest(sPrevAlphaTestEnum, sPrevAlphaTestValue);
+}
+
 void getModelViewMatrix(f32 *matrix) {
     // replace this instruction
     // glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
@@ -195,6 +198,12 @@ GLSLColor getColor() {
     GLSLColor v;
     v.lcol = sCurrentColor;
     return v;
+}
+
+void restoreColor(void) {
+    GLSLColor color;
+    color.lcol = sCurrentColor;
+    glColor4ub(color.col[0],color.col[1],color.col[2],color.col[3]);
 }
 
 // Cache Information
@@ -375,48 +384,9 @@ void drawTriangles(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
 
 // MARK: Private
 
-void setDepthMode(u8 mode) {
-    //if (mode==sLastDepthMode) return;
-    sLastDepthMode = mode;
-    switch (mode) {
-        case 0:
-            glDisable(GL_DEPTH_TEST);
-            break;
-        case 1:
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_GREATER);
-            break;
-        default:
-            logInfo(TAG, "Depth Mode unkown");
-            break;
-    }
-}
 
-void setTransMode(u8 mode) {
-    //if (mode==sLastTransMode) return;
-    sLastTransMode = mode;
-    switch (mode) {
-        case 0:
-            glDisable(GL_BLEND);
-            break;
-        case 1:
-            glEnable(GL_BLEND);
-            break;
-        default:
-            logInfo(TAG, "Depth Mode unkown");
-            break;
-    }
-}
 
 unsigned int CSVERTEX=0,CSCOLOR=0,CSTEXTURE=0;
-
-void SETCOL(OGLVertex x) {
-    if(x.c.lcol!=ulOLDCOL) {
-        ulOLDCOL=x.c.lcol;
-        glColor4ub(x.c.col[0],x.c.col[1],x.c.col[2],x.c.col[3]);
-    }
-}
-
 
 ////////////////////////////////////////////////////////////////////////
 // OpenGL primitive drawing commands

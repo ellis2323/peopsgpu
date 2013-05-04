@@ -130,6 +130,7 @@ void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 
 /// Use or Not Dither
 void useDithering(bool flag);
 
+
 // BLENDING
 
 /// Use or Not Blending
@@ -137,6 +138,9 @@ void useBlending(bool flag);
 
 /// Set blending function
 void setBlendFunc(E_BLEND_FACTOR src, E_BLEND_FACTOR dst);
+
+/// Restore Blending
+void restoreUseBlending(void);
 
 // ALPHA TEST
 
@@ -146,6 +150,9 @@ void useAlphaTest(bool flag);
 /// Set Alpha Func
 void setAlphaTest(E_ALPHA_TEST test , f32 value);
 
+/// Restore Alpha Test
+void restoreAlphaTest(void);
+
 // DEPTH TEST
 
 /// Use Depth Test
@@ -153,6 +160,10 @@ void useDepthTest(bool flag);
 
 /// Set Depth Test
 void setDepthTest(E_DEPTH_TEST test);
+
+/// Restore Depth Test
+void restoreDepthTest(void);
+
 
 // BUFFER
 
@@ -198,6 +209,9 @@ void setColor(GLSLColor color);
 /// Get color
 GLSLColor getColor(void);
 
+/// Restore color
+void restoreColor(void);
+
 void debugCommand(bool flag);
 void changeDebuggedCommand(void);
 bool isDebuggedCommand(E_CMD_TYPE type);
@@ -205,7 +219,6 @@ bool isDebuggedCommand(E_CMD_TYPE type);
 /// Draw a triangle
 void drawTriangles(Material *mat, OGLVertex *vertices, u16 *indices, s16 count);
 
-void SETCOL(OGLVertex x);
 void PRIMdrawTexturedQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OGLVertex* vertex4);
 void PRIMdrawTexturedTri(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3);
 void PRIMdrawTexGouraudTriColor(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3);

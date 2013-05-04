@@ -63,21 +63,6 @@ void useFBOInContext(Context* ctx, s32 widthFBO, s32 heightFBO) {
     
 }
 
-/*
-void createContext(s32 width, s32 height, s32 widthFBO, s32 heightFBO) {
-    sContext->mSwapMat = createMaterial();
-    sContext->mOrientation = E_ORIENTATION_UNKNOWN;
-    sContext->mSwapMat->mType = 1;
-    sContext->mX = 0;
-    sContext->mY = 0;
-    sContext->mScreenWidth = width;
-    sContext->mScreenHeight = height;
-    sContext->mFBO = createFBO(widthFBO, heightFBO, false);
-    sContext->mSwapMat->mTexturePtrId = sContext->mFBO->mTexturePtrId;
-    useFBO(sContext->mFBO);
-    logInfo(TAG, "Create Context -- %d %d", width, height);
-}*/
-
 bool hasFBOInContext() {
     if (sContext==NULL) return false;
     if (sContext->mFBO) return true;
@@ -176,9 +161,10 @@ void swapContext1() {
         indices[4] = 2;
         indices[5] = 3;
         
-
+        // saves MV & P matrix
         getModelViewMatrix(sMv);
         getProjectionMatrix(sProj);
+        // swith FBO
         useFBO(NULL);
         
         // reset modelview to identity
@@ -198,6 +184,7 @@ void swapContext1() {
         
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
+        glDisable(GL_ALPHA_TEST);
 
         glEnable(GL_TEXTURE_2D);
         Texture* tex = getTexture(sContext->mSwapMat->mTexturePtrId);
@@ -226,17 +213,21 @@ void swapContext1() {
  */
 void swapContext2() {
     if (sContext->mFBO) {        
-        // restore
+        // Back to FBO
         useFBO(sContext->mFBO);
-        // -- glClearColor(0,0,0,0);
-        // -- glClear(GL_COLOR_BUFFER_BIT);
  
+        // restore MVP matrix
         setProjectionMatrix(sProj);
         setModelViewMatrix(sMv);
-    
-        // restore context
-        loadMaterial();
-    
+
+        // restore
+        restoreUseBlending();
+        restoreDepthTest();
+        restoreAlphaTest();
+        restoreColor();
+        
+
+        // restore texturing
         if (sUseTexturing) {
             useTexturing(true);
             bindTexture(sLastTextureId);
