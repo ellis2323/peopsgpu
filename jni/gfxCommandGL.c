@@ -17,6 +17,11 @@ bool sDebugCmdFlag = false;
 E_CMD_TYPE sDebugCmdType = CMD_TYPE_NOOP;
 Box sViewportBox;
 
+s32 findFreeMaterial(void);
+GLenum convertBlendFactor(E_BLEND_FACTOR f);
+bool hasError(void);
+
+
 void initCommonGL() {
     logInfo(TAG, "Init common GL: create %d materials", MAX_MATERIAL_QTY);
     sMaterials = (Material*)malloc(sizeof(Material)*MAX_MATERIAL_QTY);
@@ -27,7 +32,7 @@ void initCommonGL() {
     }
 }
 
-s32 findFreeMaterial() {
+s32 findFreeMaterial(void) {
     for (s32 i=1; i<MAX_MATERIAL_QTY; ++i) {
         if (sMaterials[i].mVersion==0) {
             return i;
@@ -207,7 +212,7 @@ void readPixels(s32 x,s32 y, s32 width, s32 height, s8 format, u8 *dst) {
 
 
 
-bool hasError() {
+bool hasError(void) {
     GLenum error = glGetError();
     if (error == GL_NO_ERROR) {
         return false;

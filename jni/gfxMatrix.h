@@ -12,10 +12,11 @@
 #include "gfxCommon.h"
 
 // MARK: matrix (OpenGL convention is column oriented. DirectX is row oriented)
+f32 *createMatrix(void);
 
-f32* createIdentityMatrix();
+f32* createIdentityMatrix(void);
 
-f32* createNullMatrix();
+f32* createNullMatrix(void);
 
 void identityMatrix(f32* matrix);
 

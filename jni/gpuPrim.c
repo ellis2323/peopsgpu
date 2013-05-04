@@ -117,7 +117,82 @@ BOOL bUseFixes;
 long drawX,drawY,drawW,drawH; // offscreen drawing checkers
 short sxmin,sxmax,symin,symax;
 
-unsigned int GetTicks(){
+
+unsigned int GetTicks(void);
+void UpdateGlobalTP(unsigned short gdata);
+unsigned long DoubleBGR2RGB (unsigned long BGR);
+unsigned short BGR24to16 (unsigned long BGR);
+void SetSemiTrans(void);
+void SetSemiTransMulti(int Pass);
+void SetZMask3(void);
+void SetZMask3O(void);
+void SetZMask3NT(void);
+void SetZMask4(void);
+void SetZMask4O(void);
+void SetZMask4NT(void);
+void SetZMask4SP(void);
+
+void SetRenderState(unsigned long DrawAttributes);
+void SetRenderColor(unsigned long DrawAttributes);
+void SetOpaqueColor(unsigned long DrawAttributes);
+void SetRenderMode(unsigned long DrawAttributes,BOOL bSCol);
+BOOL IsPrimCompleteInsideNextScreen(short x, short y, short xoff, short yoff);
+
+BOOL ClipVertexListScreen(void);
+
+BOOL bDrawOffscreenFront(void);
+BOOL bOnePointInFront(void);
+BOOL bOnePointInBack(void);
+BOOL bDrawOffscreen4(void);
+BOOL bDrawOffscreen3(void);
+BOOL bDrawOffscreenFrontFF9G4(void);
+
+void UploadScreenEx(long Position);
+BOOL IsCompleteInsideNextScreen(short x, short y, short xoff, short yoff);
+BOOL IsInsideNextScreen(short x, short y, short xoff, short yoff);
+void cmdSTP(unsigned char * baseAddr);
+void cmdTexturePage(unsigned char * baseAddr);
+void cmdTextureWindow(unsigned char *baseAddr);
+void ClampToPSXScreen(short *x0, short *y0, short *x1, short *y1);
+void ClampToPSXScreenOffset(short *x0, short *y0, short *x1, short *y1);
+void PrepareRGB24Upload(void);
+void CheckWriteUpdate(void);
+void MoveImageWrapped(short imageX0,short imageY0, short imageX1,short imageY1, short imageSX,short imageSY);
+void DrawMultiFilterSprite(void);
+void RectTexAlign(void);
+BOOL DoLineCheck(unsigned long * gpuData);
+
+void cmdDrawAreaStart(unsigned char * baseAddr);
+void cmdDrawAreaEnd(unsigned char * baseAddr);
+void cmdDrawOffset(unsigned char * baseAddr);
+void primLoadImage(unsigned char * baseAddr);
+void primStoreImage(unsigned char * baseAddr);
+void primBlkFill(unsigned char * baseAddr);
+void primMoveImage(unsigned char * baseAddr);
+void primTileS(unsigned char *baseAddr);
+void primTile1(unsigned char *baseAddr);
+void primTile8(unsigned char *baseAddr);
+void primTile16(unsigned char *baseAddr);
+void primSprt8(unsigned char *baseAddr);
+void primSprt16(unsigned char *baseAddr);
+void primSprtSRest(unsigned char *baseAddr, unsigned short type);
+void primSprtS(unsigned char *baseAddr);
+void primPolyF4(unsigned char *baseAddr);
+void primPolyFT3(unsigned char *baseAddr);
+void primPolyFT4(unsigned char *baseAddr);
+void primPolyGT3(unsigned char *baseAddr);
+void primPolyG3(unsigned char *baseAddr);
+void primPolyGT4(unsigned char *baseAddr);
+void primPolyF3(unsigned char *baseAddr);
+void primLineGSkip(unsigned char *baseAddr);
+void primLineGEx(unsigned char *baseAddr);
+void primLineG2(unsigned char *baseAddr);
+void primLineFSkip(unsigned char *baseAddr);
+void primLineFEx(unsigned char *baseAddr);
+void primLineF2(unsigned char *baseAddr);
+void primNI(unsigned char *bA);
+
+unsigned int GetTicks(void) {
     unsigned int ticks;
     struct timeval now;
     gettimeofday(&now, NULL);
@@ -1671,7 +1746,7 @@ xrUploadAreaRGB24.y1=max(xrUploadAreaRGB24.y1,xrUploadArea.y1);
 
 ////////////////////////////////////////////////////////////////////////
 
-void CheckWriteUpdate()
+void CheckWriteUpdate(void)
 {
 int iX=0,iY=0;
 
@@ -1904,9 +1979,7 @@ FillSoftwareArea(sprtX, sprtY, sprtW, sprtH, BGR24to16(gpuData[0]));
 // cmd: move image vram -> vram
 ////////////////////////////////////////////////////////////////////////
 
-void MoveImageWrapped(short imageX0,short imageY0,
-short imageX1,short imageY1,
-short imageSX,short imageSY)
+void MoveImageWrapped(short imageX0,short imageY0, short imageX1,short imageY1, short imageSX,short imageSY)
 {
 int i,j,imageXE,imageYE;
 

@@ -34,9 +34,9 @@ void destroyFBO(FBO *fbo);
 void useFBO(FBO *fbo);
 
 /// Current Used FBO
-FBO *getFBOUsed();
+FBO *getFBOUsed(void);
 
 /// Check FBO
-bool checkFBO();
+bool checkFBO(FBO *fbo);
 
 #endif // GFX_FBO_H

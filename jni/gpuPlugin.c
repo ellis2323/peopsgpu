@@ -55,8 +55,9 @@
 
 extern unsigned int CSVERTEX,CSCOLOR,CSTEXTURE;
 #ifdef MALI
-extern void mali400();
+extern void mali400(void);
 #endif
+
     JNIEnv *env2;
 // replace iFilter by gFilter
 //extern int iFilter;
@@ -170,6 +171,39 @@ static int             iFakePrimBusy2 = 0;
 int             iRumbleVal    = 0;
 int             iRumbleTime   = 0;
 
+
+
+
+void ResizeWindow(void);
+char * GetConfigInfos(int hW);
+void DoTextSnapShot(int iNum);
+long GPU_init(void);
+long GPU_close(void);
+long CALLBACK GPU_shutdown(void);
+void draw_rectangle(float x0, float y0, float z0, float x1, float y1, float z1);
+void PaintBlackBorders(void);
+void XPRIMdrawTexturedQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OGLVertex* vertex4) ;
+void SetScanLines(void);
+void ChangeDispOffsetsX(void);
+void ChangeDispOffsetsY(void);
+void updateDisplayIfChanged(void);
+BOOL bSwapCheck(void);
+void FinishedVRAMWrite(void);
+void FinishedVRAMRead(void);
+void CALLBACK GPUsetMode(unsigned int gdata);
+long CALLBACK GPUgetMode(void);
+BOOL CheckForEndlessLoop(unsigned long laddr);
+void CALLBACK GPUsetfix(unsigned long dwFixBits);
+void CALLBACK GPUvisualVibration(unsigned long iSmall, unsigned long iBig);
+void CALLBACK GPUdisplayFlags(unsigned long dwFlags);
+void flipEGL(void);
+
+JNIEXPORT void JNICALL Java_com_emulator_fpse_MainGL_setFlipGL(JNIEnv *env, jclass c, jobject obj);
+JNIEXPORT void JNICALL Java_com_emulator_fpse_MainGLXperiaPlay_setFlipGL(JNIEnv *env, jclass c, jobject obj);
+JNIEXPORT jint JNICALL Java_com_emulator_fpse_Main_getGLversion(JNIEnv *env, jclass c, jobject obj);
+JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setOptionGL(JNIEnv *env, jobject obj,jint value);
+JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setResizeGL(JNIEnv *env, jobject obj,jint w,jint h);
+
 ////////////////////////////////////////////////////////////////////////
 // stuff to make this a true PDK module
 ////////////////////////////////////////////////////////////////////////
@@ -180,29 +214,38 @@ int             iRumbleTime   = 0;
 
 void ResizeWindow()
 {
- rRatioRect.left   = rRatioRect.top=0;
- rRatioRect.right  = iResX;
-/* if (iResX<iResY) {
-    rRatioRect.bottom = (iResX*3)/4;
- } else {*/
+    rRatioRect.left   = rRatioRect.top=0;
+    rRatioRect.right  = iResX;
     rRatioRect.bottom = iResY;
-// }
- 
- setViewport(rRatioRect.left,                           // init viewport by ratio rect
-            iResY-(rRatioRect.top+rRatioRect.bottom),
-            rRatioRect.right, 
-            rRatioRect.bottom);
-                                                      
- setScissor(0, 0, iResX, iResY);                        // init clipping (fullscreen)
- useScissor(true);
-
- // resize screen
- resizeViewPortContext(rRatioRect.left, iResY-(rRatioRect.top+rRatioRect.bottom), rRatioRect.right, rRatioRect.bottom);
- 
- // init projection with psx resolution
- setProjectionOrtho(0, PSXDisplay.DisplayMode.x, PSXDisplay.DisplayMode.y, 0, -1, 1);
- if (bKeepRatio&&iResX>iResY)
- SetAspectRatio();
+    
+    Context* ctx = getContext();
+    if (iResX < iResY) {
+        // PORTRAIT MODE
+        setOrientation(ctx, E_ORIENTATION_PORTRAIT);
+    } else {
+        // LANDSCAPE MODE
+        setOrientation(ctx, E_ORIENTATION_LANDSCAPE);
+    }
+    /* if (iResX<iResY) {
+     rRatioRect.bottom = (iResX*3)/4;
+     } else {*/
+    // }
+    
+    setViewport(rRatioRect.left,                           // init viewport by ratio rect
+                iResY-(rRatioRect.top+rRatioRect.bottom),
+                rRatioRect.right,
+                rRatioRect.bottom);
+    
+    setScissor(0, 0, iResX, iResY);                        // init clipping (fullscreen)
+    useScissor(true);
+    
+    // resize screen
+    resizeViewPortContext(rRatioRect.left, iResY-(rRatioRect.top+rRatioRect.bottom), rRatioRect.right, rRatioRect.bottom);
+    
+    // init projection with psx resolution
+    setProjectionOrtho(0, PSXDisplay.DisplayMode.x, PSXDisplay.DisplayMode.y, 0, -1, 1);
+    if (bKeepRatio&&iResX>iResY)
+        SetAspectRatio();
 }
 
 char * GetConfigInfos(int hW)
@@ -238,79 +281,81 @@ void CALLBACK GPU_makeSnapshot(void)
 
 long CALLBACK GPU_init()
 {
-//static void *  ptrVirt;
-memset(ulStatusControl,0,256*sizeof(unsigned long));
-
-bChangeRes=FALSE;
-bWindowMode=FALSE;
-
-// different ways of accessing PSX VRAM
-
-psxVSecure=(unsigned char *)malloc((iGPUHeight*2)*1024 + (1024*1024)); // always alloc one extra MB for soft drawing funcs security
-if(!psxVSecure) return -1;
-
-psxVub=psxVSecure+512*1024;                           // security offset into double sized psx vram!
-psxVsb=(signed char *)psxVub;
-psxVsw=(signed short *)psxVub;
-psxVsl=(signed long *)psxVub;
-psxVuw=(unsigned short *)psxVub;
-psxVul=(unsigned long *)psxVub;
-
-psxVuw_eom=psxVuw+1024*iGPUHeight;                    // pre-calc of end of vram
-
-memset(psxVSecure,0x00,(iGPUHeight*2)*1024 + (1024*1024));
-memset(ulGPUInfoVals,0x00,16*sizeof(unsigned long));
-
-//InitFrameCap();                                       // init frame rate stuff
-
-PSXDisplay.RGB24        = 0;                          // init vars
-PreviousPSXDisplay.RGB24= 0;
-PSXDisplay.Interlaced   = 0;
-PSXDisplay.InterlacedTest=0;
-PSXDisplay.DrawOffset.x = 0;
-PSXDisplay.DrawOffset.y = 0;
-PSXDisplay.DrawArea.x0  = 0;
-PSXDisplay.DrawArea.y0  = 0;
-PSXDisplay.DrawArea.x1  = 320;
-PSXDisplay.DrawArea.y1  = 240;
-PSXDisplay.DisplayMode.x= 320;
-PSXDisplay.DisplayMode.y= 240;
-PSXDisplay.Disabled     = FALSE;
-PreviousPSXDisplay.Range.x0 =0;
-PreviousPSXDisplay.Range.x1 =0;
-PreviousPSXDisplay.Range.y0 =0;
-PreviousPSXDisplay.Range.y1 =0;
-PSXDisplay.Range.x0=0;
-PSXDisplay.Range.x1=0;
-PSXDisplay.Range.y0=0;
-PSXDisplay.Range.y1=0;
-PreviousPSXDisplay.DisplayPosition.x = 1;
-PreviousPSXDisplay.DisplayPosition.y = 1;
-PSXDisplay.DisplayPosition.x = 1;
-PSXDisplay.DisplayPosition.y = 1;
-PreviousPSXDisplay.DisplayModeNew.y=0;
-PSXDisplay.Double=1;
-GPUdataRet=0x400;
-
-PSXDisplay.DisplayModeNew.x=0;
-PSXDisplay.DisplayModeNew.y=0;
-
-//PreviousPSXDisplay.Height = PSXDisplay.Height = 239;
-
-iDataWriteMode = DR_NORMAL;
-
-// Reset transfer values, to prevent mis-transfer of data
-memset(&VRAMWrite,0,sizeof(VRAMLoad_t));
-memset(&VRAMRead,0,sizeof(VRAMLoad_t));
-
-// device initialised already !
-//lGPUstatusRet = 0x74000000;
-
-STATUSREG = 0x14802000;
-GPUIsIdle;
-GPUIsReadyForCommands;
-
-return 0;
+    //static void *  ptrVirt;
+    memset(ulStatusControl,0,256*sizeof(unsigned long));
+    
+    bChangeRes=FALSE;
+    bWindowMode=FALSE;
+    
+    // different ways of accessing PSX VRAM
+    
+    psxVSecure=(unsigned char *)malloc((iGPUHeight*2)*1024 + (1024*1024)); // always alloc one extra MB for soft drawing funcs security
+    if(!psxVSecure) return -1;
+    
+    psxVub=psxVSecure+512*1024;                           // security offset into double sized psx vram!
+    psxVsb=(signed char *)psxVub;
+    psxVsw=(signed short *)psxVub;
+    psxVsl=(signed long *)psxVub;
+    psxVuw=(unsigned short *)psxVub;
+    psxVul=(unsigned long *)psxVub;
+    
+    psxVuw_eom=psxVuw+1024*iGPUHeight;                    // pre-calc of end of vram
+    
+    memset(psxVSecure,0x00,(iGPUHeight*2)*1024 + (1024*1024));
+    memset(ulGPUInfoVals,0x00,16*sizeof(unsigned long));
+    
+    //InitFrameCap();                                       // init frame rate stuff
+    
+    PSXDisplay.RGB24        = 0;                          // init vars
+    PreviousPSXDisplay.RGB24= 0;
+    PSXDisplay.Interlaced   = 0;
+    PSXDisplay.InterlacedTest=0;
+    PSXDisplay.DrawOffset.x = 0;
+    PSXDisplay.DrawOffset.y = 0;
+    PSXDisplay.DrawArea.x0  = 0;
+    PSXDisplay.DrawArea.y0  = 0;
+    PSXDisplay.DrawArea.x1  = 320;
+    PSXDisplay.DrawArea.y1  = 240;
+    PSXDisplay.DisplayMode.x= 320;
+    PSXDisplay.DisplayMode.y= 240;
+    PSXDisplay.Disabled     = FALSE;
+    PreviousPSXDisplay.Range.x0 =0;
+    PreviousPSXDisplay.Range.x1 =0;
+    PreviousPSXDisplay.Range.y0 =0;
+    PreviousPSXDisplay.Range.y1 =0;
+    PSXDisplay.Range.x0=0;
+    PSXDisplay.Range.x1=0;
+    PSXDisplay.Range.y0=0;
+    PSXDisplay.Range.y1=0;
+    PreviousPSXDisplay.DisplayPosition.x = 1;
+    PreviousPSXDisplay.DisplayPosition.y = 1;
+    PSXDisplay.DisplayPosition.x = 1;
+    PSXDisplay.DisplayPosition.y = 1;
+    PreviousPSXDisplay.DisplayModeNew.y=0;
+    PSXDisplay.Double=1;
+    GPUdataRet=0x400;
+    
+    PSXDisplay.DisplayModeNew.x=0;
+    PSXDisplay.DisplayModeNew.y=0;
+    
+    //PreviousPSXDisplay.Height = PSXDisplay.Height = 239;
+    
+    iDataWriteMode = DR_NORMAL;
+    
+    // Reset transfer values, to prevent mis-transfer of data
+    memset(&VRAMWrite,0,sizeof(VRAMLoad_t));
+    memset(&VRAMRead,0,sizeof(VRAMLoad_t));
+    
+    // device initialised already !
+    //lGPUstatusRet = 0x74000000;
+    
+    STATUSREG = 0x14802000;
+    GPUIsIdle;
+    GPUIsReadyForCommands;
+    
+    createContext();
+    
+    return 0;
 }                             
 
 
@@ -318,69 +363,77 @@ return 0;
 // GPU OPEN: funcs to open up the gpu display (Windows)
 ////////////////////////////////////////////////////////////////////////
 
-long CALLBACK GPU_open(int hwndGPU)                    
+long CALLBACK GPU_open(int hwndGPU)
 {
-        // InitKeyHandler();                                     // init key handler (subclass window)
-
-
-InitFPS();
-         iColDepth=0;
-         bChangeRes=FALSE;
-         bWindowMode=FALSE;
-         bFullVRam=FALSE;
-        // bAdvancedBlend=FALSE;
-         bDrawDither=FALSE;
-        // bUseLines=FALSE;
-         //bUseFrameLimit=TRUE;
-         //bUseFrameSkip=TRUE;
-         //iFrameLimit=2;
-         //fFrameRate=60.0f;
-         //iOffscreenDrawing=3;
-         //bOpaquePass=FALSE;
-         //bUseAntiAlias=FALSE;
-         //iTexQuality=0;
-         bUseFastMdec=TRUE;
-         bUse15bitMdec=FALSE;
-         dwCfgFixes=0;
-         bUseFixes=FALSE;
-        // iUseScanLines=0;
-         //iShowFPS=0;
-         iScanBlend=0;
-         iVRamSize=0;
-         iTexGarbageCollection=1;
-         iBlurBuffer=0; 
-         //iHiResTextures=0;
-         iNoScreenSaver=0;
- //iForceVSync=0;
-
-
-
- bIsFirstFrame = TRUE;                                 // flag: we have to init OGL later in windows!
-
- rRatioRect.left   = rRatioRect.top=0;
- rRatioRect.right  = iResX;
- /*if (iResX<iResY) rRatioRect.bottom = (iResX*3)/4;
- else*/
- rRatioRect.bottom = iResY;
-
- bDisplayNotSet = TRUE; 
- bSetClip=TRUE;
-
- SetFixes();                                           // setup game fixes
-
- InitializeTextureStore();                             // init texture mem
-
-// lGPUstatusRet = 0x74000000;
-
-// with some emus, we could do the OGL init right here... oh my
- if(bIsFirstFrame) GLinitialize();
- #ifdef MALI
- if (mali==1){
-	mali400();
- }
- #endif
-  
- return 0;
+    // InitKeyHandler();                                     // init key handler (subclass window)
+    
+    
+    InitFPS();
+    iColDepth=0;
+    bChangeRes=FALSE;
+    bWindowMode=FALSE;
+    bFullVRam=FALSE;
+    // bAdvancedBlend=FALSE;
+    bDrawDither=FALSE;
+    // bUseLines=FALSE;
+    //bUseFrameLimit=TRUE;
+    //bUseFrameSkip=TRUE;
+    //iFrameLimit=2;
+    //fFrameRate=60.0f;
+    //iOffscreenDrawing=3;
+    //bOpaquePass=FALSE;
+    //bUseAntiAlias=FALSE;
+    //iTexQuality=0;
+    bUseFastMdec=TRUE;
+    bUse15bitMdec=FALSE;
+    dwCfgFixes=0;
+    bUseFixes=FALSE;
+    // iUseScanLines=0;
+    //iShowFPS=0;
+    iScanBlend=0;
+    iVRamSize=0;
+    iTexGarbageCollection=1;
+    iBlurBuffer=0;
+    //iHiResTextures=0;
+    iNoScreenSaver=0;
+    //iForceVSync=0;
+    
+    
+    
+    bIsFirstFrame = TRUE;                                 // flag: we have to init OGL later in windows!
+    
+    rRatioRect.left   = rRatioRect.top=0;
+    rRatioRect.right  = iResX;
+    Context *ctx = getContext();
+    if (iResX < iResY) {
+        // PORTRAIT MODE
+        setOrientation(ctx, E_ORIENTATION_PORTRAIT);
+    } else {
+        // LANDSCAPE MODE
+        setOrientation(ctx, E_ORIENTATION_LANDSCAPE);
+    }
+    /*if (iResX<iResY) rRatioRect.bottom = (iResX*3)/4;
+     else*/
+    rRatioRect.bottom = iResY;
+    
+    bDisplayNotSet = TRUE;
+    bSetClip=TRUE;
+    
+    SetFixes();                                           // setup game fixes
+    
+    InitializeTextureStore();                             // init texture mem
+    
+    // lGPUstatusRet = 0x74000000;
+    
+    // with some emus, we could do the OGL init right here... oh my
+    if(bIsFirstFrame) GLinitialize();
+#ifdef MALI
+    if (mali==1){
+        mali400();
+    }
+#endif
+    
+    return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -404,7 +457,7 @@ long GPU_close()                                        // LINUX CLOSE
 // I shot the sheriff... last function called from emu 
 ////////////////////////////////////////////////////////////////////////
 
-long CALLBACK GPU_shutdown()
+long CALLBACK GPU_shutdown(void)
 {
  if(psxVSecure) free(psxVSecure);                      // kill emulated vram memory
  psxVSecure=0;
@@ -509,8 +562,7 @@ setColor(vertex[0].c);
 // helper to draw scanlines
 ////////////////////////////////////////////////////////////////////////
 
-void XPRIMdrawTexturedQuad(OGLVertex* vertex1, OGLVertex* vertex2, 
-                                    OGLVertex* vertex3, OGLVertex* vertex4) 
+void XPRIMdrawTexturedQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OGLVertex* vertex4) 
 {
 
 }
@@ -932,54 +984,54 @@ setViewport(rRatioRect.left,
 
 void updateDisplayIfChanged(void)
 {
-BOOL bUp;
-
-if ((PSXDisplay.DisplayMode.y == PSXDisplay.DisplayModeNew.y) && 
-    (PSXDisplay.DisplayMode.x == PSXDisplay.DisplayModeNew.x))
- {
-  if((PSXDisplay.RGB24      == PSXDisplay.RGB24New) && 
-     (PSXDisplay.Interlaced == PSXDisplay.InterlacedNew)) 
-     return;                                          // nothing has changed? fine, no swap buffer needed
- }
-else                                                  // some res change?
- {
-   // -> new psx resolution
-    resizeViewPortContext(0, 0, rRatioRect.right, rRatioRect.bottom);
- 
-  setProjectionOrtho(0, PSXDisplay.DisplayModeNew.x, PSXDisplay.DisplayModeNew.y, 0, -1, 1);
-  //LOGE("PSXDisplay.DisplayModeNew.x:%d ,PSXDisplay.DisplayModeNew.y:%d");              // -> new psx resolution
-  if(bKeepRatio&&iResX>iResY) SetAspectRatio();
- }
-
-bDisplayNotSet = TRUE;                                // re-calc offsets/display area
-
-bUp=FALSE;
-if(PSXDisplay.RGB24!=PSXDisplay.RGB24New)             // clean up textures, if rgb mode change (usually mdec on/off)
- {
-  PreviousPSXDisplay.RGB24=0;                         // no full 24 frame uploaded yet
-  ResetTextureArea(FALSE);
-  bUp=TRUE;
- }
-
-PSXDisplay.RGB24         = PSXDisplay.RGB24New;       // get new infos
-PSXDisplay.DisplayMode.y = PSXDisplay.DisplayModeNew.y;
-PSXDisplay.DisplayMode.x = PSXDisplay.DisplayModeNew.x;
-PSXDisplay.Interlaced    = PSXDisplay.InterlacedNew;
-   
-PSXDisplay.DisplayEnd.x=                              // calc new ends
- PSXDisplay.DisplayPosition.x+ PSXDisplay.DisplayMode.x;
-PSXDisplay.DisplayEnd.y=
- PSXDisplay.DisplayPosition.y+ PSXDisplay.DisplayMode.y+PreviousPSXDisplay.DisplayModeNew.y;
-PreviousPSXDisplay.DisplayEnd.x=
- PreviousPSXDisplay.DisplayPosition.x+ PSXDisplay.DisplayMode.x;
-PreviousPSXDisplay.DisplayEnd.y=
- PreviousPSXDisplay.DisplayPosition.y+ PSXDisplay.DisplayMode.y+PreviousPSXDisplay.DisplayModeNew.y;
-
-ChangeDispOffsetsX();
-
-if(iFrameLimit==2) SetAutoFrameCap();                 // set new fps limit vals (depends on interlace)
-
-if(bUp) updateDisplay();                              // yeah, real update (swap buffer)
+    BOOL bUp;
+    
+    if ((PSXDisplay.DisplayMode.y == PSXDisplay.DisplayModeNew.y) &&
+        (PSXDisplay.DisplayMode.x == PSXDisplay.DisplayModeNew.x))
+    {
+        if((PSXDisplay.RGB24      == PSXDisplay.RGB24New) &&
+           (PSXDisplay.Interlaced == PSXDisplay.InterlacedNew))
+            return;                                          // nothing has changed? fine, no swap buffer needed
+    }
+    else                                                  // some res change?
+    {
+        // -> new psx resolution
+        resizeViewPortContext(0, 0, rRatioRect.right, rRatioRect.bottom);
+        
+        setProjectionOrtho(0, PSXDisplay.DisplayModeNew.x, PSXDisplay.DisplayModeNew.y, 0, -1, 1);
+        //LOGE("PSXDisplay.DisplayModeNew.x:%d ,PSXDisplay.DisplayModeNew.y:%d");              // -> new psx resolution
+        if(bKeepRatio&&iResX>iResY) SetAspectRatio();
+    }
+    
+    bDisplayNotSet = TRUE;                                // re-calc offsets/display area
+    
+    bUp=FALSE;
+    if(PSXDisplay.RGB24!=PSXDisplay.RGB24New)             // clean up textures, if rgb mode change (usually mdec on/off)
+    {
+        PreviousPSXDisplay.RGB24=0;                         // no full 24 frame uploaded yet
+        ResetTextureArea(FALSE);
+        bUp=TRUE;
+    }
+    
+    PSXDisplay.RGB24         = PSXDisplay.RGB24New;       // get new infos
+    PSXDisplay.DisplayMode.y = PSXDisplay.DisplayModeNew.y;
+    PSXDisplay.DisplayMode.x = PSXDisplay.DisplayModeNew.x;
+    PSXDisplay.Interlaced    = PSXDisplay.InterlacedNew;
+    
+    PSXDisplay.DisplayEnd.x=                              // calc new ends
+    PSXDisplay.DisplayPosition.x+ PSXDisplay.DisplayMode.x;
+    PSXDisplay.DisplayEnd.y=
+    PSXDisplay.DisplayPosition.y+ PSXDisplay.DisplayMode.y+PreviousPSXDisplay.DisplayModeNew.y;
+    PreviousPSXDisplay.DisplayEnd.x=
+    PreviousPSXDisplay.DisplayPosition.x+ PSXDisplay.DisplayMode.x;
+    PreviousPSXDisplay.DisplayEnd.y=
+    PreviousPSXDisplay.DisplayPosition.y+ PSXDisplay.DisplayMode.y+PreviousPSXDisplay.DisplayModeNew.y;
+    
+    ChangeDispOffsetsX();
+    
+    if(iFrameLimit==2) SetAutoFrameCap();                 // set new fps limit vals (depends on interlace)
+    
+    if(bUp) updateDisplay();                              // yeah, real update (swap buffer)
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -2602,8 +2654,7 @@ void CALLBACK GPUdisplayFlags(unsigned long dwFlags)
 {
 // dwCoreFlags=dwFlags;
 }
-JNIEXPORT void JNICALL Java_com_emulator_fpse_MainGL_setFlipGL(JNIEnv *env, jclass c, jobject obj)
-{
+JNIEXPORT void JNICALL Java_com_emulator_fpse_MainGL_setFlipGL(JNIEnv *env, jclass c, jobject obj) {
     FlipGLObj = obj;
     jclass FlipGLClass;
     (*jniVM)->GetEnv(jniVM, (void**) &env, JNI_VERSION_1_4); 
@@ -2612,14 +2663,16 @@ JNIEXPORT void JNICALL Java_com_emulator_fpse_MainGL_setFlipGL(JNIEnv *env, jcla
     FlipGLClass = (*env)->GetObjectClass(env, FlipGLObj);
     FlipGL = (*env)->GetMethodID(env,FlipGLClass, "swapBuffers","()V");    
 }
-JNIEXPORT void JNICALL Java_com_emulator_fpse_MainGLXperiaPlay_setFlipGL(JNIEnv *env, jclass c, jobject obj){
+
+JNIEXPORT void JNICALL Java_com_emulator_fpse_MainGLXperiaPlay_setFlipGL(JNIEnv *env, jclass c, jobject obj) {
  Java_com_emulator_fpse_MainGL_setFlipGL(env, c, obj);
 }
-JNIEXPORT jint JNICALL Java_com_emulator_fpse_Main_getGLversion(JNIEnv *env, jclass c, jobject obj){
+
+JNIEXPORT jint JNICALL Java_com_emulator_fpse_Main_getGLversion(JNIEnv *env, jclass c, jobject obj) {
  return 1;
 }
-JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setOptionGL(JNIEnv *env, jobject obj,jint value)
-{
+
+JNIEXPORT void JNICALL Java_com_emulator_fpse_Main_setOptionGL(JNIEnv *env, jobject obj,jint value) {
    iFrameLimit=1;
    if ((value&0x2000)) fFrameRate=25;
    else if ((value&0x4000)) fFrameRate=30;

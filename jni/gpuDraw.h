@@ -27,9 +27,9 @@
 #ifndef _GL_DRAW_H_
 #define _GL_DRAW_H_
 
+#include "stdbool.h"
 
 #ifdef __cplusplus
-
 extern "C" {
 #endif
         
@@ -49,13 +49,18 @@ extern "C" {
 BOOL bSetupPixelFormat(HDC hDC);
 #endif
 
-int  GLinitialize();
-void GLcleanup();
+int  GLinitialize(void);
+void GLcleanup(void);
+bool CheckCoord4(void);
+bool CheckCoord3(void);
+bool CheckCoord2(void);
+void CreateScanLines(void);
+
 #ifdef _WINDOWS
-BOOL offset2(void);
-BOOL offset3(void);
-BOOL offset4(void);
-BOOL offsetline(void);
+bool offset2(void);
+bool offset3(void);
+bool offset4(void);
+bool offsetline(void);
 #else
 unsigned short offset2(void);
 unsigned short offset3(void);

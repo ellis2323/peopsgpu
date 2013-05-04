@@ -7,5 +7,6 @@ void CheckFrameRate(void);
 void InitFPS(void);
 void FrameSkip(void);
 unsigned long timeGetTime(void);
+void SetAutoFrameCap(void);
 
 #endif // GPU_FPS_H

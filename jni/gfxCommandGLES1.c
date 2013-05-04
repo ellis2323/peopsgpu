@@ -25,6 +25,10 @@ static u32 sCurrentColor;
 static u8 sLastDepthMode;
 static u8 sLastTransMode;
 
+void drawTriGou(OGLVertex *vertices, u16 *indices, s16 count);
+void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count);
+void mali400(void);
+
 void initGL() {
 
     glClearDepthf(1.0f);
@@ -194,7 +198,9 @@ GLSLColor getColor() {
 }
 
 // Cache Information
-// - sCSVERTEX is for Client State of Vertices. sCSCOLOR of Colors Vertices. sCSTEXTURE of TexCoord Vertices
+// - sCSVERTEX is for Client State of Vertices.
+// - sCSCOLOR of Colors Vertices.
+// - sCSTEXTURE of TexCoord Vertices
 // - sCTextureId is for Texture Id
 s32 sCSVERTEX = -1;
 s32 sCSCOLOR = -1;

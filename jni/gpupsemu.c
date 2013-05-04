@@ -22,6 +22,26 @@ unsigned int Vbuffer_incx;
 unsigned int Vbuffer_incy;
 //extern ushort FrameBuffer[];
 
+void GLESGPU_Update(void);
+
+UINT32 GLESGP1_Read(void);
+UINT32 GLESGP0_Read(void);
+void GLESGP0_Write(UINT32 data);
+void GLESGP1_Write(UINT32 code);
+int GLESGPU_Open(UINT32 *par);
+void GLESGPU_Close(void);
+void GLESGPU_ScreenShot(char *path);
+int GLESGPU_DmaChain(UINT32 adr);
+void GLESGPU_DmaIn(UINT32 adr,int size);
+void GLESGPU_DmaOut(UINT32 adr,int size);
+void GLESGPU_DmaExec(UINT32 adr,UINT32 bcr,UINT32 chcr);
+void GLESGPU_LoadState(GPU_State *gpustat);
+void  *GLESGPU_SaveState(fpse_save_helper_t *helper);
+void  *GLESGPU_SaveState(fpse_save_helper_t *helper);
+void GLESGPU_InfoDisplay(GPU_InfoDisplayType *nfo);
+void GLESGPU_DrawBmp(GPU_BmpType *bm, int x, int y);
+
+
 void GLESGPU_Update()
 {   
     GPU_updateLace();

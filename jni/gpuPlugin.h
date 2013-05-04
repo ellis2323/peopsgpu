@@ -85,7 +85,6 @@ void           DoSnapShot(void);
 void               GPU_vSinc(void);
 void           updateDisplay(void);
 void           updateFrontDisplay(void);
-void           SetAutoFrameCap(void);
 void           SetAspectRatio(void);
 void           CheckVRamRead(int x, int y, int dx, int dy, bool bFront);
 void           CheckVRamReadEx(int x, int y, int dx, int dy);

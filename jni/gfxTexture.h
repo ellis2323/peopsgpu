@@ -59,7 +59,7 @@ typedef Texture* TexturePtr;
 // ********************** Public API ********************** 
 
 /// Initialize the TexturePtr array.
-void initTextures();
+void initTextures(void);
 
 /// Create a texture and return the index in the TexturePtr array.
 s32 createTexture(s8 filters, s8 clampTypes);
@@ -83,13 +83,13 @@ Texture *getTexture(s32 TexturePtrId);
 void bindTexture(s32 tId);
 
 /// Get last current tId
-s32 getCurrentTid();
+s32 getCurrentTid(void);
 
 /// Use Texturing
 void useTexturing(bool flag);
 
 /// Use or not texturing now
-bool usingTexturing();
+bool usingTexturing(void);
 
 /// Set Filter for the current Texture
 void setFilterForCurrentTexture(s8 filter);
@@ -98,7 +98,7 @@ void setFilterForCurrentTexture(s8 filter);
 s32 convertFilterToGL(s8 filter);
 
 /// Check Texture
-bool checkTexture();
+bool checkTexture(void);
 
 /// Check Texture PtrId
 bool checkTexturePtrId(s32 tid);

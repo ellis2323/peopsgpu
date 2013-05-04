@@ -135,6 +135,7 @@ bool clearDepthBuffer;
 ////////////////////////////////////////////////////////////////////////
 
 
+
 ////////////////////////////////////////////////////////////////////////
 // Setup some stuff depending on user settings or in-game toggle
 ////////////////////////////////////////////////////////////////////////
@@ -223,7 +224,8 @@ int GLinitialize()
     initCommonGL();
     initGL();
     initTextures();
-    createContext(640, 480, 320,  240);
+    Context *ctx = getContext();
+    useFBOInContext(ctx, 320, 240);
 
     //----------------------------------------------------//
     //initEGL();
@@ -314,7 +316,7 @@ void GLcleanup()
 //              real psx polygon coord mapping right... the following
 //              works not to bad with many games, though
 
-BOOL CheckCoord4()
+bool CheckCoord4()
 {
  if(lx0<0)
   {
@@ -380,7 +382,7 @@ BOOL CheckCoord4()
  return FALSE;
 }
 
-BOOL CheckCoord3()
+bool CheckCoord3()
 {
  if(lx0<0)
   {
@@ -417,7 +419,7 @@ BOOL CheckCoord3()
 }
 
 
- BOOL CheckCoord2()
+bool CheckCoord2()
 {
  if(lx0<0)
   {

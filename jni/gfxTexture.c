@@ -19,7 +19,7 @@ static TexturePtr *sTexturesPtrArray = NULL;
 static s32 sLastTidUsed = 0;
 static bool sUseTexturing;
 
-s32 findFreeTexturePtr();
+s32 findFreeTexturePtr(void);
 
 /// Initialize the TexturePtr array.
 void initTextures() {
@@ -204,7 +204,7 @@ void useTexturing(bool flag) {
     }
 }
 
-bool usingTexturing() {
+bool usingTexturing(void) {
     return sUseTexturing;
 }
 

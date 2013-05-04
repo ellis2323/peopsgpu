@@ -87,10 +87,10 @@ typedef enum DRAWTYPE E_DRAWTYPE;
 // INIT
 
 /// Init the OpenGL Device [Common]
-void initCommonGL();
+void initCommonGL(void);
 
 /// Init the OpenGL Device [OGLES1 or OGLES2]
-void initGL();
+void initGL(void);
 
 // VIEWPORT
 
@@ -106,7 +106,7 @@ void useScissor(bool flag);
 void setScissor(s32 x, s32 y, s32 width, s32 height);
 
 /// Check scissor box
-void checkScissor();
+void checkScissor(void);
 
 // TRANSFORMATION
 
@@ -175,7 +175,7 @@ bool hasError();
 // MATERIAL
 
 /// Create a material
-Material *createMaterial();
+Material *createMaterial(void);
 
 /// Get Material
 Material *getMaterial(s32 uid);
@@ -184,7 +184,7 @@ Material *getMaterial(s32 uid);
 void destroyMaterial(s32 uid);
 
 //! load last Material saved
-void loadMaterial();
+void loadMaterial(void);
 
 //! save last Material used
 void saveMaterial(Material* mat);
@@ -196,10 +196,10 @@ void setDrawMode(E_DRAWTYPE m);
 void setColor(GLSLColor color);
 
 /// Get color
-GLSLColor getColor();
+GLSLColor getColor(void);
 
 void debugCommand(bool flag);
-void changeDebuggedCommand();
+void changeDebuggedCommand(void);
 bool isDebuggedCommand(E_CMD_TYPE type);
 
 /// Draw a triangle
@@ -232,6 +232,10 @@ void drawDebugTri(OGLVertex *vertices, u16 *indices, s32 count);
 #if defined(GL_OGLES2)
 void setClearColor(f32 r, f32 g, f32 b, f32 a);
 void clearBuffers(bool colorBuffer, bool depthBuffer, bool stencilBuffer);
+#endif
+
+#ifdef MALI
+void mali400(void);
 #endif
 
 #endif // GFX_COMMAND_H

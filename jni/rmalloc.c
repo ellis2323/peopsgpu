@@ -356,7 +356,8 @@ static jmp_buf   errorbuf;
    ======== */
 
 static int       FindBlk(const unsigned char *P);
-
+void rmalloc_generation (void *Blk);
+void Rmalloc_reinit(void);
 
 /* ===============================================================
 			IMPLEMENTATION

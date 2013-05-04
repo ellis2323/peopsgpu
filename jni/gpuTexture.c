@@ -178,6 +178,7 @@ int   iFrameReadType=0;
 unsigned long  (*TCF[2]) (unsigned long);
 unsigned short (*PTCF[2]) (unsigned short);
 
+
 ////////////////////////////////////////////////////////////////////////
 // texture cache implementation
 ////////////////////////////////////////////////////////////////////////
@@ -239,6 +240,38 @@ unsigned short MAXTPAGES     = 32;
 unsigned short CLUTMASK      = 0x7fff;
 unsigned short CLUTYMASK     = 0x1ff;
 unsigned short MAXSORTTEX    = 196;
+
+
+
+void InitializeTextureStore(void);
+void CleanupTextureStore(void);
+void InvalidateWndTextureArea(long X,long Y,long W, long H);
+void MarkFree(textureSubCacheEntryS * tsx);
+void InvalidateSubSTextureArea(long X,long Y,long W, long H);
+void DefineTextureWnd(void);
+void LoadStretchPackedWndTexturePage(int pageid, int mode, short cx, short cy);
+void LoadStretchWndTexturePage(int pageid, int mode, short cx, short cy);
+void LoadPackedWndTexturePage(int pageid, int mode, short cx, short cy);
+void LoadWndTexturePage(int pageid, int mode, short cx, short cy);
+void UploadTexWndPal(int mode,short cx,short cy);
+void DefinePalTextureWnd(void);
+void LoadPalWndTexturePage(int pageid, int mode, short cx, short cy);
+void LoadStretchPalWndTexturePage(int pageid, int mode, short cx, short cy);
+void DefinePackedTextureMovie(void);
+void DefineTextureMovie(void);
+unsigned char * LoadDirectMovieFast(void);
+u32 LoadTextureMovieFast(void);
+u32 Fake15BitTexture(void);
+u32 BlackFake15BitTexture(void);
+void Super2xSaI_ex8_Ex(unsigned char *srcPtr, DWORD srcPitch, unsigned char  *dstBitmap, int width, int height);
+void Super2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch, unsigned char  *dstBitmap, int width, int height);
+void DefineSubTextureSortHiRes(void);
+void DoTexGarbageCollection(void);
+BOOL GetCompressTexturePlace(textureSubCacheEntryS * tsx);
+void CompressTextureSpace(void);
+
+
+
 
 ////////////////////////////////////////////////////////////////////////
 // Texture color conversions... all my ASM funcs are removed for easier

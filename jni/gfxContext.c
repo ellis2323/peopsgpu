@@ -29,11 +29,43 @@ Context *getContext() {
     return sContext;
 }
 
-void createContext(s32 width, s32 height, s32 widthFBO, s32 heightFBO) {
+void createContext() {
     sMv = createIdentityMatrix();
     sProj = createIdentityMatrix();
     sContext = (Context*)malloc(sizeof(Context));
+    sContext->mSwapMat = NULL;
+    sContext->mOrientation = E_ORIENTATION_UNKNOWN;
+    sContext->mX = 0;
+    sContext->mY = 0;
+    sContext->mScreenWidth = 0;
+    sContext->mScreenHeight = 0;
+    sContext->mFBO = NULL;
+    logInfo(TAG, "Create Context");
+}
+
+void destroyContext() {
+    free(sMv);
+    free(sProj);
+}
+
+void setScreenSize(Context* ctx, s32 width, s32 height)  {
+    ctx->mScreenWidth = width;
+    ctx->mScreenHeight = height;
+}
+
+void useFBOInContext(Context* ctx, s32 widthFBO, s32 heightFBO) {
+    ctx->mSwapMat = createMaterial();
+    sContext->mSwapMat->mType = 1;
+    sContext->mFBO = createFBO(widthFBO, heightFBO, false);
+    sContext->mSwapMat->mTexturePtrId = sContext->mFBO->mTexturePtrId;
+    useFBO(sContext->mFBO);
+    
+}
+
+/*
+void createContext(s32 width, s32 height, s32 widthFBO, s32 heightFBO) {
     sContext->mSwapMat = createMaterial();
+    sContext->mOrientation = E_ORIENTATION_UNKNOWN;
     sContext->mSwapMat->mType = 1;
     sContext->mX = 0;
     sContext->mY = 0;
@@ -43,11 +75,16 @@ void createContext(s32 width, s32 height, s32 widthFBO, s32 heightFBO) {
     sContext->mSwapMat->mTexturePtrId = sContext->mFBO->mTexturePtrId;
     useFBO(sContext->mFBO);
     logInfo(TAG, "Create Context -- %d %d", width, height);
+}*/
+
+bool hasFBOInContext() {
+    if (sContext==NULL) return false;
+    if (sContext->mFBO) return true;
+    return false;
 }
 
-void destroyContext() {
-    free(sMv);
-    free(sProj);
+void setOrientation(Context *ctx, E_ORIENTATION_MODE mode) {
+    ctx->mOrientation = mode;
 }
 
 void resizeViewPortContext(s32 x, s32 y, s32 width, s32 height) {
@@ -93,33 +130,40 @@ void swapContext1() {
             sLastTextureId = -1;
         }
         
+        f32 vy = 0;
+        if (sContext->mOrientation==E_ORIENTATION_PORTRAIT) {
+            vy = -1.f + 2.f * 3.f/4.f;
+        } else {
+            vy = 1.f;
+        }
+        
         // Bottom Right
         v[0].x = 1;
         v[0].y = -1;
         v[0].z = 0;
         v[0].sow = 1;
-        v[0].tow = 1;
+        v[0].tow = 0;
         v[0].c.lcol = 0xFFFFFFFF;
         // Upper Right
         v[1].x = 1;
         v[1].y = 1;
         v[1].z = 0;
         v[1].sow = 1;
-        v[1].tow = 0;
+        v[1].tow = 1;
         v[1].c.lcol = 0xFFFFFFFF;
         // Upper Left
         v[2].x = -1;
         v[2].y = 1;
         v[2].z = 0;
         v[2].sow = 0;
-        v[2].tow = 0;
+        v[2].tow = 1;
         v[2].c.lcol = 0xFFFFFFFF;
         // Bottom Left
         v[3].x = -1;
         v[3].y = -1;
         v[3].z = 0;
         v[3].sow = 0;
-        v[3].tow = 1;
+        v[3].tow = 0;
         v[3].c.lcol = 0xFFFFFFFF;
 
         indices[0] = 0;
@@ -141,7 +185,7 @@ void swapContext1() {
 
         // init projection with psx resolution
         f32 projection[16];
-        projectionMatrix(projection, -1, 1, 1, -1, -1, 1);
+        projectionMatrix(projection, -1, 1, -1, 1, -1, 1);
         setProjectionMatrix(projection);
 
         color += .01;

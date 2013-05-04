@@ -162,6 +162,140 @@ short          ly0,lx0,ly1,lx1,ly2,lx2,ly3,lx3;        // global psx vertex coor
 long           GlobalTextAddrX,GlobalTextAddrY,GlobalTextTP;
 long           GlobalTextREST,GlobalTextABR,GlobalTextPAGE;
 
+
+void Dither16(unsigned short * pdest,unsigned long r,unsigned long g,unsigned long b,unsigned short sM);
+void GetShadeTransCol_Dither(unsigned short * pdest,long m1,long m2,long m3);
+void GetShadeTransCol(unsigned short * pdest,unsigned short color);
+void GetShadeTransCol32(unsigned long * pdest,unsigned long color);
+void GetTextureTransColG(unsigned short * pdest,unsigned short color);
+void GetTextureTransColG_S(unsigned short * pdest,unsigned short color);
+void GetTextureTransColG_SPR(unsigned short * pdest,unsigned short color);
+void GetTextureTransColG32(unsigned long * pdest,unsigned long color);
+void GetTextureTransColG32_S(unsigned long * pdest,unsigned long color);
+void GetTextureTransColG32_SPR(unsigned long * pdest,unsigned long color);
+void GetTextureTransColGX(unsigned short * pdest,unsigned short color,short m1,short m2,short m3);
+void GetTextureTransColGX_Dither(unsigned short * pdest,unsigned short color,long m1,long m2,long m3);
+void GetTextureTransColGX_S(unsigned short * pdest,unsigned short color,short m1,short m2,short m3);
+void GetTextureTransColGX32_S(unsigned long * pdest,unsigned long color,short m1,short m2,short m3);
+
+int shl10idiv(int x, int y);
+int RightSection_F(void);
+int LeftSection_F(void);
+BOOL NextRow_F(void);
+BOOL SetupSections_F(short x1, short y1, short x2, short y2, short x3, short y3);
+int RightSection_G(void);
+int LeftSection_G(void);
+BOOL NextRow_G(void);
+BOOL SetupSections_G(short x1,short y1,short x2,short y2,short x3,short y3,long rgb1, long rgb2, long rgb3);
+int RightSection_FT(void);
+int LeftSection_FT(void);
+BOOL NextRow_FT(void);
+BOOL SetupSections_FT(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3);
+int RightSection_GT(void);
+int LeftSection_GT(void);
+BOOL NextRow_GT(void);
+BOOL SetupSections_GT(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, long rgb1, long rgb2, long rgb3);
+int RightSection_F4(void);
+int LeftSection_F4(void);
+BOOL NextRow_F4(void);
+BOOL SetupSections_F4(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4);
+int RightSection_FT4(void);
+int LeftSection_FT4(void);
+BOOL NextRow_FT4(void);
+BOOL SetupSections_FT4(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4);
+int RightSection_GT4(void);
+int LeftSection_GT4(void);
+BOOL NextRow_GT4(void);
+BOOL SetupSections_GT4(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,long rgb1,long rgb2,long rgb3,long rgb4);
+void drawPoly3Fi(short x1,short y1,short x2,short y2,short x3,short y3,long rgb);
+void drawPoly3TEx4(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY);
+void drawPoly3TEx4_IL(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY);
+void drawPoly3TEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY);
+void drawPoly4TEx4_TRI(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY);
+void drawPoly4TEx4(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY);
+void drawPoly4TEx4_IL(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY);
+void drawPoly4TEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY);
+void drawPoly4TEx4_TW_S(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY);
+void drawPoly3TEx8(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY);
+void drawPoly3TEx8_IL(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY);
+void drawPoly3TEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY);
+void drawPoly4TEx8_TRI(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY);
+void drawPoly4TEx8(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY);
+void drawPoly4TEx8_IL(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY);
+void drawPoly4TEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY);
+void drawPoly4TEx8_TW_S(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY);
+void drawPoly3TD(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3);
+void drawPoly3TD_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3);
+void drawPoly4TD_TRI(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4);
+void drawPoly4TD(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4);
+void drawPoly4TD_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4);
+void drawPoly4TD_TW_S(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4);
+void drawPoly3Gi(short x1,short y1,short x2,short y2,short x3,short y3,long rgb1, long rgb2, long rgb3);
+void drawPoly3TGEx4(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3);
+void drawPoly3TGEx4_IL(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3);
+void drawPoly3TGEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3);
+void drawPoly4TGEx4_TRI_IL(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, 
+                    short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, 
+                    short clX, short clY,
+                    long col1, long col2, long col3, long col4);
+void drawPoly4TGEx4_TRI(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, 
+                    short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, 
+                    short clX, short clY,
+                    long col1, long col2, long col3, long col4);
+void drawPoly4TGEx4_TRI_IL(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, 
+                    short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, 
+                    short clX, short clY,
+                    long col1, long col2, long col3, long col4);
+void drawPoly4TGEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, 
+                    short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, 
+                    short clX, short clY,
+                    long col1, long col2, long col3, long col4);
+void drawPoly4TGEx4(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, 
+                    short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, 
+                    short clX, short clY,
+                    long col1, long col2, long col4, long col3);
+void drawPoly3TGEx8(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3);
+void drawPoly3TGEx8_IL(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3);
+void drawPoly3TGEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3);
+void drawPoly4TGEx8_TRI_IL(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, 
+                           short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, 
+                           short clX, short clY,
+                           long col1, long col2, long col3, long col4);
+void drawPoly4TGEx8_TRI(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, 
+                   short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, 
+                   short clX, short clY,
+                   long col1, long col2, long col3, long col4);
+void drawPoly4TGEx8(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, 
+                   short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, 
+                   short clX, short clY,
+                   long col1, long col2, long col4, long col3);
+void drawPoly4TGEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, 
+                   short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, 
+                   short clX, short clY,
+                   long col1, long col2, long col3, long col4);
+void drawPoly3TGD(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,long col1, long col2, long col3);
+void drawPoly3TGD_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,long col1, long col2, long col3);
+void drawPoly4TGD_TRI(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, long col1, long col2, long col3, long col4);
+void drawPoly4TGD(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, long col1, long col2, long col4, long col3);
+void drawPoly4TGD_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, long col1, long col2, long col3, long col4);
+BOOL IsNoRect(void);
+void DrawSoftwareSprite_IL(unsigned char * baseAddr,short w,short h,long tx,long ty);
+void Line_E_SE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigned long rgb1);
+void Line_S_SE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigned long rgb1);
+void Line_N_NE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigned long rgb1);
+void Line_E_NE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigned long rgb1);
+void VertLineShade(int x, int y0, int y1, unsigned long rgb0, unsigned long rgb1);
+void HorzLineShade(int y, int x0, int x1, unsigned long rgb0, unsigned long rgb1);
+void Line_E_SE_Flat(int x0, int y0, int x1, int y1, unsigned short colour);
+void Line_S_SE_Flat(int x0, int y0, int x1, int y1, unsigned short colour);
+void Line_N_NE_Flat(int x0, int y0, int x1, int y1, unsigned short colour);
+void Line_E_NE_Flat(int x0, int y0, int x1, int y1, unsigned short colour);
+void VertLineFlat(int x, int y0, int y1, unsigned short colour);
+void HorzLineFlat(int y, int x0, int x1, unsigned short colour);
+void DrawSoftwareLineFlat(long rgb);
+void DrawSoftwareLineShade(long rgb0, long rgb1);
+
+
 ////////////////////////////////////////////////////////////////////////
 // POLYGON OFFSET FUNCS
 ////////////////////////////////////////////////////////////////////////

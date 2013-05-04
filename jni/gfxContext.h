@@ -13,6 +13,14 @@
 #include "gfxFBO.h"
 #include "gfxCommand.h"
 
+enum ORIENTATION_MODE {
+    E_ORIENTATION_UNKNOWN = 0,
+    E_ORIENTATION_PORTRAIT = 1,
+    E_ORIENTATION_LANDSCAPE
+};
+
+typedef enum ORIENTATION_MODE E_ORIENTATION_MODE;
+
 struct SContext {
     // screen viewport
     s32 mX;
@@ -23,15 +31,28 @@ struct SContext {
     FBO *mFBO;
     // Material to swap
     Material *mSwapMat;
+    // Orientation: Portrait or Landscape
+    E_ORIENTATION_MODE mOrientation;
 };
 typedef struct SContext Context;
 
-//! create a context with a screen size & FBO size
-void createContext(s32 width, s32 height, s32 widthFBO, s32 heightFBO);
+//! create a context 
+void createContext(void);
 //! destroy
-void destroyContext();
+void destroyContext(void);
 //! get context
-Context *getContext();
+Context *getContext(void);
+
+//! set screen size
+void setScreenSize(Context* ctx, s32 width, s32 height);
+//! use fbo & define size
+void useFBOInContext(Context* ctx, s32 widthFBO, s32 heightFBO);
+//! orientation
+void setOrientation(Context *ctx, E_ORIENTATION_MODE mode);
+
+//! hasFBO in context
+bool hasFBOInContext(void);
+
 //! resize screen viewport
 void resizeViewPortContext(s32 x, s32 y, s32 width, s32 height);
 //! resize FBO
@@ -40,8 +61,8 @@ void resizeFBOContext(s32 width, s32 height);
 
 
 //! select Screen & copy FBO -> Screen
-void swapContext1();
+void swapContext1(void);
 //! select FBO
-void swapContext2();
+void swapContext2(void);
 
 #endif // GPU_CONTEXT_H
