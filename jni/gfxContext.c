@@ -49,6 +49,7 @@ void destroyContext() {
 }
 
 void setScreenSize(Context* ctx, s32 width, s32 height)  {
+    logInfo(TAG, "Set screen size: %d %d", width, height);
     ctx->mScreenWidth = width;
     ctx->mScreenHeight = height;
 }
@@ -132,14 +133,16 @@ void swapContext1() {
         
         f32 vy = 0;
         if (sContext->mOrientation==E_ORIENTATION_PORTRAIT) {
-            vy = -1.f + 2.f * 3.f/4.f;
+            f32 ratio = ((f32)sContext->mScreenWidth) / ((f32)sContext->mScreenHeight);
+            f32 ratio2 = 3.f/4.f;
+            vy = 1 - 2.f*ratio*ratio2;
         } else {
-            vy = 1.f;
+            vy = -1.f;
         }
         
         // Bottom Right
         v[0].x = 1;
-        v[0].y = -1;
+        v[0].y = vy;
         v[0].z = 0;
         v[0].sow = 1;
         v[0].tow = 0;
@@ -160,7 +163,7 @@ void swapContext1() {
         v[2].c.lcol = 0xFFFFFFFF;
         // Bottom Left
         v[3].x = -1;
-        v[3].y = -1;
+        v[3].y = vy;
         v[3].z = 0;
         v[3].sow = 0;
         v[3].tow = 0;

@@ -222,9 +222,11 @@ void ResizeWindow()
     if (iResX < iResY) {
         // PORTRAIT MODE
         setOrientation(ctx, E_ORIENTATION_PORTRAIT);
+        setScreenSize(ctx, iResX, iResY);
     } else {
         // LANDSCAPE MODE
         setOrientation(ctx, E_ORIENTATION_LANDSCAPE);
+        setScreenSize(ctx, iResY, iResX);
     }
     /* if (iResX<iResY) {
      rRatioRect.bottom = (iResX*3)/4;
@@ -408,9 +410,11 @@ long CALLBACK GPU_open(int hwndGPU)
     if (iResX < iResY) {
         // PORTRAIT MODE
         setOrientation(ctx, E_ORIENTATION_PORTRAIT);
+        setScreenSize(ctx, iResX, iResY);
     } else {
         // LANDSCAPE MODE
         setOrientation(ctx, E_ORIENTATION_LANDSCAPE);
+        setScreenSize(ctx, iResY, iResX);
     }
     /*if (iResX<iResY) rRatioRect.bottom = (iResX*3)/4;
      else*/
