@@ -82,6 +82,15 @@ struct SVertex {
 typedef struct SVertex OGLVertex;
 typedef OGLVertex GLSLVertex;
 
+struct SColor4f {
+    f32 r;
+    f32 g;
+    f32 b;
+    f32 a;
+};
+
+typedef struct SColor4f Color4f;
+
 // struct of command
 struct SCoord {
     s16 lx;

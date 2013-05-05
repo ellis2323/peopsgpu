@@ -175,6 +175,9 @@ void restoreDepthTest(void);
 /// Set clear color
 void setClearColor(f32 r, f32 g, f32 b, f32 a);
 
+/// Restore clear color
+void restoreClearColor(void);
+
 /// Clear Buffers
 void clearBuffers(bool color, bool depth, bool stencil);
 
@@ -207,6 +210,9 @@ void saveMaterial(Material* mat);
 
 /// Set Draw Mode FLAT or SMOOTH
 void setDrawMode(E_DRAWTYPE m);
+
+/// Restore
+void restoreDrawMode(void);
 
 /// Set color
 void setColor(GLSLColor color);

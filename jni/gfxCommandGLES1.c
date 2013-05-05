@@ -76,6 +76,11 @@ void setDrawMode(E_DRAWTYPE m) {
     }
 }
 
+void restoreDrawMode() {
+    setDrawMode(sPrevDrawType);
+}
+
+
 void useAlphaTest(bool flag) {
     sUsePrevAlphaTest = flag;
     if (flag) {

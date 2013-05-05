@@ -26,6 +26,7 @@ static s32  sDepthTestMode = -1;
 static bool sUseBlending = false;
 static E_BLEND_FACTOR sSrcBlendFactor;
 static E_BLEND_FACTOR sDstBlendFactor;
+static Color4f sClearColor;
 
 void initCommonGL() {
     logInfo(TAG, "Init common GL: create %d materials", MAX_MATERIAL_QTY);
@@ -134,7 +135,7 @@ void setTransMode(u8 mode) {
 }
 
 void restoreUseBlending(void) {
-    if (sUseBlending) {
+    if (!sUseBlending) {
         glDisable(GL_BLEND);
         setBlendFunc(sSrcBlendFactor, sDstBlendFactor);
     } else {
@@ -243,7 +244,15 @@ void restoreDepthTest(void) {
 }
 
 void setClearColor(f32 r, f32 g, f32 b, f32 a) {
+    sClearColor.r = r;
+    sClearColor.g = g;
+    sClearColor.b = b;
+    sClearColor.a = a;
     glClearColor(r,g,b,a);
+}
+
+void restoreClearColor(void) {
+    glClearColor(sClearColor.r, sClearColor.g, sClearColor.b, sClearColor.a);
 }
 
 void clearBuffers(bool colorBuffer, bool depthBuffer, bool stencilBuffer) {

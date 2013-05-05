@@ -215,18 +215,20 @@ void swapContext2() {
     if (sContext->mFBO) {        
         // Back to FBO
         useFBO(sContext->mFBO);
- 
-        loadMaterial();
+        
+        //loadMaterial();
  
         // restore MVP matrix
         setProjectionMatrix(sProj);
         setModelViewMatrix(sMv);
 
         // restore
-        restoreUseBlending();
+        restoreClearColor();
+        restoreColor();
+        restoreDrawMode();
         restoreDepthTest();
         restoreAlphaTest();
-        restoreColor();
+        restoreUseBlending();
         
 
         // restore texturing
