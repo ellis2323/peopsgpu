@@ -22,6 +22,18 @@ static E_ALPHA_TEST sPrevAlphaTestEnum = ALPHA_TEST_ALWAYS;
 static f32 sPrevAlphaTestValue = 1.0;
 static u32 sCurrentColor;
 
+// Cache Information
+// - sCSVERTEX is for Client State of Vertices.
+// - sCSCOLOR of Colors Vertices.
+// - sCSTEXTURE of TexCoord Vertices
+// - sCTextureId is for Texture Id
+s32 sCSVERTEX = -1;
+s32 sCSCOLOR = -1;
+s32 sCSTEXTURE = -1;
+static s32 sCTextureId = -1;
+static s8 sCTextureFilters = -1;
+static s8 sCTextureClampTypes = -1;
+
 
 void drawTriGou(OGLVertex *vertices, u16 *indices, s16 count);
 void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count);
@@ -211,17 +223,17 @@ void restoreColor(void) {
     glColor4ub(color.col[0],color.col[1],color.col[2],color.col[3]);
 }
 
-// Cache Information
-// - sCSVERTEX is for Client State of Vertices.
-// - sCSCOLOR of Colors Vertices.
-// - sCSTEXTURE of TexCoord Vertices
-// - sCTextureId is for Texture Id
-s32 sCSVERTEX = -1;
-s32 sCSCOLOR = -1;
-s32 sCSTEXTURE = -1;
-static s32 sCTextureId = -1;
-static s8 sCTextureFilters = -1;
-static s8 sCTextureClampTypes = -1;
+void resetDrawCmd(void) {
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+    sCSVERTEX=0;
+    sCSCOLOR=0;
+    sCSTEXTURE=0;
+}
+
 
 
 /*
@@ -229,9 +241,9 @@ static s8 sCTextureClampTypes = -1;
  Flat or Gouraud are equal method.
  */
 void drawTriGou(OGLVertex *vertices, u16 *indices, s16 count) {
-    /*if (sCSVERTEX) glEnableClientState(GL_VERTEX_ARRAY);
-    if (sCSCOLOR) glEnableClientState(GL_COLOR_ARRAY);
-    if (sCSTEXTURE) glDisableClientState(GL_TEXTURE_COORD_ARRAY);*/
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     
     glDisable(GL_TEXTURE_2D);
     if (count == 0 || vertices == NULL || indices == NULL) return;
@@ -260,9 +272,9 @@ void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
 #ifdef DEBUG
     if (mat==NULL) logError(TAG, "drawTexTriGou with NULL MATERIAL!");
 #endif
-    /*if (sCSVERTEX) glEnableClientState(GL_VERTEX_ARRAY);
-    if (sCSCOLOR) glEnableClientState(GL_COLOR_ARRAY);
-    if (sCSTEXTURE) glEnableClientState(GL_TEXTURE_COORD_ARRAY);*/
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
     glEnable(GL_TEXTURE_2D);
     Texture *tex = getTexture(mat->mTexturePtrId);
@@ -308,9 +320,9 @@ void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
     if (count == 0 || vertices == NULL || indices == NULL) return;
 
     // change
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    //glEnableClientState(GL_VERTEX_ARRAY);
+    //glEnableClientState(GL_COLOR_ARRAY);
+    //glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisable(GL_SCISSOR_TEST);
     
     glVertexPointer(3, GL_FLOAT, sizeof(OGLVertex), &vertices[0].x);
@@ -322,9 +334,9 @@ void drawTexTriGou(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
     
     glDrawElements(GL_TRIANGLES, 3*count, GL_UNSIGNED_SHORT, indices);
     
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
+    //glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    //glDisableClientState(GL_VERTEX_ARRAY);
+    //glDisableClientState(GL_COLOR_ARRAY);
     
     glDisable(GL_TEXTURE_2D);
     
@@ -389,10 +401,6 @@ void drawTriangles(Material *mat, OGLVertex *vertices, u16 *indices, s16 count) 
 
 // MARK: Private
 
-
-
-unsigned int CSVERTEX=0,CSCOLOR=0,CSTEXTURE=0;
-
 ////////////////////////////////////////////////////////////////////////
 // OpenGL primitive drawing commands
 ////////////////////////////////////////////////////////////////////////
@@ -405,16 +413,17 @@ void PRIMdrawTexturedQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* ver
     v[2] = *vertex4;
     v[3] = *vertex3;
     
-    if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);
-    if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
     
     glTexCoordPointer(2, GL_FLOAT, sizeof(v[0]), &v[0].sow);
     glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     
-    CSTEXTURE=CSVERTEX=1;
-    CSCOLOR=0;
+    sCSTEXTURE=1;
+    sCSVERTEX=1;
+    sCSCOLOR=0;
 }
 
 /////////////////////////////////////////////////////////
@@ -428,16 +437,17 @@ void PRIMdrawTexturedTri(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vert
     v[1] = *vertex2;
     v[2] = *vertex3;
         
-    if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);
-    if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
     glTexCoordPointer(2, GL_FLOAT, sizeof(v[0]), &v[0].sow);
     glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);
     
     glDrawArrays(GL_TRIANGLES, 0, 3);
     
-    CSTEXTURE=CSVERTEX=1;
-    CSCOLOR=0;
+    sCSTEXTURE=1;
+    sCSVERTEX=1;
+    sCSCOLOR=0;
 }
 
 /////////////////////////////////////////////////////////
@@ -451,16 +461,18 @@ void PRIMdrawTexGouraudTriColor(OGLVertex* vertex1, OGLVertex* vertex2, OGLVerte
     v[1] = *vertex2;
     v[2] = *vertex3;
     
-    if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
-    if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
     glTexCoordPointer(2, GL_FLOAT, sizeof(v[0]), &v[0].sow);
     glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);
     glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].c);
     
     glDrawArrays(GL_TRIANGLES, 0, 3);
     
-    CSTEXTURE=CSVERTEX=CSCOLOR=1;
+    sCSTEXTURE=1;
+    sCSVERTEX=1;
+    sCSCOLOR=1;
 }
 
 /////////////////////////////////////////////////////////
@@ -475,16 +487,18 @@ void PRIMdrawTexGouraudTriColorQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLV
     v[2] = *vertex4;
     v[3] = *vertex3;
     
-    if (CSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
-    if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE==0) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
     
     glTexCoordPointer(2, GL_FLOAT, sizeof(v[0]), &v[0].sow);
     glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);
     glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].c);
     
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    CSTEXTURE=CSVERTEX=CSCOLOR=1;
+    sCSTEXTURE=1;
+    sCSVERTEX=1;
+    sCSCOLOR=1;
 }
 
 /////////////////////////////////////////////////////////
@@ -498,14 +512,15 @@ void PRIMdrawTri(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3)
     v[1] = *vertex2;
     v[2] = *vertex3;
     
-    if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
-    if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (sCSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);
     
     glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);
     glDrawArrays(GL_TRIANGLES, 0, 3);
-    CSVERTEX=1;
-    CSTEXTURE=CSCOLOR=0;
+    sCSVERTEX=1;
+    sCSTEXTURE=1;
+    sCSCOLOR=0;
 }
 
 /////////////////////////////////////////////////////////
@@ -520,14 +535,15 @@ void PRIMdrawTri2(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OG
     v[2] = *vertex2;
     v[3] = *vertex4;
     
-    if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
-    if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (sCSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);
     
     glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    CSVERTEX=1;
-    CSTEXTURE=CSCOLOR=0;
+    sCSVERTEX=1;
+    sCSTEXTURE=1;
+    sCSCOLOR=0;
 }
 
 /////////////////////////////////////////////////////////
@@ -541,16 +557,17 @@ void PRIMdrawGouraudTriColor(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* 
     v[1] = *vertex2;
     v[2] = *vertex3;
     
-    if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
-    if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
-    if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     
     glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);
     glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].c);
     
     glDrawArrays(GL_TRIANGLES, 0, 3);
-    CSVERTEX=CSCOLOR=1;
-    CSTEXTURE=0;
+    sCSVERTEX=1;
+    sCSCOLOR=1;
+    sCSTEXTURE=0;
 }
 
 /////////////////////////////////////////////////////////
@@ -565,16 +582,17 @@ void PRIMdrawGouraudTri2Color(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex*
     v[2] = *vertex3;
     v[3] = *vertex4;
 
-    if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
-    if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
     
     glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);
     glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].c);
     
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    CSTEXTURE=0;
-    CSVERTEX=CSCOLOR=1;
+    sCSTEXTURE=0;
+    sCSVERTEX=1;
+    sCSCOLOR=1;
 }
 
 /////////////////////////////////////////////////////////
@@ -589,17 +607,18 @@ void PRIMdrawFlatLine(OGLVertex* vertex1, OGLVertex* vertex2,OGLVertex* vertex3,
     v[2] = *vertex4;
     v[3] = *vertex3;
     
-    if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
-    if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
     
     glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);
     glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].c);
     
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     
-    CSTEXTURE=0;
-    CSVERTEX=CSCOLOR=1;
+    sCSTEXTURE=0;
+    sCSVERTEX=1;
+    sCSCOLOR=1;
     
     
 }
@@ -616,16 +635,17 @@ void PRIMdrawGouraudLine(OGLVertex* vertex1, OGLVertex* vertex2,OGLVertex* verte
     v[2] = *vertex3;
     v[3] = *vertex4;
     
-    if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
-    if (CSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR==0) glEnableClientState(GL_COLOR_ARRAY);
     
     glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);
     glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(v[0]), &v[0].c);
     
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    CSTEXTURE=0;
-    CSVERTEX=CSCOLOR=1;
+    sCSTEXTURE=0;
+    sCSVERTEX=1;
+    sCSCOLOR=1;
 }
 
 /////////////////////////////////////////////////////////
@@ -640,15 +660,15 @@ void PRIMdrawQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OG
     v[2] = *vertex4;
     v[3] = *vertex3;
     
-    if (CSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (CSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
-    if (CSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);
+    if (sCSTEXTURE==1) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (sCSVERTEX==0) glEnableClientState(GL_VERTEX_ARRAY);
+    if (sCSCOLOR==1) glDisableClientState(GL_COLOR_ARRAY);
     
     glVertexPointer(3, GL_FLOAT, sizeof(v[0]), &v[0].x);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    CSTEXTURE=0;
-    CSVERTEX=1;
-    CSCOLOR=0;
+    sCSTEXTURE=0;
+    sCSVERTEX=1;
+    sCSCOLOR=0;
 }
 
 

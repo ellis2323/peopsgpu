@@ -147,6 +147,7 @@ void setBlendFunc(E_BLEND_FACTOR src, E_BLEND_FACTOR dst);
 /// Restore Blending
 void restoreUseBlending(void);
 
+
 // ALPHA TEST
 
 /// Use Alpha Test
@@ -157,6 +158,7 @@ void setAlphaTest(E_ALPHA_TEST test , f32 value);
 
 /// Restore Alpha Test
 void restoreAlphaTest(void);
+
 
 // DEPTH TEST
 
@@ -181,15 +183,18 @@ void restoreClearColor(void);
 /// Clear Buffers
 void clearBuffers(bool color, bool depth, bool stencil);
 
+
 // READ PIXELS
 
 /// Read Pixels
 void readPixels(s32 x,s32 y, s32 width, s32 height, s8 format, u8 *dst);
 
+
 // ERROR
 
 /// Check error
 bool hasError();
+
 
 // MATERIAL
 
@@ -208,11 +213,17 @@ void loadMaterial(void);
 //! save last Material used
 void saveMaterial(Material* mat);
 
+
+/// DRAW MODE
+
 /// Set Draw Mode FLAT or SMOOTH
 void setDrawMode(E_DRAWTYPE m);
 
 /// Restore
 void restoreDrawMode(void);
+
+
+// COLOR
 
 /// Set color
 void setColor(GLSLColor color);
@@ -223,11 +234,17 @@ GLSLColor getColor(void);
 /// Restore color
 void restoreColor(void);
 
+
+
+
+
 void debugCommand(bool flag);
 void changeDebuggedCommand(void);
 bool isDebuggedCommand(E_CMD_TYPE type);
 
 /// Draw a triangle
+void resetDrawCmd(void);
+
 void drawTriangles(Material *mat, OGLVertex *vertices, u16 *indices, s16 count);
 
 void PRIMdrawTexturedQuad(OGLVertex* vertex1, OGLVertex* vertex2, OGLVertex* vertex3, OGLVertex* vertex4);
