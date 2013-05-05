@@ -24,6 +24,8 @@ bool hasError(void);
 static bool sUseDepthTest = false;
 static s32  sDepthTestMode = -1;
 static bool sUseBlending = false;
+static E_BLEND_FACTOR sSrcBlendFactor;
+static E_BLEND_FACTOR sDstBlendFactor;
 
 void initCommonGL() {
     logInfo(TAG, "Init common GL: create %d materials", MAX_MATERIAL_QTY);
@@ -134,8 +136,10 @@ void setTransMode(u8 mode) {
 void restoreUseBlending(void) {
     if (sUseBlending) {
         glDisable(GL_BLEND);
+        setBlendFunc(sSrcBlendFactor, sDstBlendFactor);
     } else {
         glEnable(GL_BLEND);
+        setBlendFunc(sSrcBlendFactor, sDstBlendFactor);
     }
 }
 
@@ -158,6 +162,8 @@ GLenum convertBlendFactor(E_BLEND_FACTOR f) {
 }
 
 void setBlendFunc(E_BLEND_FACTOR src, E_BLEND_FACTOR dst) {
+    sSrcBlendFactor = src;
+    sDstBlendFactor = dst;
     GLenum s = convertBlendFactor(src);
     GLenum d = convertBlendFactor(dst);
     glBlendFunc(s,d);

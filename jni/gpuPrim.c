@@ -308,82 +308,82 @@ SemiTransParams TransSets[4]=
 
 void SetSemiTrans(void)
 {
-/*
-* 0.5 x B + 0.5 x F
-* 1.0 x B + 1.0 x F
-* 1.0 x B - 1.0 x F
-* 1.0 x B +0.25 x F
-*/
-
-if(!DrawSemiTrans) // no semi trans at all?
-{
-    if(bBlendEnable) {
-        useBlending(false);
-        bBlendEnable=FALSE;
-    } // -> don't wanna blend
-ubGloAlpha=ubGloColAlpha=255; // -> full alpha
-return; // -> and bye
-}
-
-ubGloAlpha=ubGloColAlpha=TransSets[GlobalTextABR].alpha;
-
-if(!bBlendEnable) {
-    useBlending(true);
-    bBlendEnable=TRUE;
-} // wanna blend
-
-if(TransSets[GlobalTextABR].srcFac!=obm1 ||
-TransSets[GlobalTextABR].dstFac!=obm2)
-{
-//if(glBlendEquationEXTEx==NULL)
-{
-obm1=TransSets[GlobalTextABR].srcFac;
-obm2=TransSets[GlobalTextABR].dstFac;
-setBlendFunc(obm1,obm2);glError(); // set blend func
-}
-/*else
-if(TransSets[GlobalTextABR].dstFac !=GL_ONE_MINUS_SRC_COLOR)
-{
-if(obm2==GL_ONE_MINUS_SRC_COLOR)
-glBlendEquationEXTEx(FUNC_ADD_EXT);
-obm1=TransSets[GlobalTextABR].srcFac;
-obm2=TransSets[GlobalTextABR].dstFac;
-glBlendFunc(obm1,obm2); // set blend func
-}
-else
-{
-glBlendEquationEXTEx(FUNC_REVERSESUBTRACT_EXT);
-obm1=TransSets[GlobalTextABR].srcFac;
-obm2=TransSets[GlobalTextABR].dstFac;
-glBlendFunc(GL_ONE,GL_ONE); // set blend func
-}*/
-}
+    /*
+     * 0.5 x B + 0.5 x F
+     * 1.0 x B + 1.0 x F
+     * 1.0 x B - 1.0 x F
+     * 1.0 x B +0.25 x F
+     */
+    
+    if(!DrawSemiTrans) // no semi trans at all?
+    {
+        if(bBlendEnable) {
+            useBlending(false);
+            bBlendEnable=FALSE;
+        } // -> don't wanna blend
+        ubGloAlpha = ubGloColAlpha=255; // -> full alpha
+        return; // -> and bye
+    }
+    
+    ubGloAlpha=ubGloColAlpha=TransSets[GlobalTextABR].alpha;
+    
+    if(!bBlendEnable) {
+        useBlending(true);
+        bBlendEnable=TRUE;
+    } // wanna blend
+    
+    if(TransSets[GlobalTextABR].srcFac!=obm1 ||
+       TransSets[GlobalTextABR].dstFac!=obm2)
+    {
+        //if(glBlendEquationEXTEx==NULL)
+        {
+            obm1=TransSets[GlobalTextABR].srcFac;
+            obm2=TransSets[GlobalTextABR].dstFac;
+            setBlendFunc(obm1,obm2);glError(); // set blend func
+        }
+        /*else
+         if(TransSets[GlobalTextABR].dstFac !=GL_ONE_MINUS_SRC_COLOR)
+         {
+         if(obm2==GL_ONE_MINUS_SRC_COLOR)
+         glBlendEquationEXTEx(FUNC_ADD_EXT);
+         obm1=TransSets[GlobalTextABR].srcFac;
+         obm2=TransSets[GlobalTextABR].dstFac;
+         glBlendFunc(obm1,obm2); // set blend func
+         }
+         else
+         {
+         glBlendEquationEXTEx(FUNC_REVERSESUBTRACT_EXT);
+         obm1=TransSets[GlobalTextABR].srcFac;
+         obm2=TransSets[GlobalTextABR].dstFac;
+         glBlendFunc(GL_ONE,GL_ONE); // set blend func
+         }*/
+    }
 }
 
 void SetScanTrans(void) // blending for scan lines
 {
-/* if(glBlendEquationEXTEx!=NULL)
-{
-if(obm2==GL_ONE_MINUS_SRC_COLOR)
-glBlendEquationEXTEx(FUNC_ADD_EXT);
-}
-*/
-obm1=TransSets[0].srcFac;
-obm2=TransSets[0].dstFac;
-setBlendFunc(obm1,obm2);glError(); // set blend func
+    /* if(glBlendEquationEXTEx!=NULL)
+     {
+     if(obm2==GL_ONE_MINUS_SRC_COLOR)
+     glBlendEquationEXTEx(FUNC_ADD_EXT);
+     }
+     */
+    obm1=TransSets[0].srcFac;
+    obm2=TransSets[0].dstFac;
+    setBlendFunc(obm1,obm2);glError(); // set blend func
 }
 
 void SetScanTexTrans(void) // blending for scan mask texture
 {
-/* if(glBlendEquationEXTEx!=NULL)
-{
-if(obm2==GL_ONE_MINUS_SRC_COLOR)
-glBlendEquationEXTEx(FUNC_ADD_EXT);
-}
-*/
-obm1=TransSets[2].srcFac;
-obm2=TransSets[2].dstFac;
-setBlendFunc(obm1,obm2);glError(); // set blend func
+    /* if(glBlendEquationEXTEx!=NULL)
+     {
+     if(obm2==GL_ONE_MINUS_SRC_COLOR)
+     glBlendEquationEXTEx(FUNC_ADD_EXT);
+     }
+     */
+    obm1=TransSets[2].srcFac;
+    obm2=TransSets[2].dstFac;
+    setBlendFunc(obm1,obm2);glError(); // set blend func
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -392,86 +392,86 @@ setBlendFunc(obm1,obm2);glError(); // set blend func
 
 SemiTransParams MultiTexTransSets[4][2]=
 {
-{
-{BF_ONE ,BF_SRC_ALPHA, 127},
-{BF_SRC_ALPHA,BF_ONE, 127}
-},
-{
-{BF_ONE, BF_SRC_ALPHA, 255},
-{BF_SRC_ALPHA,BF_ONE, 255}
-},
-{
-{BF_ZERO, BF_ONE_MINUS_SRC_COLOR,255},
-{BF_ZERO, BF_ONE_MINUS_SRC_COLOR,255}
-},
-{
-{BF_SRC_ALPHA, BF_ONE, 127},
-{BF_ONE_MINUS_SRC_ALPHA, BF_ONE, 255}
-}
+    {
+        {BF_ONE ,BF_SRC_ALPHA, 127},
+        {BF_SRC_ALPHA,BF_ONE, 127}
+    },
+    {
+        {BF_ONE, BF_SRC_ALPHA, 255},
+        {BF_SRC_ALPHA,BF_ONE, 255}
+    },
+    {
+        {BF_ZERO, BF_ONE_MINUS_SRC_COLOR,255},
+        {BF_ZERO, BF_ONE_MINUS_SRC_COLOR,255}
+    },
+    {
+        {BF_SRC_ALPHA, BF_ONE, 127},
+        {BF_ONE_MINUS_SRC_ALPHA, BF_ONE, 255}
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////
 
 SemiTransParams MultiColTransSets[4]=
 {
-{BF_ONE_MINUS_SRC_ALPHA, BF_SRC_ALPHA,127},
-{BF_ONE, BF_ONE, 255},
-{BF_ZERO, BF_ONE_MINUS_SRC_COLOR,255},
-{BF_SRC_ALPHA, BF_ONE, 127}
+    {BF_ONE_MINUS_SRC_ALPHA, BF_SRC_ALPHA,127},
+    {BF_ONE, BF_ONE, 255},
+    {BF_ZERO, BF_ONE_MINUS_SRC_COLOR,255},
+    {BF_SRC_ALPHA, BF_ONE, 127}
 };
 
 ////////////////////////////////////////////////////////////////////////
 
 void SetSemiTransMulti(int Pass)
 {
-static u32 bm1=BF_ZERO;
-static u32 bm2=BF_ONE;
-
-ubGloAlpha=255;
-ubGloColAlpha=255;
-
-// are we enabling SemiTransparent mode?
-if(DrawSemiTrans)
-{
-if(bDrawTextured)
-{
-bm1=MultiTexTransSets[GlobalTextABR][Pass].srcFac;
-bm2=MultiTexTransSets[GlobalTextABR][Pass].dstFac;
-ubGloAlpha=MultiTexTransSets[GlobalTextABR][Pass].alpha;
-}
-// no texture
-else
-{
-bm1=MultiColTransSets[GlobalTextABR].srcFac;
-bm2=MultiColTransSets[GlobalTextABR].dstFac;
-ubGloColAlpha=MultiColTransSets[GlobalTextABR].alpha;
-}
-}
-// no shading
-else
-{
-if(Pass==0)
-{
-// disable blending
-bm1=BF_ONE; bm2=BF_ZERO;
-}
-else
-{
-// disable blending, but add src col a second time
-bm1=BF_ONE; bm2=BF_ONE;
-}
-}
-
-if(!bBlendEnable) {
-    useBlending(true);
-    bBlendEnable=TRUE;
-} // wanna blend
-
-if(bm1!=obm1 || bm2!=obm2)
-{
-setBlendFunc(bm1,bm2); glError();// set blend func
-obm1=bm1;obm2=bm2;
-}
+    static u32 bm1=BF_ZERO;
+    static u32 bm2=BF_ONE;
+    
+    ubGloAlpha=255;
+    ubGloColAlpha=255;
+    
+    // are we enabling SemiTransparent mode?
+    if(DrawSemiTrans)
+    {
+        if(bDrawTextured)
+        {
+            bm1=MultiTexTransSets[GlobalTextABR][Pass].srcFac;
+            bm2=MultiTexTransSets[GlobalTextABR][Pass].dstFac;
+            ubGloAlpha=MultiTexTransSets[GlobalTextABR][Pass].alpha;
+        }
+        // no texture
+        else
+        {
+            bm1=MultiColTransSets[GlobalTextABR].srcFac;
+            bm2=MultiColTransSets[GlobalTextABR].dstFac;
+            ubGloColAlpha=MultiColTransSets[GlobalTextABR].alpha;
+        }
+    }
+    // no shading
+    else
+    {
+        if(Pass==0)
+        {
+            // disable blending
+            bm1=BF_ONE; bm2=BF_ZERO;
+        }
+        else
+        {
+            // disable blending, but add src col a second time
+            bm1=BF_ONE; bm2=BF_ONE;
+        }
+    }
+    
+    if(!bBlendEnable) {
+        useBlending(true);
+        bBlendEnable=TRUE;
+    } // wanna blend
+    
+    if(bm1!=obm1 || bm2!=obm2)
+    {
+        setBlendFunc(bm1,bm2); glError();// set blend func
+        obm1=bm1;obm2=bm2;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////

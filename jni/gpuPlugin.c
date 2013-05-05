@@ -219,14 +219,20 @@ void ResizeWindow()
     rRatioRect.bottom = iResY;
     
     Context* ctx = getContext();
-    if (iResX < iResY) {
-        // PORTRAIT MODE
-        setOrientation(ctx, E_ORIENTATION_PORTRAIT);
-        setScreenSize(ctx, iResX, iResY);
+    if (ctx->mFBO) {
+        if (iResX < iResY) {
+            // PORTRAIT MODE
+            setOrientation(ctx, E_ORIENTATION_PORTRAIT);
+            setScreenSize(ctx, iResX, iResY);
+        } else {
+            // LANDSCAPE MODE
+            setOrientation(ctx, E_ORIENTATION_LANDSCAPE);
+            setScreenSize(ctx, iResY, iResX);
+        }
     } else {
-        // LANDSCAPE MODE
-        setOrientation(ctx, E_ORIENTATION_LANDSCAPE);
-        setScreenSize(ctx, iResY, iResX);
+        if (iResX<iResY) {
+            rRatioRect.bottom = (iResX*3)/4;
+        }
     }
     /* if (iResX<iResY) {
      rRatioRect.bottom = (iResX*3)/4;
@@ -407,18 +413,26 @@ long CALLBACK GPU_open(int hwndGPU)
     rRatioRect.left   = rRatioRect.top=0;
     rRatioRect.right  = iResX;
     Context *ctx = getContext();
-    if (iResX < iResY) {
-        // PORTRAIT MODE
-        setOrientation(ctx, E_ORIENTATION_PORTRAIT);
-        setScreenSize(ctx, iResX, iResY);
+    if (ctx->mFBO) {
+        if (iResX < iResY) {
+            // PORTRAIT MODE
+            setOrientation(ctx, E_ORIENTATION_PORTRAIT);
+            setScreenSize(ctx, iResX, iResY);
+        } else {
+            // LANDSCAPE MODE
+            setOrientation(ctx, E_ORIENTATION_LANDSCAPE);
+            setScreenSize(ctx, iResY, iResX);
+        }
+        rRatioRect.bottom = iResY;
     } else {
-        // LANDSCAPE MODE
-        setOrientation(ctx, E_ORIENTATION_LANDSCAPE);
-        setScreenSize(ctx, iResY, iResX);
+        if (iResX<iResY) {
+            rRatioRect.bottom = (iResX*3)/4;
+        } else  {
+            rRatioRect.bottom = iResY;
+        }
     }
     /*if (iResX<iResY) rRatioRect.bottom = (iResX*3)/4;
      else*/
-    rRatioRect.bottom = iResY;
     
     bDisplayNotSet = TRUE;
     bSetClip=TRUE;

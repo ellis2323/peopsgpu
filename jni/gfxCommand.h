@@ -82,6 +82,7 @@ enum DRAWTYPE {
     DRAWTYPE_SMOOTH = 1,
 };
 typedef enum DRAWTYPE E_DRAWTYPE;
+
 // ********************** Public API **********************
 
 // INIT
@@ -92,10 +93,12 @@ void initCommonGL(void);
 /// Init the OpenGL Device [OGLES1 or OGLES2]
 void initGL(void);
 
+
 // VIEWPORT
 
 /// set Viewport Box
 void setViewport(s32 x, s32 y, s32 width, s32 height);
+
 
 // SCISSOR
 
@@ -107,6 +110,7 @@ void setScissor(s32 x, s32 y, s32 width, s32 height);
 
 /// Check scissor box
 void checkScissor(void);
+
 
 // TRANSFORMATION
 
@@ -124,6 +128,7 @@ void setProjectionMatrix(f32 *matrix);
 
 /// Define an orthogonal projection matrix
 void setProjectionOrtho(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far);
+
 
 // DITHER
 

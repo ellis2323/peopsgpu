@@ -216,6 +216,8 @@ void swapContext2() {
         // Back to FBO
         useFBO(sContext->mFBO);
  
+        /*loadMaterial();*/
+ 
         // restore MVP matrix
         setProjectionMatrix(sProj);
         setModelViewMatrix(sMv);
