@@ -226,7 +226,7 @@ int GLinitialize()
     initTextures();
     Context *ctx = getContext();
     useFBOInContext(ctx, 320, 240);
-
+    ResizeWindow();
     //----------------------------------------------------//
     //initEGL();
     
