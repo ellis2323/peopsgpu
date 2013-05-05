@@ -22,7 +22,7 @@ GLenum convertBlendFactor(E_BLEND_FACTOR f);
 bool hasError(void);
 
 static bool sUseDepthTest = false;
-static s32  sDepthTestMode = -1;
+static s32  sDepthTestMode = 0;
 static bool sUseBlending = false;
 static E_BLEND_FACTOR sSrcBlendFactor;
 static E_BLEND_FACTOR sDstBlendFactor;
