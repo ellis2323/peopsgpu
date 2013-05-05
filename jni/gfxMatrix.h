@@ -1,13 +1,20 @@
 #pragma once
 #ifndef GFX_MATRIX_H
 #define GFX_MATRIX_H
-//
-//  gfxMatrix.h
-//  fpse [NEW]
-//
-//  Created by Mallet Laurent on 27/01/13.
-//  Copyright (c) 2013 Mallet Laurent. All rights reserved.
-//
+
+/**********************************************************************
+
+   FPSE Plugin: OpenGL Plugin for FPSE
+   This file is copyright (c) 2012-2013 Laurent Mallet.
+   License: GPL v3.  See License.txt.
+
+   Created by Mallet Laurent on 27/01/13.
+   Copyright (c) 2013 Mallet Laurent. All rights reserved.
+   
+   Original Plugin written by Pete Bernert
+
+*******************************************************************/
+
 
 #include "gfxCommon.h"
 
