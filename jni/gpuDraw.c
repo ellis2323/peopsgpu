@@ -224,8 +224,8 @@ int GLinitialize()
     initCommonGL();
     initGL();
     initTextures();
-    Context *ctx = getContext();
-    useFBOInContext(ctx, 640, 480);
+    //Context *ctx = getContext();
+    //useFBOInContext(ctx, 640, 480);
     ResizeWindow();
     //----------------------------------------------------//
     //initEGL();

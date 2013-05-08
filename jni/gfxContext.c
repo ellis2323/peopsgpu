@@ -112,137 +112,136 @@ void swapContext1() {
         return;
     }
 #endif
-    if (sContext->mFBO) {
-        // save texturing state
-        sUseTexturing = usingTexturing();
-        if (sUseTexturing) {
-            sLastTextureId = getCurrentTid();
-        } else {
-            sLastTextureId = -1;
-        }
-        
-        f32 vy = 0;
-        if (sContext->mOrientation==E_ORIENTATION_PORTRAIT) {
-            f32 ratio = ((f32)sContext->mScreenWidth) / ((f32)sContext->mScreenHeight);
-            f32 ratio2 = 3.f/4.f;
-            vy = 1 - 2.f*ratio*ratio2;
-        } else {
-            vy = -1.f;
-        }
-        
-        // Bottom Right
-        v[0].x = 1;
-        v[0].y = vy;
-        v[0].z = 0;
-        v[0].sow = 1;
-        v[0].tow = 0;
-        v[0].c.lcol = 0xFFFFFFFF;
-        // Upper Right
-        v[1].x = 1;
-        v[1].y = 1;
-        v[1].z = 0;
-        v[1].sow = 1;
-        v[1].tow = 1;
-        v[1].c.lcol = 0xFFFFFFFF;
-        // Upper Left
-        v[2].x = -1;
-        v[2].y = 1;
-        v[2].z = 0;
-        v[2].sow = 0;
-        v[2].tow = 1;
-        v[2].c.lcol = 0xFFFFFFFF;
-        // Bottom Left
-        v[3].x = -1;
-        v[3].y = vy;
-        v[3].z = 0;
-        v[3].sow = 0;
-        v[3].tow = 0;
-        v[3].c.lcol = 0xFFFFFFFF;
-
-        indices[0] = 0;
-        indices[1] = 1;
-        indices[2] = 2;
-        indices[3] = 0;
-        indices[4] = 2;
-        indices[5] = 3;
-        
-        // saves MV & P matrix
-        getModelViewMatrix(sMv);
-        getProjectionMatrix(sProj);
-        // swith FBO
-        useFBO(NULL);
-        
-        // reset modelview to identity
-        f32 modelView[16];
-        identityMatrix(modelView);
-        setModelViewMatrix(modelView);
-
-        // init projection with psx resolution
-        f32 projection[16];
-        projectionMatrix(projection, -1, 1, -1, 1, -1, 1);
-        setProjectionMatrix(projection);
-
-        color += .01;
-        color = fmod(color, 1.);
-        glClearColor(0,0,0,0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_BLEND);
-        glDisable(GL_ALPHA_TEST);
-
-        glEnable(GL_TEXTURE_2D);
-        Texture* tex = getTexture(sContext->mSwapMat->mTexturePtrId);
-        glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_COLOR_ARRAY);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glDisable(GL_SCISSOR_TEST);
+    if (sContext->mFBO==NULL) return;
     
-        glVertexPointer(3, GL_FLOAT, sizeof(OGLVertex), &v[0].x);
-        glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(OGLVertex), &v[0].c.lcol);
-        glTexCoordPointer(2, GL_FLOAT, sizeof(OGLVertex), &v[0].sow);
-    
-        glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_SHORT, indices);
-
+    // FBO present
+    // save texturing state
+    sUseTexturing = usingTexturing();
+    if (sUseTexturing) {
+        sLastTextureId = getCurrentTid();
+    } else {
+        sLastTextureId = -1;
     }
+    
+    f32 vy = 0;
+    if (sContext->mOrientation==E_ORIENTATION_PORTRAIT) {
+        f32 ratio = ((f32)sContext->mScreenWidth) / ((f32)sContext->mScreenHeight);
+        f32 ratio2 = 3.f/4.f;
+        vy = 1 - 2.f*ratio*ratio2;
+    } else {
+        vy = -1.f;
+    }
+    
+    // Bottom Right
+    v[0].x = 1;
+    v[0].y = vy;
+    v[0].z = 0;
+    v[0].sow = 1;
+    v[0].tow = 0;
+    v[0].c.lcol = 0xFFFFFFFF;
+    // Upper Right
+    v[1].x = 1;
+    v[1].y = 1;
+    v[1].z = 0;
+    v[1].sow = 1;
+    v[1].tow = 1;
+    v[1].c.lcol = 0xFFFFFFFF;
+    // Upper Left
+    v[2].x = -1;
+    v[2].y = 1;
+    v[2].z = 0;
+    v[2].sow = 0;
+    v[2].tow = 1;
+    v[2].c.lcol = 0xFFFFFFFF;
+    // Bottom Left
+    v[3].x = -1;
+    v[3].y = vy;
+    v[3].z = 0;
+    v[3].sow = 0;
+    v[3].tow = 0;
+    v[3].c.lcol = 0xFFFFFFFF;
+    
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+    indices[3] = 0;
+    indices[4] = 2;
+    indices[5] = 3;
+    
+    // saves MV & P matrix
+    getModelViewMatrix(sMv);
+    getProjectionMatrix(sProj);
+    // swith FBO
+    useFBO(NULL);
+    
+    // reset modelview to identity
+    f32 modelView[16];
+    identityMatrix(modelView);
+    setModelViewMatrix(modelView);
+    
+    // init projection with psx resolution
+    f32 projection[16];
+    projectionMatrix(projection, -1, 1, -1, 1, -1, 1);
+    setProjectionMatrix(projection);
+    
+    color += .01;
+    color = fmod(color, 1.);
+    glClearColor(0,0,0,0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    
+    glEnable(GL_TEXTURE_2D);
+    Texture* tex = getTexture(sContext->mSwapMat->mTexturePtrId);
+    glBindTexture(GL_TEXTURE_2D, tex->mTextureId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisable(GL_SCISSOR_TEST);
+    
+    glVertexPointer(3, GL_FLOAT, sizeof(OGLVertex), &v[0].x);
+    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(OGLVertex), &v[0].c.lcol);
+    glTexCoordPointer(2, GL_FLOAT, sizeof(OGLVertex), &v[0].sow);
+    
+    glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_SHORT, indices);
 }
 
 /*
  * This part restore
  */
 void swapContext2() {
-    if (sContext->mFBO) {        
-        // Back to FBO
-        useFBO(sContext->mFBO);
-        
- 
-        // restore MVP matrix
-        setProjectionMatrix(sProj);
-        setModelViewMatrix(sMv);
+    if (sContext->mFBO==NULL) return;
 
-        // restore
-        resetDrawCmd();
-        restoreClearColor();
-        restoreColor();
-        restoreDrawMode();
-        restoreDepthTest();
-        restoreAlphaTest();
-        restoreUseBlending();
-        
-
-        // restore texturing
-        if (sUseTexturing) {
-            useTexturing(true);
-            bindTexture(sLastTextureId);
-        } else {
-             bindTexture(0);
-        }
+    // Back to FBO
+    useFBO(sContext->mFBO);
+    
+    // restore MVP matrix
+    setProjectionMatrix(sProj);
+    setModelViewMatrix(sMv);
+    
+    // restore
+    resetDrawCmd();
+    restoreClearColor();
+    restoreColor();
+    restoreDrawMode();
+    restoreDepthTest();
+    restoreAlphaTest();
+    restoreUseBlending();
+    
+    
+    // restore texturing
+    if (sUseTexturing) {
+        useTexturing(true);
+        bindTexture(sLastTextureId);
+    } else {
+        bindTexture(0);
     }
 }
 
